@@ -5512,7 +5512,7 @@ int main(int argc, char *argv[])
     gdkdisplay = gdk_display_get_default();
     xdisplay = gdk_x11_display_get_xdisplay(gdkdisplay);
 
-    frame_window_atom = XInternAtom(xdisplay, "_NET_FRAME_WINDOW", FALSE);
+    frame_window_atom = XInternAtom(xdisplay, DECOR_INPUT_FRAME_ATOM_NAME, FALSE);
     win_decor_atom = XInternAtom(xdisplay, DECOR_WINDOW_ATOM_NAME, FALSE);
     win_blur_decor_atom = XInternAtom (xdisplay, DECOR_BLUR_ATOM_NAME, FALSE);
     wm_move_resize_atom = XInternAtom(xdisplay, "_NET_WM_MOVERESIZE", FALSE);
@@ -5617,7 +5617,8 @@ int main(int argc, char *argv[])
     update_window_extents(ws);
     update_shadow(pfs);
 
-    decor_set_dm_check_hint(xdisplay, DefaultScreen(xdisplay));
+    decor_set_dm_check_hint(xdisplay, DefaultScreen(xdisplay),
+    			    WINDOW_DECORATION_TYPE_PIXMAP);
 
     update_settings(ws);
 
