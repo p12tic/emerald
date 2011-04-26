@@ -505,7 +505,7 @@ static void decor_update_window_property(decor_t * d)
 	maxextents = extents;
 
     decor_quads_to_property(data, GDK_PIXMAP_XID(d->pixmap),
-			    &extents, &maxextents, 0, 0, quads, nQuad);
+			    &extents, &maxextents, &maxextents, &maxextents, 0, 0, quads, nQuad);
 
     gdk_error_trap_push();
     XChangeProperty(xdisplay, d->prop_xid,
@@ -1937,7 +1937,7 @@ static void decor_update_switcher_property(decor_t * d)
     nQuad = set_switcher_quads(quads, d->width, d->height, ws);
 
     decor_quads_to_property(data, GDK_PIXMAP_XID(d->pixmap),
-			    &extents, &extents, 0, 0, quads, nQuad);
+			    &extents, &extents, &extents, &extents, 0, 0, quads, nQuad);
 
     style = gtk_widget_get_style (style_window);
 
@@ -2364,7 +2364,7 @@ update_default_decorations(GdkScreen * screen, frame_settings * fs_act,
 	nQuad = set_shadow_quads(quads, width, height, ws);
 
 	decor_quads_to_property(data, GDK_PIXMAP_XID(ws->shadow_pixmap),
-				&ws->shadow_extents, &ws->shadow_extents, 0, 0,
+				&ws->shadow_extents, &ws->shadow_extents, &ws->shadow_extents, &ws->shadow_extents, 0, 0,
 				quads, nQuad);
 
 	XChangeProperty(xdisplay, xroot,
@@ -2424,7 +2424,7 @@ update_default_decorations(GdkScreen * screen, frame_settings * fs_act,
 	(*d.draw) (&d);
 
 	decor_quads_to_property(data, GDK_PIXMAP_XID(d.p_inactive),
-				&extents, &extents, 0, 0, quads, nQuad);
+				&extents, &extents, &extents, &extents, 0, 0, quads, nQuad);
 
 	XChangeProperty(xdisplay, xroot,
 			normalAtom,
@@ -2433,7 +2433,7 @@ update_default_decorations(GdkScreen * screen, frame_settings * fs_act,
 			BASE_PROP_SIZE + QUAD_PROP_SIZE * nQuad);
 
 	decor_quads_to_property(data, GDK_PIXMAP_XID(d.p_active),
-				&extents, &extents, 0, 0, quads, nQuad);
+				&extents, &extents, &extents, &extents, 0, 0, quads, nQuad);
 
 	XChangeProperty(xdisplay, xroot,
 			activeAtom,
