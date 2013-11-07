@@ -1,5 +1,6 @@
 autom4te.cache/*
 *.in
+*.creator.user
 config.guess
 config.h.in*
 config.sub
