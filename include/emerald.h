@@ -12,6 +12,7 @@
 #include <X11/cursorfont.h>
 #include <X11/extensions/Xrender.h>
 
+/*
 #ifndef GDK_DISABLE_DEPRECATED
 #define GDK_DISABLE_DEPRECATED
 #endif
@@ -19,6 +20,7 @@
 #ifndef GTK_DISABLE_DEPRECATED
 #define GTK_DISABLE_DEPRECATED
 #endif
+*/
 
 #include <gtk/gtk.h>
 #include <gtk/gtkwindow.h>
@@ -157,7 +159,7 @@ typedef struct _window_settings
     gint button_offset;
     gint button_hoffset;
     gchar * tobj_layout;
-    
+
     gint double_click_action;
     gint button_hover_cursor;
 
@@ -255,7 +257,7 @@ typedef struct _window_settings
                    // active and inactive glow pixmaps are assumed to be of same size
     gboolean stretch_sides;
     gint blur_type;// = BLUR_TYPE_NONE;
-	
+
 } window_settings;
 
 struct _frame_settings
