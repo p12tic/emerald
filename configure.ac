@@ -5,6 +5,7 @@ AC_INIT([emerald],[emerald_version], [livinglatexkali@gmail.com])
 
 AM_INIT_AUTOMAKE([1.9 dist-bzip2])
 AC_CONFIG_HEADER([config.h])
+AC_CONFIG_MACRO_DIR([m4])
 
 AC_ISC_POSIX
 AC_PROG_CC
