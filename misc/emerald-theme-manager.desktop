@@ -1,13 +1,18 @@
 [Desktop Entry]
 Encoding=UTF-8
+Type=Application
 Name=Emerald Theme Manager
+Name[ca]=Gestor de temes de l'Emerald
+Name[de]=Emerald Motiv Manager
+Name[es]=Gestor de temas del Emerald
 Name[fr]=Gestionnaire de thèmes Emerald
 Comment=Configure Emerald themes
+Comment[ca]=Configureu els temes de l'Emerald
+Comment[de]=Konfiguriert Emerald Motive
+Comment[es]=Configura los temas del Emerald
 Comment[fr]=Configurerer les options des thèmes Emerald
-Icon=/usr/share/pixmaps/emerald-theme-manager-icon.png
+Icon=emerald-theme-manager-icon
 Terminal=false
-Type=Application
 Categories=Settings;DesktopSettings;
-Exec=emerald-theme-manager -i %f
 MimeType=application/x-emerald-theme;
 
