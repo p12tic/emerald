@@ -815,7 +815,7 @@ static void draw_shadow_background(decor_t * d, cairo_t * cr)
 }
 
 
-static void draw_help_button(decor_t * d, cairo_t * cr, double s)
+static void draw_help_button(cairo_t * cr)
 {
     cairo_rel_move_to(cr, 0.0, 6.0);
     cairo_rel_line_to(cr, 0.0, 3.0);
@@ -834,7 +834,7 @@ static void draw_help_button(decor_t * d, cairo_t * cr, double s)
 
     cairo_close_path(cr);
 }
-static void draw_close_button(decor_t * d, cairo_t * cr, double s)
+static void draw_close_button(cairo_t * cr, double s)
 {
     cairo_rel_move_to(cr, 0.0, s);
 
@@ -855,7 +855,7 @@ static void draw_close_button(decor_t * d, cairo_t * cr, double s)
     cairo_close_path(cr);
 }
 
-static void draw_max_button(decor_t * d, cairo_t * cr, double s)
+static void draw_max_button(cairo_t * cr, double s)
 {
     cairo_set_fill_rule(cr, CAIRO_FILL_RULE_EVEN_ODD);
 
@@ -874,7 +874,7 @@ static void draw_max_button(decor_t * d, cairo_t * cr, double s)
     cairo_close_path(cr);
 }
 
-static void draw_unmax_button(decor_t * d, cairo_t * cr, double s)
+static void draw_unmax_button(cairo_t * cr, double s)
 {
     cairo_set_fill_rule(cr, CAIRO_FILL_RULE_EVEN_ODD);
 
@@ -895,7 +895,7 @@ static void draw_unmax_button(decor_t * d, cairo_t * cr, double s)
     cairo_close_path(cr);
 }
 
-static void draw_min_button(decor_t * d, cairo_t * cr, double s)
+static void draw_min_button(cairo_t * cr, double s)
 {
     cairo_rel_move_to(cr, 0.0, 8.0);
 
@@ -1037,20 +1037,20 @@ draw_button_with_glow_alpha_bstate(gint b_t, decor_t * d, cairo_t * cr,
         switch (b)
         {
             case B_CLOSE:
-                draw_close_button(d, cr, 3.1);
+                draw_close_button(cr, 3.1);
                 break;
             case B_MAXIMIZE:
-                draw_max_button(d, cr, 4.0);
+                draw_max_button(cr, 4.0);
                 break;
             case B_RESTORE:
-                draw_unmax_button(d, cr, 4.0);
+                draw_unmax_button(cr, 4.0);
                 break;
             case B_MINIMIZE:
-                draw_min_button(d, cr, 4.0);
+                draw_min_button(cr, 4.0);
                 break;
             case B_HELP:
                 cairo_move_to(cr, x, y);
-                draw_help_button(d, cr, 3.1);
+                draw_help_button(cr); // was (cr, 3.1)
                 break;
             default:
                 //FIXME - do something here
@@ -1271,8 +1271,8 @@ gint draw_buttons_timer_func(gpointer data)
         {
             // Draw button's non-hovered version (with 1-alpha)
             draw_button_with_glow_alpha_bstate(b_t, d, fade_info->cr,
-                                               fade_info->y1, pow(1 - alpha,
-                                                                  0.4), 0.0,
+                                               fade_info->y1,
+                                               pow(1 - alpha, 0.4), 0.0,
                                                d->active ? 0 : 3);
         }
         button_alphas[b_t] = alpha;
@@ -1601,22 +1601,13 @@ static void update_button_regions(decor_t * d)
 static void draw_window_decoration_real(decor_t * d, gboolean shadow_time)
 {
     cairo_t *cr;
-    double x1, y1, x2, y2, h;
-    int top;
     frame_settings *fs = d->fs;
     window_settings *ws = fs->ws;
 
     if (!d->pixmap)
         return;
 
-    top = ws->win_extents.top + ws->titlebar_height;
-
-    x1 = ws->left_space - ws->win_extents.left;
-    y1 = ws->top_space - ws->win_extents.top;
-    x2 = d->width - ws->right_space + ws->win_extents.right;
-    y2 = d->height - ws->bottom_space + ws->win_extents.bottom;
-
-    h = d->height - ws->top_space - ws->titlebar_height - ws->bottom_space;
+    double y1 = ws->top_space - ws->win_extents.top;
 
     if (!d->draw_only_buttons_region)        // if not only drawing buttons
     {
@@ -2157,30 +2148,27 @@ static void draw_switcher_background(decor_t * d)
 
 static void draw_switcher_foreground(decor_t * d)
 {
-    cairo_t *cr;
-    GtkStyle *style;
-    decor_color_t color;
-    double alpha = SWITCHER_ALPHA / 65535.0;
-    double x1, y1, x2;
-    int top;
-    window_settings *ws = d->fs->ws;
-
     if (!IS_VALID(d->pixmap) || !IS_VALID(d->buffer_pixmap))
         return;
 
-    style = gtk_widget_get_style(style_window);
+    double alpha = SWITCHER_ALPHA / 65535.0;
+    window_settings *ws = d->fs->ws;
 
-    color.r = style->bg[GTK_STATE_NORMAL].red / 65535.0;
-    color.g = style->bg[GTK_STATE_NORMAL].green / 65535.0;
-    color.b = style->bg[GTK_STATE_NORMAL].blue / 65535.0;
+    GtkStyle *style = gtk_widget_get_style(style_window);
 
-    top = ws->win_extents.bottom;
+    //decor_color_t color;
 
-    x1 = ws->left_space - ws->win_extents.left;
-    y1 = ws->top_space - ws->win_extents.top;
-    x2 = d->width - ws->right_space + ws->win_extents.right;
+    //color.r = style->bg[GTK_STATE_NORMAL].red / 65535.0;
+    //color.g = style->bg[GTK_STATE_NORMAL].green / 65535.0;
+    //color.b = style->bg[GTK_STATE_NORMAL].blue / 65535.0;
 
-    cr = gdk_cairo_create(GDK_DRAWABLE(d->buffer_pixmap));
+    int top = ws->win_extents.bottom;
+
+    double x1 = ws->left_space - ws->win_extents.left;
+    double y1 = ws->top_space - ws->win_extents.top;
+    double x2 = d->width - ws->right_space + ws->win_extents.right;
+
+    cairo_t *cr = gdk_cairo_create(GDK_DRAWABLE(d->buffer_pixmap));
 
     cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
 
@@ -2832,7 +2820,7 @@ static void update_window_decoration_name(WnckWindow * win)
     name = wnck_window_get_name(win);
     if (name && (name_length = strlen(name)))
     {
-        gint w, n_line;
+        gint w;
 
         pango_layout_set_auto_dir (d->layout, FALSE);
         pango_layout_set_text(d->layout, "", 0);
@@ -2845,8 +2833,6 @@ static void update_window_decoration_name(WnckWindow * win)
 
         pango_layout_set_width(d->layout, w * PANGO_SCALE);
         pango_layout_set_text(d->layout, name, name_length);
-
-        n_line = pango_layout_get_line_count(d->layout);
 
         line = pango_layout_get_line(d->layout, 0);
 
@@ -3197,8 +3183,6 @@ static gboolean update_switcher_window(WnckWindow * win, Window selected)
         name = wnck_window_get_name(selected_win);
         if (name && (name_length = strlen(name)))
         {
-            gint n_line;
-
             if (!d->layout)
             {
                 d->layout = pango_layout_new(ws->pango_context);
@@ -3211,8 +3195,6 @@ static gboolean update_switcher_window(WnckWindow * win, Window selected)
                 pango_layout_set_auto_dir (d->layout, FALSE);
                 pango_layout_set_width(d->layout, -1);
                 pango_layout_set_text(d->layout, name, name_length);
-
-                n_line = pango_layout_get_line_count(d->layout);
 
                 line = pango_layout_get_line(d->layout, 0);
 
@@ -4690,14 +4672,14 @@ static XFixed *create_gaussian_kernel(double radius,
     double *amp, scale, x_scale, fx, sum;
     int size, x, i, n;
 
-    scale = 1.0f / (2.0f * M_PI * sigma * sigma);
+    scale = 1.0 / (2.0 * M_PI * sigma * sigma);
 
-    if (alpha == -0.5f)
-        alpha = 0.5f;
+    if (alpha == -0.5)
+        alpha = 0.5;
 
     size = alpha * 2 + 2;
 
-    x_scale = 2.0f * radius / size;
+    x_scale = 2.0 * radius / size;
 
     if (size < 3)
         return NULL;
@@ -4719,9 +4701,9 @@ static XFixed *create_gaussian_kernel(double radius,
 
     for (x = 0; x < size; x++)
     {
-        fx = x_scale * (x - alpha - 0.5f);
+        fx = x_scale * (x - alpha - 0.5);
 
-        amp[i] = scale * exp((-1.0f * (fx * fx)) / (2.0f * sigma * sigma));
+        amp[i] = scale * exp((-1.0 * (fx * fx)) / (2.0 * sigma * sigma));
 
         sum += amp[i];
 
