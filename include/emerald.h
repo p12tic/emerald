@@ -6,12 +6,6 @@
 
 #include <decoration.h>
 
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-#include <X11/Xregion.h>
-#include <X11/cursorfont.h>
-#include <X11/extensions/Xrender.h>
-
 /*
 #ifndef GDK_DISABLE_DEPRECATED
 #define GDK_DISABLE_DEPRECATED

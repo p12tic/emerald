@@ -30,6 +30,12 @@
 //#define BASE_PROP_SIZE 12
 //#define QUAD_PROP_SIZE 9
 
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+#include <X11/Xregion.h>
+#include <X11/cursorfont.h>
+#include <X11/extensions/Xrender.h>
+
 #ifndef DECOR_INTERFACE_VERSION
 #define DECOR_INTERFACE_VERSION 0
 #endif
