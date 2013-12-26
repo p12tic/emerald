@@ -115,6 +115,6 @@ enum EngineCol { // TODO: move to a separate file
     ENGINE_COL_COUNT
 };
 
-void search_engine(EngineData* d, void* p);
+void search_engine(EngineData& d, FindEngine& fe);
 
 #endif

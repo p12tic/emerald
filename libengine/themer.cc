@@ -24,7 +24,7 @@
 #include <list>
 
 std::list<SettingItem> g_setting_list;
-GSList* EngineList = NULL;
+std::list<EngineData> g_engine_list;
 GtkWidget* EngineCombo;
 GtkListStore* EngineModel;
 GtkWidget* EngineContainer;
@@ -259,11 +259,10 @@ void setup_dbus()
 }
 #endif
 
-void show_engine_named(EngineData* d, void* p)
+void show_engine_named(EngineData& d, const char* nam)
 {
-    char* nam = p;
-    if (!strcmp(nam, d->canname)) {
-        gtk_container_add(GTK_CONTAINER(EngineContainer), d->vbox);
+    if (!strcmp(nam, d.canname)) {
+        gtk_container_add(GTK_CONTAINER(EngineContainer), d.vbox);
         gtk_widget_show_all(EngineContainer);
     }
 }
@@ -280,18 +279,19 @@ void do_engine(const char* nam)
     if ((w = gtk_bin_get_child(GTK_BIN(EngineContainer)))) {
         gtk_container_remove(GTK_CONTAINER(EngineContainer), w);
     }
-    g_slist_foreach(EngineList, (GFunc) show_engine_named, (void*) nam);
+    for (auto& item : g_engine_list) {
+        show_engine_named(item, nam);
+    }
 
 }
-void search_engine(EngineData* d, void* p)
+void search_engine(EngineData& d, FindEngine& fe)
 {
-    FindEngine* fe = p;
-    if (!fe->found) {
-        if (!strcmp(d->canname, fe->canname)) {
-            fe->d = d;
-            fe->found = true;
+    if (!fe.found) {
+        if (!strcmp(d.canname, fe.canname)) {
+            fe.d = &d;
+            fe.found = true;
         } else {
-            fe->i++;
+            fe.i++;
         }
     }
 }
@@ -302,7 +302,9 @@ bool get_engine_meta_info(const char* engine, EngineMetaInfo* inf)
     fe.found = false;
     fe.i = 0;
     fe.d = NULL;
-    g_slist_foreach(EngineList, (GFunc) search_engine, &fe);
+    for (auto& item : g_engine_list) {
+        search_engine(item, fe);
+    }
     if (fe.found) {
         memcpy(inf, &(fe.d->meta), sizeof(EngineMetaInfo));
     }
@@ -389,11 +391,10 @@ static char* canonize_name(char* dlname)
     end[0] = '\0';
     return begin;
 }
-static void engine_comp(EngineData* d, void* p)
+static void engine_comp(EngineData& d, FindEngine& e)
 {
-    FindEngine* e = p;
-    if (!strcmp(e->canname, d->canname)) {
-        e->found = true;
+    if (!strcmp(e.canname, d.canname)) {
+        e.found = true;
     }
 }
 static bool engine_is_unique(char* canname)
@@ -401,7 +402,9 @@ static bool engine_is_unique(char* canname)
     FindEngine e;
     e.canname = canname;
     e.found = false;
-    g_slist_foreach(EngineList, (GFunc)engine_comp, &e);
+    for (auto& item : g_engine_list) {
+        engine_comp(item, e);
+    }
     return !e.found;
 }
 static void append_engine(char* dlname)
@@ -427,7 +430,8 @@ static void append_engine(char* dlname)
         }
         if (lay) {
             get_meta_info_proc meta;
-            EngineData* d = malloc(sizeof(EngineData));
+            g_engine_list.push_back(EngineData());
+            EngineData* d = &g_engine_list.back();
             GtkTreeIter i;
             const char* format =
                 "<b>%s</b> (%s)\n"
@@ -452,7 +456,6 @@ static void append_engine(char* dlname)
             d->vbox = gtk_vbox_new(false, 2);
             g_object_ref(d->vbox);
             lay(d->vbox);
-            EngineList = g_slist_append(EngineList, d);
             gtk_list_store_append(EngineModel, &i);
 
             gtk_list_store_set(EngineModel, &i, ENGINE_COL_DLNAME, d->dlname, ENGINE_COL_NAME, d->canname,

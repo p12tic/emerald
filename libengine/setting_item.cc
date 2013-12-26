@@ -24,7 +24,7 @@
 extern GKeyFile* global_theme_file;
 extern GKeyFile* global_settings_file;
 extern std::list<SettingItem> g_setting_list;
-extern GSList* EngineList;
+extern std::list<EngineData> g_engine_list;
 extern GtkListStore* EngineModel;
 
 char* globalStr = NULL;
@@ -194,14 +194,18 @@ void SettingItem::set_engine_combo(char* val)
     fe.canname = val;
     fe.found = false;
     fe.i = 0;
-    g_slist_foreach(EngineList, (GFunc) search_engine, &fe);
+    for (auto& item : g_engine_list) {
+        search_engine(item, fe);
+    }
     if (fe.found) {
         gtk_combo_box_set_active(GTK_COMBO_BOX(widget_), fe.i);
     } else {
         fe.canname = "legacy";
         fe.found = false;
         fe.i = 0;
-        g_slist_foreach(EngineList, (GFunc) search_engine, &fe);
+        for (auto& item : g_engine_list) {
+            search_engine(item, fe);
+        }
         if (fe.found) {
             gtk_combo_box_set_active(GTK_COMBO_BOX(widget_), fe.i);
         }
