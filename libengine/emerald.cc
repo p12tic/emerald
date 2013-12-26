@@ -58,7 +58,7 @@ void copy_from_defaults_if_needed()
     g_free(opath);
 }
 
-char* make_filename(char* sect, char* key, char* ext)
+char* make_filename(const char* sect, const char* key, const char* ext)
 {
     return g_strdup_printf("%s/.emerald/theme/%s.%s.%s", g_get_home_dir(), sect, key, ext);
 }
@@ -66,7 +66,8 @@ void cairo_set_source_alpha_color(cairo_t* cr, alpha_color* c)
 {
     cairo_set_source_rgba(cr, c->color.r, c->color.g, c->color.b, c->alpha);
 }
-void load_color_setting(GKeyFile* f, decor_color_t* color, char* key, char* sect)
+void load_color_setting(GKeyFile* f, decor_color_t* color, const char* key,
+                        const char* sect)
 {
     GdkColor c;
     char* s = g_key_file_get_string(f, sect, key, NULL);
@@ -78,7 +79,8 @@ void load_color_setting(GKeyFile* f, decor_color_t* color, char* key, char* sect
         g_free(s);
     }
 }
-void load_shadow_color_setting(GKeyFile* f, int sc[3], char* key, char* sect)
+void load_shadow_color_setting(GKeyFile* f, int sc[3], const char* key,
+                               const char* sect)
 {
     GdkColor c;
     char* s = g_key_file_get_string(f, sect, key, NULL);
@@ -90,7 +92,7 @@ void load_shadow_color_setting(GKeyFile* f, int sc[3], char* key, char* sect)
         g_free(s);
     }
 }
-void load_float_setting(GKeyFile* f, double* d, char* key, char* sect)
+void load_float_setting(GKeyFile* f, double* d, const char* key, const char* sect)
 {
     char* s = g_key_file_get_string(f, sect, key, NULL);
     if (s) {
@@ -98,7 +100,7 @@ void load_float_setting(GKeyFile* f, double* d, char* key, char* sect)
         g_free(s);
     }
 }
-void load_int_setting(GKeyFile* f, int* i, char* key, char* sect)
+void load_int_setting(GKeyFile* f, int* i, const char* key, const char* sect)
 {
     GError* e = NULL;
     int ii = g_key_file_get_integer(f, sect, key, &e);
@@ -106,7 +108,7 @@ void load_int_setting(GKeyFile* f, int* i, char* key, char* sect)
         *i = ii;
     }
 }
-void load_bool_setting(GKeyFile* f, bool* b, char* key, char* sect)
+void load_bool_setting(GKeyFile* f, bool* b, const char* key, const char* sect)
 {
     GError* e = NULL;
     bool bb = g_key_file_get_boolean(f, sect, key, &e);
@@ -114,7 +116,8 @@ void load_bool_setting(GKeyFile* f, bool* b, char* key, char* sect)
         *b = bb;
     }
 }
-void load_font_setting(GKeyFile* f, PangoFontDescription** fd, char* key, char* sect)
+void load_font_setting(GKeyFile* f, PangoFontDescription** fd, const char* key,
+                       const char* sect)
 {
     char* s = g_key_file_get_string(f, sect, key, NULL);
     if (s) {
@@ -125,7 +128,8 @@ void load_font_setting(GKeyFile* f, PangoFontDescription** fd, char* key, char* 
         g_free(s);
     }
 }
-void load_string_setting(GKeyFile* f, char** s, char* key, char* sect)
+void load_string_setting(GKeyFile* f, char** s, const char* key,
+                         const char* sect)
 {
     char* st = g_key_file_get_string(f, sect, key, NULL);
     if (st) {
