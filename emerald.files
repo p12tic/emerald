@@ -56,10 +56,12 @@ include/Makefile.am
 include/emerald.h
 include/engine.h
 include/libengine.h
+include/setting_item.h
 include/titlebar.h
 libengine/Makefile.am
 libengine/emerald.cc
 libengine/emeraldengine.pc.in
+libengine/setting_item.cc
 libengine/themer.cc
 misc/Makefile.am
 misc/application-x-emerald-theme.png

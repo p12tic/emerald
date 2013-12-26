@@ -1,6 +1,9 @@
 #ifndef EMERALD_LIBENGINE_H
 #define EMERALD_LIBENGINE_H
+
 #include <emerald.h>
+#include "setting_item.h"
+
 void copy_from_defaults_if_needed();
 void load_color_setting(GKeyFile* f, decor_color_t* color, const char* key,
                         const char* sect);
@@ -44,39 +47,6 @@ rounded_rectangle(cairo_t* cr,
 
 //////////////////////////////////////////////////////
 //themer stuff
-struct EngineMetaInfo {
-    char* description;
-    char* version;
-    char* last_compat;
-    GdkPixbuf* icon;
-};
-
-enum SettingType {
-    ST_BOOL,
-    ST_INT,
-    ST_FLOAT,
-    ST_COLOR,
-    ST_FONT,
-    ST_META_STRING,
-    ST_IMG_FILE,
-    ST_STRING_COMBO,
-    ST_SFILE_INT_COMBO,
-    ST_ENGINE_COMBO,
-    ST_SFILE_BOOL,
-    ST_SFILE_INT,
-    ST_NUM
-};
-
-struct SettingItem {
-    SettingType type;
-    char* key;
-    char* section;
-    GtkWidget* widget;
-
-    char* fvalue;
-    GtkImage* image;
-    GtkImage* preview;
-};
 
 #include <titlebar.h>
 
@@ -109,39 +79,15 @@ void cb_apply_setting(GtkWidget* w, void* p);
 void setup_dbus();
 #endif
 
-void write_setting(SettingItem* item, void* p);
-void write_setting_file();
-bool get_bool(SettingItem* item);
-double get_float(SettingItem* item);
-int get_int(SettingItem* item);
-const char* get_float_str(SettingItem* item);
-const char* get_color(SettingItem* item);
-const char* get_font(SettingItem* item);
-const char* get_string(SettingItem* item);
-void check_file(SettingItem* item, char* f);
-const char* get_file(SettingItem* item);
-const char* get_string_combo(SettingItem* item);
-int get_sf_int_combo(SettingItem* item);
 void update_preview(GtkFileChooser* fc, char* filename, GtkImage* img);
 void update_preview_cb(GtkFileChooser* file_chooser, void* data);
-void set_file(SettingItem* item, char* f);
-void set_bool(SettingItem* item, bool b);
-void set_float(SettingItem* item, double f);
-void set_int(SettingItem* item, int i);
-void set_float_str(SettingItem* item, char* s);
-void set_color(SettingItem* item, char* s);
-void set_font(SettingItem* item, char* f);
-void set_string(SettingItem* item, char* s);
-void set_string_combo(SettingItem* item, char* s);
-void set_sf_int_combo(SettingItem* item, int i);
-void read_setting(SettingItem* item, void** p);
+
 void init_settings();
 void set_changed(bool schanged);
 void set_apply(bool sapply);
 void cb_clear_file(GtkWidget* button, void* p);
 void init_key_files();
 GSList* get_setting_list();
-const char* get_engine_combo(SettingItem* item);
 void do_engine(const char* nam);
 GtkWidget* build_notebook_page(char* title, GtkWidget* notebook);
 char* make_filename(const char* sect, const char* key, const char* ext);
