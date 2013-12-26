@@ -40,14 +40,14 @@ enum btypes {
 };
 #ifdef NEED_BUTTON_BISTATES
 static const bool btbistate[B_T_COUNT] = {
-    FALSE,
-    TRUE,
-    FALSE,
-    FALSE,
-    FALSE,
-    TRUE,
-    TRUE,
-    TRUE,
+    false,
+    true,
+    false,
+    false,
+    false,
+    true,
+    true,
+    true,
 };
 #endif
 #ifdef NEED_BUTTON_STATE_FLAGS

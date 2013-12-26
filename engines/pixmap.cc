@@ -108,7 +108,7 @@ void get_meta_info(EngineMetaInfo* emi)
     emi->version = g_strdup("0.2");
     emi->description = g_strdup(_("Everything done with customizable pixmaps!"));
     emi->last_compat = g_strdup("0.0"); // old themes marked still compatible
-    emi->icon = gdk_pixbuf_new_from_inline(-1, my_pixbuf, TRUE, NULL);
+    emi->icon = gdk_pixbuf_new_from_inline(-1, my_pixbuf, true, NULL);
 }
 
 void
@@ -125,7 +125,7 @@ fill_rounded_rectangle_pixmap_blend(cairo_t*       cr,
                                     bool blend_only_if_pixmaps_available)
 {
     cairo_pattern_t* pattern;
-    bool blend = TRUE;
+    bool blend = true;
     int iw, ih;
 
     if (cairo_surface_status(pix->surface) == CAIRO_STATUS_SUCCESS) {
@@ -156,7 +156,7 @@ fill_rounded_rectangle_pixmap_blend(cairo_t*       cr,
         cairo_fill(cr);
         cairo_pattern_destroy(pattern);
     } else if (blend_only_if_pixmaps_available) {
-        blend = FALSE;
+        blend = false;
     }
 
     cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
@@ -303,7 +303,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                                         CORNER_TOPLEFT & corners,
                                         &pfs->title_inner, &pfs->title_outer,
                                         SHADE_TOP | SHADE_LEFT, &pfs->pixmaps[TOP_LEFT], ws,
-                                        pws->top_corner_radius, TRUE);
+                                        pws->top_corner_radius, true);
 
     // Top Bar
     fill_rounded_rectangle_pixmap_blend(cr,
@@ -314,7 +314,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                                         0,
                                         &pfs->title_inner, &pfs->title_outer,
                                         SHADE_TOP, &pfs->pixmaps[TOP], ws,
-                                        pws->top_corner_radius, TRUE);
+                                        pws->top_corner_radius, true);
 
     // Top Right Bar
     fill_rounded_rectangle_pixmap_blend(cr,
@@ -325,7 +325,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                                         CORNER_TOPRIGHT & corners,
                                         &pfs->title_inner, &pfs->title_outer,
                                         SHADE_TOP | SHADE_RIGHT, &pfs->pixmaps[TOP_RIGHT], ws,
-                                        pws->top_corner_radius, TRUE);
+                                        pws->top_corner_radius, true);
 
     // Left Bar
     fill_rounded_rectangle_pixmap_blend(cr,
@@ -336,7 +336,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                                         0,
                                         &pfs->inner, &pfs->outer,
                                         SHADE_LEFT, &pfs->pixmaps[LEFT], ws,
-                                        pws->top_corner_radius, FALSE);
+                                        pws->top_corner_radius, false);
 
     // Right Bar
     fill_rounded_rectangle_pixmap_blend(cr,
@@ -347,7 +347,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                                         0,
                                         &pfs->inner, &pfs->outer,
                                         SHADE_RIGHT, &pfs->pixmaps[RIGHT], ws,
-                                        pws->top_corner_radius, FALSE);
+                                        pws->top_corner_radius, false);
 
     // Bottom Left Bar
     fill_rounded_rectangle_pixmap_blend(cr,
@@ -358,7 +358,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                                         CORNER_BOTTOMLEFT & corners,
                                         &pfs->inner, &pfs->outer,
                                         SHADE_BOTTOM | SHADE_LEFT, &pfs->pixmaps[BOTTOM_LEFT], ws,
-                                        pws->bottom_corner_radius, FALSE);
+                                        pws->bottom_corner_radius, false);
 
     // Bottom Bar
     fill_rounded_rectangle_pixmap_blend(cr,
@@ -368,7 +368,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                                         ws->win_extents.bottom, 0,
                                         &pfs->inner, &pfs->outer,
                                         SHADE_BOTTOM, &pfs->pixmaps[BOTTOM], ws,
-                                        pws->bottom_corner_radius, FALSE);
+                                        pws->bottom_corner_radius, false);
 
     // Bottom Right Bar
     fill_rounded_rectangle_pixmap_blend(cr,
@@ -379,7 +379,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                                         CORNER_BOTTOMRIGHT & corners,
                                         &pfs->inner, &pfs->outer,
                                         SHADE_BOTTOM | SHADE_RIGHT, &pfs->pixmaps[BOTTOM_RIGHT], ws,
-                                        pws->bottom_corner_radius, FALSE);
+                                        pws->bottom_corner_radius, false);
 
     cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
 
@@ -408,7 +408,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                                         0,
                                         &pfs->title_inner, &pfs->title_outer,
                                         SHADE_TOP, &pfs->pixmaps[TITLE_LEFT], ws,
-                                        pws->top_corner_radius, TRUE);
+                                        pws->top_corner_radius, true);
 
     // Title
     fill_rounded_rectangle_pixmap_blend(cr,
@@ -419,7 +419,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                                         0,
                                         &pfs->title_inner, &pfs->title_outer,
                                         SHADE_TOP, &pfs->pixmaps[TITLE], ws,
-                                        pws->top_corner_radius, TRUE);
+                                        pws->top_corner_radius, true);
 
     // Title Right
     fill_rounded_rectangle_pixmap_blend(cr,
@@ -430,7 +430,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                                         0,
                                         &pfs->title_inner, &pfs->title_outer,
                                         SHADE_TOP, &pfs->pixmaps[TITLE_RIGHT], ws,
-                                        pws->top_corner_radius, TRUE);
+                                        pws->top_corner_radius, true);
 
     cairo_stroke(cr);
 }
@@ -504,10 +504,10 @@ void init_engine(window_settings* ws)
     pws = malloc(sizeof(private_ws));
     ws->engine_ws = pws;
     bzero(pws, sizeof(private_ws));
-    pws->round_top_left = TRUE;
-    pws->round_top_right = TRUE;
-    pws->round_bottom_left = TRUE;
-    pws->round_bottom_right = TRUE;
+    pws->round_top_left = true;
+    pws->round_top_right = true;
+    pws->round_bottom_left = true;
+    pws->round_bottom_right = true;
     pws->top_corner_radius = 5.0;
     pws->bottom_corner_radius = 5.0;
 
@@ -543,49 +543,49 @@ void layout_corners_frame(GtkWidget* vbox)
     GtkWidget* junk;
 
     junk = gtk_check_button_new_with_label(_("Round Top Left Corner"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "round_top_left");
 
     junk = gtk_check_button_new_with_label(_("Round Top Right Corner"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "round_top_right");
 
     junk = gtk_check_button_new_with_label(_("Round Bottom Left Corner"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "round_bottom_left");
 
     junk = gtk_check_button_new_with_label(_("Round Bottom Right Corner"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "round_bottom_right");
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
-    gtk_box_pack_startC(hbox, gtk_label_new(_("Top Rounding Radius")), FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
+    gtk_box_pack_startC(hbox, gtk_label_new(_("Top Rounding Radius")), false, false, 0);
     junk = scaler_new(0, 20, 0.5);
-    gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
+    gtk_box_pack_startC(hbox, junk, true, true, 0);
     SettingItem::register_setting(junk, ST_FLOAT, SECT, "top_radius");
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
-    gtk_box_pack_startC(hbox, gtk_label_new(_("Bottom Rounding Radius")), FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
+    gtk_box_pack_startC(hbox, gtk_label_new(_("Bottom Rounding Radius")), false, false, 0);
     junk = scaler_new(0, 20, 0.5);
-    gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
+    gtk_box_pack_startC(hbox, junk, true, true, 0);
     SettingItem::register_setting(junk, ST_FLOAT, SECT, "bottom_radius");
 }
 void my_engine_settings(GtkWidget* hbox,  bool active)
 {
     GtkWidget* vbox;
     GtkWidget* scroller;
-    vbox = gtk_vbox_new(FALSE, 2);
-    gtk_box_pack_startC(hbox, vbox, TRUE, TRUE, 0);
-    gtk_box_pack_startC(vbox, gtk_label_new(active ? "Active Window" : "Inactive Window"), FALSE, FALSE, 0);
-    gtk_box_pack_startC(vbox, gtk_hseparator_new(), FALSE, FALSE, 0);
+    vbox = gtk_vbox_new(false, 2);
+    gtk_box_pack_startC(hbox, vbox, true, true, 0);
+    gtk_box_pack_startC(vbox, gtk_label_new(active ? "Active Window" : "Inactive Window"), false, false, 0);
+    gtk_box_pack_startC(vbox, gtk_hseparator_new(), false, false, 0);
     scroller = gtk_scrolled_window_new(NULL, NULL);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller),
                                    GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-    gtk_box_pack_startC(vbox, scroller, TRUE, TRUE, 0);
+    gtk_box_pack_startC(vbox, scroller, true, true, 0);
 
-    table_new(3, FALSE, FALSE);
+    table_new(3, false, false);
 
     gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scroller), GTK_WIDGET(get_current_table()));
 
@@ -602,11 +602,11 @@ void my_engine_settings(GtkWidget* hbox,  bool active)
 void layout_engine_colors(GtkWidget* vbox)
 {
     GtkWidget* hbox;
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, TRUE, TRUE, 0);
-    my_engine_settings(hbox, TRUE);
-    gtk_box_pack_startC(hbox, gtk_vseparator_new(), FALSE, FALSE, 0);
-    my_engine_settings(hbox, FALSE);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, true, true, 0);
+    my_engine_settings(hbox, true);
+    gtk_box_pack_startC(hbox, gtk_vseparator_new(), false, false, 0);
+    my_engine_settings(hbox, false);
 }
 static void layout_pixmap_box(GtkWidget* vbox, int b_t, bool active)
 {
@@ -628,11 +628,11 @@ static void layout_pixmap_box(GtkWidget* vbox, int b_t, bool active)
         pre = "inactive";
     }
 
-    table_append(gtk_label_new(names[b_t]), FALSE);
+    table_append(gtk_label_new(names[b_t]), false);
 
     filesel = gtk_file_chooser_button_new(g_strdup_printf("%s Pixmap", names[b_t]),
                                           GTK_FILE_CHOOSER_ACTION_OPEN);
-    table_append(filesel, FALSE);
+    table_append(filesel, false);
     imgfilter = gtk_file_filter_new();
     gtk_file_filter_set_name(imgfilter, "Images");
     gtk_file_filter_add_pixbuf_formats(imgfilter);
@@ -647,20 +647,20 @@ static void layout_pixmap_box(GtkWidget* vbox, int b_t, bool active)
     item = SettingItem::register_img_file_setting(filesel, "pixmaps",  g_strdup_printf("%s_%s", pre, p_types[b_t]), (GtkImage*)image);
     gtk_scrolled_window_add_with_viewport(
         GTK_SCROLLED_WINDOW(scroller), GTK_WIDGET(image));
-    table_append(scroller, TRUE);
+    table_append(scroller, true);
 
     clearer = gtk_button_new_from_stock(GTK_STOCK_CLEAR);
     g_signal_connect(clearer, "clicked", G_CALLBACK(cb_clear_file), item);
-    table_append(clearer, FALSE);
+    table_append(clearer, false);
 
     // Style : Use Tiled or Scaled pixmaps
     use_scaled = gtk_check_button_new_with_label(_("Scaled"));
     SettingItem::register_setting(use_scaled,  ST_BOOL,  SECT,  g_strdup_printf("%s_%s_use_scaled", pre, p_types[b_t]));
-    table_append(use_scaled, FALSE);
+    table_append(use_scaled, false);
 
     // Width : Checkbox (Use my width) + Number (0-500)
     if (b_t == 0 || b_t == 5 || b_t == 8) {
-        table_append(gtk_label_new(_("Not adjustable")), FALSE);
+        table_append(gtk_label_new(_("Not adjustable")), false);
     } else {
         width = gtk_spin_button_new_with_range(0, 500, 1);
         SettingItem::register_setting(width,
@@ -669,10 +669,10 @@ static void layout_pixmap_box(GtkWidget* vbox, int b_t, bool active)
         use_my_width = gtk_check_button_new_with_label("");
         SettingItem::register_setting(use_my_width, ST_BOOL, SECT, g_strdup_printf("%s_%s_use_width", pre, p_types[b_t]));
 
-        tbox = gtk_hbox_new(FALSE, 2);
-        gtk_box_pack_startC(tbox, width, FALSE, FALSE, 0);
-        gtk_box_pack_startC(tbox, use_my_width, FALSE, FALSE, 0);
-        table_append(tbox, FALSE);
+        tbox = gtk_hbox_new(false, 2);
+        gtk_box_pack_startC(tbox, width, false, false, 0);
+        gtk_box_pack_startC(tbox, use_my_width, false, false, 0);
+        table_append(tbox, false);
     }
 
     // Height : Checkbox (Use my width) + Number (0-500)
@@ -683,12 +683,12 @@ static void layout_pixmap_box(GtkWidget* vbox, int b_t, bool active)
         use_my_height = gtk_check_button_new_with_label("");
         SettingItem::register_setting(use_my_height, ST_BOOL, SECT, g_strdup_printf("%s_%s_use_height", pre, p_types[b_t]));
 
-        ttbox = gtk_hbox_new(FALSE, 2);
-        gtk_box_pack_startC(ttbox, height, FALSE, FALSE, 0);
-        gtk_box_pack_startC(ttbox, use_my_height, FALSE, FALSE, 0);
-        table_append(ttbox, FALSE);
+        ttbox = gtk_hbox_new(false, 2);
+        gtk_box_pack_startC(ttbox, height, false, false, 0);
+        gtk_box_pack_startC(ttbox, use_my_height, false, false, 0);
+        table_append(ttbox, false);
     } else {
-        table_append(gtk_label_new(_("Not adjustable")), FALSE);
+        table_append(gtk_label_new(_("Not adjustable")), false);
     }
 
 }
@@ -699,31 +699,31 @@ void layout_engine_pixmaps(GtkWidget* vbox, bool active)
     GtkWidget* junk;
     int i;
 
-    hbox = gtk_hbox_new(TRUE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(true, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
 
     if (!active) {
         junk = gtk_check_button_new_with_label(_("Same as Active"));
-        gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
+        gtk_box_pack_startC(hbox, junk, true, true, 0);
         SettingItem::register_setting(junk, ST_BOOL, SECT, "inactive_use_active_pixmaps");
     }
 
     scroller = gtk_scrolled_window_new(NULL, NULL);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller),
                                    GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-    gtk_box_pack_startC(vbox, scroller, TRUE, TRUE, 0);
+    gtk_box_pack_startC(vbox, scroller, true, true, 0);
 
-    table_new(7, FALSE, FALSE);
+    table_new(7, false, false);
     gtk_scrolled_window_add_with_viewport(
         GTK_SCROLLED_WINDOW(scroller), GTK_WIDGET(get_current_table()));
 
-    table_append(gtk_label_new(_("Pixmap")), FALSE);
-    table_append(gtk_label_new(_("File")), FALSE);
-    table_append(gtk_label_new(_("Preview")), FALSE);
-    table_append(gtk_label_new(_("Clear")), FALSE);
-    table_append(gtk_label_new(_("Tiled/Scaled")), FALSE);
-    table_append(gtk_label_new(_("Width Override")), FALSE);
-    table_append(gtk_label_new(_("Height Override")), FALSE);
+    table_append(gtk_label_new(_("Pixmap")), false);
+    table_append(gtk_label_new(_("File")), false);
+    table_append(gtk_label_new(_("Preview")), false);
+    table_append(gtk_label_new(_("Clear")), false);
+    table_append(gtk_label_new(_("Tiled/Scaled")), false);
+    table_append(gtk_label_new(_("Width Override")), false);
+    table_append(gtk_label_new(_("Height Override")), false);
 
     for (i = 0; i < 11; i++) {
         layout_pixmap_box(vbox, i, active);
@@ -735,9 +735,9 @@ void layout_engine_settings(GtkWidget* vbox)
 {
     GtkWidget* note;
     note = gtk_notebook_new();
-    gtk_box_pack_startC(vbox, note, TRUE, TRUE, 0);
-    layout_engine_pixmaps(build_notebook_page("Pixmaps (Active)", note), TRUE);
-    layout_engine_pixmaps(build_notebook_page("Pixmaps (Inactive)", note), FALSE);
+    gtk_box_pack_startC(vbox, note, true, true, 0);
+    layout_engine_pixmaps(build_notebook_page("Pixmaps (Active)", note), true);
+    layout_engine_pixmaps(build_notebook_page("Pixmaps (Inactive)", note), false);
     layout_engine_colors(build_notebook_page("Colors", note));
     layout_corners_frame(build_notebook_page("Frame", note));
 }

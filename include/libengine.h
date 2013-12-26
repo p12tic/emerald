@@ -55,7 +55,7 @@ rounded_rectangle(cairo_t* cr,
 #define gtk_container_addC(a,b) gtk_container_add(GTK_CONTAINER(a),b)
 #define gtk_container_set_border_widthC(a,b) gtk_container_set_border_width(GTK_CONTAINER(a),b)
 
-bool get_engine_meta_info(const char* engine, EngineMetaInfo* inf);   // returns FALSE if couldn't find engine
+bool get_engine_meta_info(const char* engine, EngineMetaInfo* inf);   // returns false if couldn't find engine
 
 GtkWidget* scaler_new(double low, double high, double prec);
 void add_color_alpha_value(const char* caption, const char* basekey,

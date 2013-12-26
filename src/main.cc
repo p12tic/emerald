@@ -41,7 +41,7 @@
 void reload_all_settings(int sig);
 
 GdkPixmap* pdeb;
-static bool do_reload = FALSE;
+static bool do_reload = false;
 
 static GdkPixmap* create_pixmap(int w, int h)
 {
@@ -59,7 +59,7 @@ static GdkPixmap* create_pixmap(int w, int h)
         return NULL;
     }
 
-    colormap = gdk_colormap_new(visual, FALSE);
+    colormap = gdk_colormap_new(visual, false);
     if (!colormap) {
         g_object_unref(G_OBJECT(pixmap));
         return NULL;
@@ -122,7 +122,7 @@ static GtkWidget* style_window;
 
 static GHashTable* frame_table;
 static GtkWidget* action_menu = NULL;
-static bool action_menu_mapped = FALSE;
+static bool action_menu_mapped = false;
 static int double_click_timeout = 250;
 
 static GtkWidget* tip_window;
@@ -133,7 +133,7 @@ static int tooltip_timer_tag = 0;
 static GSList* draw_list = NULL;
 static unsigned draw_idle_id = 0;
 
-static bool enable_tooltips = TRUE;
+static bool enable_tooltips = true;
 static char* engine = NULL;
 
 static int get_b_offset(int b)
@@ -462,14 +462,14 @@ decor_update_blur_property(decor_t* d,
                         XA_INTEGER,
                         32, PropModeReplace, (guchar*) data,
                         2 + size * 6);
-        XSync(xdisplay, FALSE);
+        XSync(xdisplay, false);
         gdk_error_trap_pop();
 
         free(data);
     } else {
         gdk_error_trap_push();
         XDeleteProperty(xdisplay, d->prop_xid, win_blur_decor_atom);
-        XSync(xdisplay, FALSE);
+        XSync(xdisplay, false);
         gdk_error_trap_pop();
     }
 }
@@ -519,7 +519,7 @@ static void decor_update_window_property(decor_t* d)
                     XA_INTEGER,
                     32, PropModeReplace, (guchar*) data,
                     PROP_HEADER_SIZE + BASE_PROP_SIZE + QUAD_PROP_SIZE * N_QUADS_MAX);
-    XSync(xdisplay, FALSE);
+    XSync(xdisplay, false);
     gdk_error_trap_pop();
 
     top.rects = &top.extents;
@@ -598,7 +598,7 @@ set_switcher_quads(decor_quad_t* q, int width, int height, window_settings* ws)
                                 -ws->left_space, 0, GRAVITY_WEST,
                                 height - ws->top_space - ws->titlebar_height - ws->bottom_space,
                                 (ws->switcher_top_corner_space - ws->switcher_bottom_corner_space) >> 1,
-                                0, 0.0, ws->top_space + SWITCHER_TOP_EXTRA, FALSE);
+                                0, 0.0, ws->top_space + SWITCHER_TOP_EXTRA, false);
 
     q += n;
     nQuad += n;
@@ -609,7 +609,7 @@ set_switcher_quads(decor_quad_t* q, int width, int height, window_settings* ws)
                                 0, ws->right_space, GRAVITY_EAST,
                                 height - ws->top_space - ws->titlebar_height - ws->bottom_space,
                                 (ws->switcher_top_corner_space - ws->switcher_bottom_corner_space) >> 1,
-                                0, width - ws->right_space, ws->top_space + SWITCHER_TOP_EXTRA, FALSE);
+                                0, width - ws->right_space, ws->top_space + SWITCHER_TOP_EXTRA, false);
 
     q += n;
     nQuad += n;
@@ -660,7 +660,7 @@ set_shadow_quads(decor_quad_t* q, int width, int height, window_settings* ws)
                                 -ws->shadow_left_space, 0, GRAVITY_WEST,
                                 height - ws->shadow_top_space - ws->shadow_bottom_space,
                                 (ws->shadow_top_corner_space - ws->shadow_bottom_corner_space) >> 1,
-                                0, 0.0, ws->shadow_top_space, FALSE);
+                                0, 0.0, ws->shadow_top_space, false);
 
     q += n;
     nQuad += n;
@@ -671,7 +671,7 @@ set_shadow_quads(decor_quad_t* q, int width, int height, window_settings* ws)
                                 ws->shadow_right_space, GRAVITY_EAST,
                                 height - ws->shadow_top_space - ws->shadow_bottom_space,
                                 (ws->shadow_top_corner_space - ws->shadow_bottom_corner_space) >> 1,
-                                0, width - ws->shadow_right_space, ws->shadow_top_space, FALSE);
+                                0, width - ws->shadow_right_space, ws->shadow_top_space, false);
 
     q += n;
     nQuad += n;
@@ -1065,7 +1065,7 @@ static void draw_button(int b_t, decor_t* d, cairo_t* cr, int y1)
 }
 static void reset_buttons_bg_and_fade(decor_t* d)
 {
-    d->draw_only_buttons_region = FALSE;
+    d->draw_only_buttons_region = false;
     d->button_fade_info.cr = NULL;
     d->button_fade_info.timer = -1;
     int b_t;
@@ -1167,7 +1167,7 @@ int draw_buttons_timer_func(void* data)
     /* decorations no longer available? */
     if (!d->buffer_pixmap && !d->pixmap) {
         stop_button_fade(d);
-        return FALSE;
+        return false;
     }
 
     d->min_drawn_buttons_region.x1 = 10000;
@@ -1231,7 +1231,7 @@ int draw_buttons_timer_func(void* data)
         }
         if (ws->button_fade_pulse_len_steps > 0 &&
                 fade_info->counters[b_t] == num_steps) {
-            fade_info->pulsating[b_t] = TRUE;    // start pulse
+            fade_info->pulsating[b_t] = true;    // start pulse
         }
 
         if (fade_info->counters[b_t] != num_steps + 1 ||        // unless fade is at max
@@ -1278,14 +1278,14 @@ int draw_buttons_timer_func(void* data)
     }
 
     // Check if the fade has come to an end
-    bool any_active_buttons = FALSE;
+    bool any_active_buttons = false;
 
     for (b_t = 0; b_t < B_T_COUNT; b_t++)
         if (!BUTTON_NOT_VISIBLE(d, b_t) &&
                 ((fade_info->counters[b_t] &&
                   fade_info->counters[b_t] < num_steps + 1) ||
                  fade_info->pulsating[b_t])) {
-            any_active_buttons = TRUE;
+            any_active_buttons = true;
             break;
         }
 
@@ -1304,7 +1304,7 @@ int draw_buttons_timer_func(void* data)
                           d->min_drawn_buttons_region.y2 -
                           d->min_drawn_buttons_region.y1);
     }
-    fade_info->first_draw = FALSE;
+    fade_info->first_draw = false;
     if (!any_active_buttons) {
         cairo_destroy(fade_info->cr);
         fade_info->cr = NULL;
@@ -1312,9 +1312,9 @@ int draw_buttons_timer_func(void* data)
             g_source_remove(fade_info->timer);
             fade_info->timer = -1;
         }
-        return FALSE;
+        return false;
     }
-    return TRUE;
+    return true;
 }
 static void draw_buttons_with_fade(decor_t* d, cairo_t* cr, double y1)
 {
@@ -1330,7 +1330,7 @@ static void draw_buttons_with_fade(decor_t* d, cairo_t* cr, double y1)
         }
     }
     button_fade_info_t* fade_info = &(d->button_fade_info);
-    bool button_pressed = FALSE;
+    bool button_pressed = false;
 
     for (b_t = 0; b_t < B_T_COUNT; b_t++) {
         if (BUTTON_NOT_VISIBLE(d, b_t)) {
@@ -1342,7 +1342,7 @@ static void draw_buttons_with_fade(decor_t* d, cairo_t* cr, double y1)
                 (b_state == S_ACTIVE_PRESS || b_state == S_INACTIVE_PRESS)) {
             // Button pressed, stop fade
             fade_info->counters[b_t] = 0;
-            button_pressed = TRUE;
+            button_pressed = true;
         } else if (fade_info->counters[b_t] > 0 && (b_state == S_ACTIVE || b_state == S_INACTIVE)) {    // moved out
             // Change fade in -> out and proceed 1 step
             fade_info->counters[b_t] =
@@ -1360,7 +1360,7 @@ static void draw_buttons_with_fade(decor_t* d, cairo_t* cr, double y1)
         if (fade_info->pulsating[b_t] &&
                 b_state != S_ACTIVE_HOVER && b_state != S_INACTIVE_HOVER) {
             // Stop pulse
-            fade_info->pulsating[b_t] = FALSE;
+            fade_info->pulsating[b_t] = false;
         }
     }
 
@@ -1371,7 +1371,7 @@ static void draw_buttons_with_fade(decor_t* d, cairo_t* cr, double y1)
     {
         fade_info->d = (void*) d;
         fade_info->y1 = y1;
-        if (draw_buttons_timer_func((void*) fade_info) == TRUE) {      // call once now
+        if (draw_buttons_timer_func((void*) fade_info) == true) {      // call once now
             // and start a new timer for the next step
             fade_info->timer =
                 g_timeout_add(ws->button_fade_step_duration,
@@ -1419,7 +1419,7 @@ static void draw_buttons_without_fade(decor_t* d, cairo_t* cr, double y1)
     }
     if (button_hovered_on >= 0) {
         // Draw the button and the glow for the button hovered on
-        draw_button_with_glow(button_hovered_on, d, cr, y1, TRUE);
+        draw_button_with_glow(button_hovered_on, d, cr, y1, true);
     }
 }
 static void update_button_regions(decor_t* d)
@@ -1448,14 +1448,14 @@ static void update_button_regions(decor_t* d)
         // Reset overlaps
         for (b_t2 = 0; b_t2 < b_t; b_t2++)
             if (!BUTTON_NOT_VISIBLE(d, b_t2)) {
-                d->button_region[b_t].overlap_buttons[b_t2] = FALSE;
+                d->button_region[b_t].overlap_buttons[b_t2] = false;
             }
         for (b_t2 = 0; b_t2 < b_t; b_t2++)
             if (!BUTTON_NOT_VISIBLE(d, b_t2)) {
-                d->button_region_inact[b_t].overlap_buttons[b_t2] = FALSE;
+                d->button_region_inact[b_t].overlap_buttons[b_t2] = false;
             }
     }
-    d->button_fade_info.first_draw = TRUE;
+    d->button_fade_info.first_draw = true;
 
     if (ws->use_pixmap_buttons) {
         if ((d->active && ws->use_button_glow) ||
@@ -1500,9 +1500,9 @@ static void update_button_regions(decor_t* d)
                                     button_region
                                     [b_t2].
                                     base_x1)) {
-                        button_region->overlap_buttons[b_t2] = TRUE;
+                        button_region->overlap_buttons[b_t2] = true;
                     } else {
-                        button_region->overlap_buttons[b_t2] = FALSE;
+                        button_region->overlap_buttons[b_t2] = false;
                     }
 
                     // buttons' protruding glow length might be asymmetric
@@ -1515,9 +1515,9 @@ static void update_button_regions(decor_t* d)
                                     >=
                                     button_region->
                                     base_x1)) {
-                        d->button_region[b_t2].overlap_buttons[b_t] = TRUE;
+                        d->button_region[b_t2].overlap_buttons[b_t] = true;
                     } else {
-                        d->button_region[b_t2].overlap_buttons[b_t] = FALSE;
+                        d->button_region[b_t2].overlap_buttons[b_t] = false;
                     }
                 }
             }
@@ -1623,7 +1623,7 @@ static void draw_window_decoration_real(decor_t* d, bool shadow_time)
         // Copy button region backgrounds to buffers
         // for fast drawing of buttons from now on
         // when drawing is done for buttons
-        bool bg_pixmaps_update_needed = FALSE;
+        bool bg_pixmaps_update_needed = false;
         int b_t;
 
         for (b_t = 0; b_t < B_T_COUNT; b_t++) {
@@ -1634,7 +1634,7 @@ static void draw_window_decoration_real(decor_t* d, bool shadow_time)
                 continue;
             }
             if (!button_region->bg_pixmap && button_region->base_x1 >= 0) {      // if region is valid
-                bg_pixmaps_update_needed = TRUE;
+                bg_pixmaps_update_needed = true;
                 break;
             }
         }
@@ -1821,26 +1821,26 @@ static void draw_window_decoration(decor_t* d)
         d->buffer_pixmap = d->p_inactive_buffer;
     }
     if (d->draw_only_buttons_region) {
-        draw_window_decoration_real(d, FALSE);
+        draw_window_decoration_real(d, false);
     }
     if (!d->only_change_active) {
         bool save = d->active;
         frame_settings* fs = d->fs;
 
-        d->active = TRUE;
+        d->active = true;
         d->fs = d->fs->ws->fs_act;
         d->pixmap = d->p_active;
         d->buffer_pixmap = d->p_active_buffer;
-        draw_window_decoration_real(d, FALSE);
-        d->active = FALSE;
+        draw_window_decoration_real(d, false);
+        d->active = false;
         d->fs = d->fs->ws->fs_inact;
         d->pixmap = d->p_inactive;
         d->buffer_pixmap = d->p_inactive_buffer;
-        draw_window_decoration_real(d, FALSE);
+        draw_window_decoration_real(d, false);
         d->active = save;
         d->fs = fs;
     } else {
-        d->only_change_active = FALSE;
+        d->only_change_active = false;
     }
     if (d->active) {
         d->pixmap = d->p_active;
@@ -1853,11 +1853,11 @@ static void draw_window_decoration(decor_t* d)
         decor_update_window_property(d);
         d->prop_xid = 0;
     }
-    d->draw_only_buttons_region = FALSE;
+    d->draw_only_buttons_region = false;
 }
 static void draw_shadow_window(decor_t* d)
 {
-    draw_window_decoration_real(d, TRUE);
+    draw_window_decoration_real(d, true);
 }
 
 #define SWITCHER_ALPHA 0xa0a0
@@ -1896,7 +1896,7 @@ static void decor_update_switcher_property(decor_t* d)
                     PROP_HEADER_SIZE + BASE_PROP_SIZE + QUAD_PROP_SIZE * N_QUADS_MAX);
     XChangeProperty(xdisplay, d->prop_xid, switcher_fg_atom,
                     XA_INTEGER, 32, PropModeReplace, (guchar*) fgColor, 4);
-    XSync(xdisplay, FALSE);
+    XSync(xdisplay, false);
     gdk_error_trap_pop();
     if (data) {
         free(data);
@@ -2084,7 +2084,7 @@ static void draw_switcher_background(decor_t* d)
     gdk_error_trap_push();
     XSetWindowBackground(xdisplay, d->prop_xid, pixel);
     XClearWindow(xdisplay, d->prop_xid);
-    XSync(xdisplay, FALSE);
+    XSync(xdisplay, false);
     gdk_error_trap_pop();
 
     d->prop_xid = 0;
@@ -2221,7 +2221,7 @@ static bool draw_decor_list(void* data)
     g_slist_free(draw_list);
     draw_list = NULL;
 
-    return FALSE;
+    return false;
 }
 
 static void queue_decor_draw_for_buttons(decor_t* d, bool for_buttons)
@@ -2245,8 +2245,8 @@ static void queue_decor_draw_for_buttons(decor_t* d, bool for_buttons)
 }
 static void queue_decor_draw(decor_t* d)
 {
-    d->only_change_active = FALSE;
-    queue_decor_draw_for_buttons(d, FALSE);
+    d->only_change_active = false;
+    queue_decor_draw_for_buttons(d, false);
 }
 
 static GdkPixmap* pixmap_new_from_pixbuf(GdkPixbuf* pixbuf)
@@ -2291,8 +2291,8 @@ update_default_decorations(GdkScreen* screen, frame_settings* fs_act,
 
     xroot = RootWindowOfScreen(gdk_x11_screen_get_xscreen(screen));
 
-    bareAtom = XInternAtom(xdisplay, DECOR_BARE_ATOM_NAME, FALSE);
-    activeAtom = XInternAtom(xdisplay, DECOR_ACTIVE_ATOM_NAME, FALSE);
+    bareAtom = XInternAtom(xdisplay, DECOR_BARE_ATOM_NAME, false);
+    activeAtom = XInternAtom(xdisplay, DECOR_ACTIVE_ATOM_NAME, false);
 
     if (ws->shadow_pixmap) {
         int width, height;
@@ -2334,7 +2334,7 @@ update_default_decorations(GdkScreen* screen, frame_settings* fs_act,
     d.actions = 0;
     d.prop_xid = 0;
     d.draw = draw_window_decoration;
-    d.only_change_active = FALSE;
+    d.only_change_active = false;
 
     reset_buttons_bg_and_fade(&d);
 
@@ -2345,7 +2345,7 @@ update_default_decorations(GdkScreen* screen, frame_settings* fs_act,
         g_object_unref(G_OBJECT(ws->decor_active_pixmap));
     }
 
-    nQuad = my_set_window_quads(quads, d.width, d.height, ws, FALSE, FALSE);
+    nQuad = my_set_window_quads(quads, d.width, d.height, ws, false, false);
 
     ws->decor_active_pixmap = ws->decor_normal_pixmap =
                                   create_pixmap(MAX(d.width, d.height),
@@ -2359,7 +2359,7 @@ update_default_decorations(GdkScreen* screen, frame_settings* fs_act,
         d.p_active = ws->decor_active_pixmap;
         d.p_active_buffer = NULL;
         d.p_inactive_buffer = NULL;
-        d.active = FALSE;
+        d.active = false;
         d.fs = fs_inact;
 
         (*d.draw)(&d);
@@ -2406,18 +2406,18 @@ static bool get_window_prop(Window xwindow, Atom atom, Window* val)
                                 &bytes_after, (void*)&w);
     err = gdk_error_trap_pop();
     if (err != Success || result != Success) {
-        return FALSE;
+        return false;
     }
 
     if (type != XA_WINDOW) {
         XFree(w);
-        return FALSE;
+        return false;
     }
 
     *val = *w;
     XFree(w);
 
-    return TRUE;
+    return true;
 }
 
 static unsigned int get_mwm_prop(Window xwindow)
@@ -2435,7 +2435,7 @@ static unsigned int get_mwm_prop(Window xwindow)
     gdk_error_trap_push();
 
     result = XGetWindowProperty(xdisplay, xwindow, mwm_hints_atom,
-                                0L, 20L, FALSE, mwm_hints_atom,
+                                0L, 20L, false, mwm_hints_atom,
                                 &actual, &format, &n, &left, &hints_ret);
     mwm_hints = (MwmHints*) hints_ret;
 
@@ -2548,7 +2548,7 @@ void position_title_object(char obj, WnckWindow* win, window_settings* ws,
                 XUndefineCursor(xdisplay, d->button_windows[i]);
             }
         }
-        XSync(xdisplay, FALSE);
+        XSync(xdisplay, false);
         gdk_error_trap_pop();
     }
     d->tobj_item_pos[i] = x - d->tobj_pos[s];
@@ -2565,7 +2565,7 @@ void layout_title_objects(WnckWindow* win)
     int state = 0;
     int owidth;
     int x;
-    bool removed = FALSE;
+    bool removed = false;
 
     d->tobj_size[0] = 0;
     d->tobj_size[1] = 0;
@@ -2623,7 +2623,7 @@ void layout_title_objects(WnckWindow* win)
         } else {
             if (state == 2 && !removed) {
                 x -= ws->button_hoffset;
-                removed = TRUE;
+                removed = true;
             }
             position_title_object(ws->tobj_layout[i], win, ws, x, state);
             x += get_title_object_width(ws->tobj_layout[i], ws, d);
@@ -2695,7 +2695,7 @@ static void update_event_windows(WnckWindow* win)
         }
     }
     layout_title_objects(win);
-    XSync(xdisplay, FALSE);
+    XSync(xdisplay, false);
     gdk_error_trap_pop();
 }
 
@@ -2728,7 +2728,7 @@ int max_window_name_width(WnckWindow* win)
         pango_layout_set_wrap(d->layout, PANGO_WRAP_CHAR);
     }
 
-    pango_layout_set_auto_dir(d->layout, FALSE);
+    pango_layout_set_auto_dir(d->layout, false);
     pango_layout_set_width(d->layout, -1);
     pango_layout_set_text(d->layout, name, strlen(name));
     pango_layout_get_pixel_size(d->layout, &w, NULL);
@@ -2757,7 +2757,7 @@ static void update_window_decoration_name(WnckWindow* win)
     if (name && (name_length = strlen(name))) {
         int w;
 
-        pango_layout_set_auto_dir(d->layout, FALSE);
+        pango_layout_set_auto_dir(d->layout, false);
         pango_layout_set_text(d->layout, "", 0);
         pango_layout_set_width(d->layout, 0);
         layout_title_objects(win);
@@ -2860,7 +2860,7 @@ static void update_window_decoration_actions(WnckWindow* win)
     offset = 0;
     while (left) {
         result = XGetWindowProperty(xdisplay, id, wm_protocols_atom,
-                                    offset, 1L, FALSE, XA_ATOM, &actual,
+                                    offset, 1L, false, XA_ATOM, &actual,
                                     &format, &n, &left, &data);
         offset++;
         if (result == Success && n && data) {
@@ -2909,7 +2909,7 @@ static bool update_window_decoration_size(WnckWindow* win)
 
     if (width == d->width && height == d->height) {
         update_window_decoration_name(win);
-        return FALSE;
+        return false;
     }
     reset_buttons_bg_and_fade(d);
 
@@ -2918,7 +2918,7 @@ static bool update_window_decoration_size(WnckWindow* win)
                            ws->left_space + ws->right_space +
                            ws->bottom_space);
     if (!pixmap) {
-        return FALSE;
+        return false;
     }
 
     buffer_pixmap =
@@ -2928,7 +2928,7 @@ static bool update_window_decoration_size(WnckWindow* win)
                       ws->bottom_space);
     if (!buffer_pixmap) {
         g_object_unref(G_OBJECT(pixmap));
-        return FALSE;
+        return false;
     }
 
     ipixmap = create_pixmap(MAX(width, height),
@@ -2961,7 +2961,7 @@ static bool update_window_decoration_size(WnckWindow* win)
         g_object_unref(G_OBJECT(d->gc));
     }
 
-    d->only_change_active = FALSE;
+    d->only_change_active = false;
 
     d->pixmap = d->active ? pixmap : ipixmap;
     d->buffer_pixmap = d->active ? buffer_pixmap : ibuffer_pixmap;
@@ -2983,7 +2983,7 @@ static bool update_window_decoration_size(WnckWindow* win)
 
     queue_decor_draw(d);
 
-    return TRUE;
+    return true;
 }
 
 static void add_frame_window(WnckWindow* win, Window frame)
@@ -2998,7 +2998,7 @@ static void add_frame_window(WnckWindow* win, Window frame)
 
     bzero(&attr, sizeof(XSetWindowAttributes));
     attr.event_mask = ButtonPressMask | EnterWindowMask | LeaveWindowMask;
-    attr.override_redirect = TRUE;
+    attr.override_redirect = true;
 
     gdk_error_trap_push();
 
@@ -3031,10 +3031,10 @@ static void add_frame_window(WnckWindow* win, Window frame)
         d->button_states[i] = 0;
     }
 
-    XSync(xdisplay, FALSE);
+    XSync(xdisplay, false);
     if (!gdk_error_trap_pop()) {
         if (get_mwm_prop(xid) & (MWM_DECOR_ALL | MWM_DECOR_TITLE)) {
-            d->decorated = TRUE;
+            d->decorated = true;
         }
 
         for (i = 0; i < 3; i++)
@@ -3075,7 +3075,7 @@ static bool update_switcher_window(WnckWindow* win, Window selected)
              ws->switcher_top_corner_space + SWITCHER_SPACE +
              ws->switcher_bottom_corner_space + ws->bottom_space;
 
-    d->decorated = FALSE;
+    d->decorated = false;
     d->draw = draw_switcher_decoration;
 
     if (!IS_VALID(d->pixmap) && IS_VALID(ws->switcher_pixmap)) {
@@ -3117,7 +3117,7 @@ static bool update_switcher_window(WnckWindow* win, Window selected)
             }
 
             if (d->layout) {
-                pango_layout_set_auto_dir(d->layout, FALSE);
+                pango_layout_set_auto_dir(d->layout, false);
                 pango_layout_set_width(d->layout, -1);
                 pango_layout_set_text(d->layout, name, name_length);
 
@@ -3157,19 +3157,19 @@ static bool update_switcher_window(WnckWindow* win, Window selected)
 
         if (d->pixmap) {
             queue_decor_draw(d);
-            return FALSE;
+            return false;
         }
     }
 
     pixmap = create_pixmap(width, height);
     if (!pixmap) {
-        return FALSE;
+        return false;
     }
 
     buffer_pixmap = create_pixmap(width, height);
     if (!buffer_pixmap) {
         g_object_unref(G_OBJECT(pixmap));
-        return FALSE;
+        return false;
     }
 
     if (ws->switcher_pixmap) {
@@ -3214,7 +3214,7 @@ static bool update_switcher_window(WnckWindow* win, Window selected)
 
     queue_decor_draw(d);
 
-    return TRUE;
+    return true;
 }
 
 static void remove_frame_window(WnckWindow* win)
@@ -3304,7 +3304,7 @@ static void remove_frame_window(WnckWindow* win)
     d->width = 0;
     d->height = 0;
 
-    d->decorated = FALSE;
+    d->decorated = false;
 
     d->state = 0;
     d->actions = 0;
@@ -3407,11 +3407,11 @@ static void active_window_changed(WnckScreen* screen)
             d->active = wnck_window_is_active(win);
             d->fs = (d->active ? d->fs->ws->fs_act : d->fs->ws->fs_inact);
             if (!g_slist_find(draw_list, d)) {
-                d->only_change_active = TRUE;
+                d->only_change_active = true;
             }
             d->prop_xid = wnck_window_get_xid(win);
             stop_button_fade(d);
-            queue_decor_draw_for_buttons(d, TRUE);
+            queue_decor_draw_for_buttons(d, true);
         }
     }
 
@@ -3422,11 +3422,11 @@ static void active_window_changed(WnckScreen* screen)
             d->active = wnck_window_is_active(win);
             d->fs = (d->active ? d->fs->ws->fs_act : d->fs->ws->fs_inact);
             if (!g_slist_find(draw_list, d)) {
-                d->only_change_active = TRUE;
+                d->only_change_active = true;
             }
             d->prop_xid = wnck_window_get_xid(win);
             stop_button_fade(d);
-            queue_decor_draw_for_buttons(d, TRUE);
+            queue_decor_draw_for_buttons(d, true);
         }
     }
 }
@@ -3473,7 +3473,7 @@ static void window_closed(WnckScreen* screen, WnckWindow* win)
 
     gdk_error_trap_push();
     XDeleteProperty(xdisplay, wnck_window_get_xid(win), win_decor_atom);
-    XSync(xdisplay, FALSE);
+    XSync(xdisplay, false);
     gdk_error_trap_pop();
 
     if (!get_window_prop(wnck_window_get_xid(win), select_window_atom, &window)) {
@@ -3519,7 +3519,7 @@ move_resize_window(WnckWindow* win, int direction, XEvent* xevent)
 
     if (action_menu_mapped) {
         gtk_object_destroy(GTK_OBJECT(action_menu));
-        action_menu_mapped = FALSE;
+        action_menu_mapped = false;
         action_menu = NULL;
         return;
     }
@@ -3528,7 +3528,7 @@ move_resize_window(WnckWindow* win, int direction, XEvent* xevent)
     ev.xclient.display = xdisplay;
 
     ev.xclient.serial = 0;
-    ev.xclient.send_event = TRUE;
+    ev.xclient.send_event = true;
 
     ev.xclient.window = wnck_window_get_xid(win);
     ev.xclient.message_type = wm_move_resize_atom;
@@ -3543,10 +3543,10 @@ move_resize_window(WnckWindow* win, int direction, XEvent* xevent)
     XUngrabPointer(xdisplay, xevent->xbutton.time);
     XUngrabKeyboard(xdisplay, xevent->xbutton.time);
 
-    XSendEvent(xdisplay, xroot, FALSE,
+    XSendEvent(xdisplay, xroot, false,
                SubstructureRedirectMask | SubstructureNotifyMask, &ev);
 
-    XSync(xdisplay, FALSE);
+    XSync(xdisplay, false);
 }
 
 static void restack_window(WnckWindow* win, int stack_mode)
@@ -3564,7 +3564,7 @@ static void restack_window(WnckWindow* win, int stack_mode)
 
     if (action_menu_mapped) {
         gtk_object_destroy(GTK_OBJECT(action_menu));
-        action_menu_mapped = FALSE;
+        action_menu_mapped = false;
         action_menu = NULL;
         return;
     }
@@ -3573,7 +3573,7 @@ static void restack_window(WnckWindow* win, int stack_mode)
     ev.xclient.display = xdisplay;
 
     ev.xclient.serial = 0;
-    ev.xclient.send_event = TRUE;
+    ev.xclient.send_event = true;
 
     ev.xclient.window = wnck_window_get_xid(win);
     ev.xclient.message_type = restack_window_atom;
@@ -3585,10 +3585,10 @@ static void restack_window(WnckWindow* win, int stack_mode)
     ev.xclient.data.l[3] = 0;
     ev.xclient.data.l[4] = 0;
 
-    XSendEvent(xdisplay, xroot, FALSE,
+    XSendEvent(xdisplay, xroot, false,
                SubstructureRedirectMask | SubstructureNotifyMask, &ev);
 
-    XSync(xdisplay, FALSE);
+    XSync(xdisplay, false);
 }
 
 /* stolen from gtktooltip.c */
@@ -3678,7 +3678,7 @@ static int tooltip_timeout(void* data)
 
     show_tooltip((const char*)data);
 
-    return FALSE;
+    return false;
 }
 
 static void tooltip_start_delay(const char* text)
@@ -3707,15 +3707,15 @@ static int tooltip_paint_window(GtkWidget* tooltip)
                        NULL, GTK_WIDGET(tip_window), "tooltip",
                        0, 0, req.width, req.height);
 
-    return FALSE;
+    return false;
 }
 
 static bool create_tooltip_window(void)
 {
     tip_window = gtk_window_new(GTK_WINDOW_POPUP);
 
-    gtk_widget_set_app_paintable(tip_window, TRUE);
-    gtk_window_set_resizable(GTK_WINDOW(tip_window), FALSE);
+    gtk_widget_set_app_paintable(tip_window, true);
+    gtk_window_set_resizable(GTK_WINDOW(tip_window), false);
     gtk_widget_set_name(tip_window, "gtk-tooltips");
     gtk_container_set_border_width(GTK_CONTAINER(tip_window), 4);
 
@@ -3730,7 +3730,7 @@ static bool create_tooltip_window(void)
                              G_CALLBACK(tooltip_paint_window), 0);
 
     tip_label = gtk_label_new(NULL);
-    gtk_label_set_line_wrap(GTK_LABEL(tip_label), TRUE);
+    gtk_label_set_line_wrap(GTK_LABEL(tip_label), true);
     gtk_misc_set_alignment(GTK_MISC(tip_label), 0.5, 0.5);
     gtk_widget_show(tip_label);
 
@@ -3738,7 +3738,7 @@ static bool create_tooltip_window(void)
 
     gtk_widget_ensure_style(tip_window);
 
-    return TRUE;
+    return true;
 }
 
 static void
@@ -3765,7 +3765,7 @@ handle_tooltip_event(WnckWindow* win,
 }
 static void action_menu_unmap(GObject* object)
 {
-    action_menu_mapped = FALSE;
+    action_menu_mapped = false;
 }
 
 static void action_menu_map(WnckWindow* win, long button, Time time)
@@ -3779,7 +3779,7 @@ static void action_menu_map(WnckWindow* win, long button, Time time)
     if (action_menu) {
         if (action_menu_mapped) {
             gtk_widget_destroy(action_menu);
-            action_menu_mapped = FALSE;
+            action_menu_mapped = false;
             action_menu = NULL;
             return;
         } else {
@@ -3816,7 +3816,7 @@ static void action_menu_map(WnckWindow* win, long button, Time time)
     gtk_menu_popup(GTK_MENU(action_menu),
                    NULL, NULL, NULL, NULL, button, time);
 
-    action_menu_mapped = TRUE;
+    action_menu_mapped = true;
 }
 
 /* generic_button_event returns:
@@ -3884,7 +3884,7 @@ static int generic_button_event(WnckWindow* win, XEvent* xevent,
     }
 
     if (state != d->button_states[button]) {
-        queue_decor_draw_for_buttons(d, TRUE);
+        queue_decor_draw_for_buttons(d, true);
     }
 
     return ret;
@@ -3977,7 +3977,7 @@ static void send_help_message(WnckWindow* win)
     //ev.xclient.display = xdisplay;
 
     //ev.xclient.serial     = 0;
-    //ev.xclient.send_event = TRUE;
+    //ev.xclient.send_event = true;
 
     ev.xclient.window = id;
     ev.xclient.message_type = wm_protocols_atom;
@@ -3985,9 +3985,9 @@ static void send_help_message(WnckWindow* win)
     ev.xclient.data.l[1] = 0L;
     ev.xclient.format = 32;
 
-    XSendEvent(xdisplay, id, FALSE, 0L, &ev);
+    XSendEvent(xdisplay, id, false, 0L, &ev);
 
-    XSync(xdisplay, FALSE);
+    XSync(xdisplay, false);
 }
 
 static void help_button_event(WnckWindow* win, XEvent* xevent)
@@ -4143,7 +4143,7 @@ static void force_quit_dialog_realize(GtkWidget* dialog, void* data)
     XSetTransientForHint(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()),
                          GDK_WINDOW_XID(dialog->window),
                          wnck_window_get_xid(win));
-    XSync(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), FALSE);
+    XSync(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), false);
     gdk_error_trap_pop();
 }
 
@@ -4156,14 +4156,14 @@ static char* get_client_machine(Window xwindow)
     int format, result;
     char* retval;
 
-    atom = XInternAtom(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), "WM_CLIENT_MACHINE", FALSE);
+    atom = XInternAtom(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), "WM_CLIENT_MACHINE", false);
 
     gdk_error_trap_push();
 
     result = XGetWindowProperty(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()),
                                 xwindow, atom,
                                 0, G_MAXLONG,
-                                FALSE, XA_STRING, &type, &format, &nitems,
+                                false, XA_STRING, &type, &format, &nitems,
                                 &bytes_after, &sstr);
 
     str = (char*) sstr;
@@ -4212,7 +4212,7 @@ static void kill_window(WnckWindow* win)
 
     gdk_error_trap_push();
     XKillClient(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), wnck_window_get_xid(win));
-    XSync(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), FALSE);
+    XSync(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), false);
     gdk_error_trap_pop();
 }
 
@@ -4266,9 +4266,9 @@ static void show_force_quit_dialog(WnckWindow* win, Time timestamp)
     gtk_window_set_icon_name(GTK_WINDOW(dialog), "force-quit");
 
     gtk_label_set_use_markup(GTK_LABEL(GTK_MESSAGE_DIALOG(dialog)->label),
-                             TRUE);
+                             true);
     gtk_label_set_line_wrap(GTK_LABEL(GTK_MESSAGE_DIALOG(dialog)->label),
-                            TRUE);
+                            true);
 
     gtk_dialog_add_buttons(GTK_DIALOG(dialog),
                            GTK_STOCK_CANCEL,
@@ -4283,7 +4283,7 @@ static void show_force_quit_dialog(WnckWindow* win, Time timestamp)
     g_signal_connect(G_OBJECT(dialog), "response",
                      G_CALLBACK(force_quit_dialog_response), win);
 
-    gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
+    gtk_window_set_modal(GTK_WINDOW(dialog), true);
 
     gtk_widget_realize(dialog);
 
@@ -4358,10 +4358,10 @@ event_filter_func(GdkXEvent* gdkxevent, GdkEvent* event, void* data)
             win = wnck_window_get(xid);
             if (win) {
                 decor_t* d = g_object_get_data(G_OBJECT(win), "decor");
-                bool decorated = FALSE;
+                bool decorated = false;
 
                 if (get_mwm_prop(xid) & (MWM_DECOR_ALL | MWM_DECOR_TITLE)) {
-                    decorated = TRUE;
+                    decorated = true;
                 }
 
                 if (decorated != d->decorated) {
@@ -4374,7 +4374,7 @@ event_filter_func(GdkXEvent* gdkxevent, GdkEvent* event, void* data)
                     } else {
                         gdk_error_trap_push();
                         XDeleteProperty(xdisplay, xid, win_decor_atom);
-                        XSync(xdisplay, FALSE);
+                        XSync(xdisplay, false);
                         gdk_error_trap_pop();
                     }
                 }
@@ -4704,7 +4704,7 @@ static int update_shadow(frame_settings* fs)
     d.actions = 0;
     d.prop_xid = 0;
     d.draw = draw_shadow_window;
-    d.active = TRUE;
+    d.active = true;
     d.fs = fs;
 
     reset_buttons_bg_and_fade(&d);
@@ -4932,7 +4932,7 @@ static void load_buttons_image(window_settings* ws, int y)
     }
     file = make_filename("buttons", b_types[y], "png");
     if (!file || !(ws->ButtonArray[y] = gdk_pixbuf_new_from_file(file, NULL))) {
-        ws->ButtonArray[y] = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, 16 * S_COUNT, 16);    // create a blank pixbuf
+        ws->ButtonArray[y] = gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, 16 * S_COUNT, 16);    // create a blank pixbuf
     }
     g_free(file);
 
@@ -4956,8 +4956,8 @@ static void load_buttons_glow_images(window_settings* ws)
     char* file2 = NULL;
     int x, pix_width, pix_height;
     int pix_width2, pix_height2;
-    bool success1 = FALSE;
-    bool success2 = FALSE;
+    bool success1 = false;
+    bool success2 = false;
 
     if (ws->use_button_glow) {
         if (ws->ButtonGlowArray) {
@@ -4966,7 +4966,7 @@ static void load_buttons_glow_images(window_settings* ws)
         file1 = make_filename("buttons", "glow", "png");
         if (file1 &&
                 (ws->ButtonGlowArray = gdk_pixbuf_new_from_file(file1, NULL))) {
-            success1 = TRUE;
+            success1 = true;
         }
     }
     if (ws->use_button_inactive_glow) {
@@ -4977,7 +4977,7 @@ static void load_buttons_glow_images(window_settings* ws)
         if (file2 &&
                 (ws->ButtonInactiveGlowArray =
                      gdk_pixbuf_new_from_file(file2, NULL))) {
-            success2 = TRUE;
+            success2 = true;
         }
     }
     if (success1 && success2) {
@@ -4995,7 +4995,7 @@ static void load_buttons_glow_images(window_settings* ws)
             GdkPixbuf* tmp_pixbuf =
                 gdk_pixbuf_new(gdk_pixbuf_get_colorspace
                                (ws->ButtonGlowArray),
-                               TRUE,
+                               true,
                                gdk_pixbuf_get_bits_per_sample(ws->
                                        ButtonGlowArray),
                                pix_width * B_COUNT,
@@ -5024,10 +5024,10 @@ static void load_buttons_glow_images(window_settings* ws)
             pix_height = gdk_pixbuf_get_height(ws->ButtonInactiveGlowArray);
         }
         if (!success1 && ws->use_button_glow) {
-            ws->ButtonGlowArray = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, pix_width * B_COUNT, pix_height);    // create a blank pixbuf
+            ws->ButtonGlowArray = gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, pix_width * B_COUNT, pix_height);    // create a blank pixbuf
         }
         if (!success2 && ws->use_button_inactive_glow) {
-            ws->ButtonInactiveGlowArray = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, pix_width * B_COUNT, pix_height);    // create a blank pixbuf
+            ws->ButtonInactiveGlowArray = gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, pix_width * B_COUNT, pix_height);    // create a blank pixbuf
         }
     }
     ws->c_glow_size.w = pix_width;
@@ -5105,7 +5105,7 @@ static void load_settings(window_settings* ws)
     if (ws->button_fade_num_steps == 0) {
         ws->button_fade_num_steps = 1;
     }
-    bool use_button_fade_pulse = FALSE;
+    bool use_button_fade_pulse = false;
 
     load_bool_setting(f, &use_button_fade_pulse, "use_button_fade_pulse",
                       "buttons");
@@ -5240,18 +5240,18 @@ void dbc(DBusError* err)
 void reload_all_settings(int sig)
 {
     if (sig == SIGUSR1) {
-        do_reload = TRUE;
+        do_reload = true;
     }
 }
 #endif
 bool reload_if_needed(void* p)
 {
     if (do_reload) {
-        do_reload = FALSE;
+        do_reload = false;
         puts("Reloading...");
         update_settings(global_ws);
     }
-    return TRUE;
+    return true;
 }
 
 int main(int argc, char* argv[])
@@ -5262,7 +5262,7 @@ int main(int argc, char* argv[])
     int status;
 
     int i, j;
-    bool replace = FALSE;
+    bool replace = false;
     PangoFontMetrics* metrics;
     PangoLanguage* lang;
     frame_settings* pfs;
@@ -5313,13 +5313,13 @@ int main(int argc, char* argv[])
     ACOLOR(button_halo, 0.0, 0.0, 0.0, 0.2);
     ws->fs_inact = pfs;
 
-    ws->round_top_left = TRUE;
-    ws->round_top_right = TRUE;
-    ws->round_bottom_left = TRUE;
-    ws->round_bottom_right = TRUE;
+    ws->round_top_left = true;
+    ws->round_top_right = true;
+    ws->round_bottom_left = true;
+    ws->round_bottom_right = true;
 
     engine = g_strdup("legacy");
-    load_engine(engine, ws);        // assumed to always return TRUE
+    load_engine(engine, ws);        // assumed to always return true
 
     program_name = argv[0];
 
@@ -5338,7 +5338,7 @@ int main(int argc, char* argv[])
 
     for (i = 0; i < argc; i++) {
         if (strcmp(argv[i], "--replace") == 0) {
-            replace = TRUE;
+            replace = true;
         } else if (strcmp(argv[i], "--version") == 0) {
             printf("%s: %s version %s\n", program_name, PACKAGE, VERSION);
             return 0;
@@ -5376,33 +5376,33 @@ int main(int argc, char* argv[])
     gdkdisplay = gdk_display_get_default();
     xdisplay = gdk_x11_display_get_xdisplay(gdkdisplay);
 
-    frame_window_atom = XInternAtom(xdisplay, DECOR_INPUT_FRAME_ATOM_NAME, FALSE);
-    win_decor_atom = XInternAtom(xdisplay, DECOR_WINDOW_ATOM_NAME, FALSE);
-    win_blur_decor_atom = XInternAtom(xdisplay, DECOR_BLUR_ATOM_NAME, FALSE);
-    wm_move_resize_atom = XInternAtom(xdisplay, "_NET_WM_MOVERESIZE", FALSE);
-    restack_window_atom = XInternAtom(xdisplay, "_NET_RESTACK_WINDOW", FALSE);
+    frame_window_atom = XInternAtom(xdisplay, DECOR_INPUT_FRAME_ATOM_NAME, false);
+    win_decor_atom = XInternAtom(xdisplay, DECOR_WINDOW_ATOM_NAME, false);
+    win_blur_decor_atom = XInternAtom(xdisplay, DECOR_BLUR_ATOM_NAME, false);
+    wm_move_resize_atom = XInternAtom(xdisplay, "_NET_WM_MOVERESIZE", false);
+    restack_window_atom = XInternAtom(xdisplay, "_NET_RESTACK_WINDOW", false);
     select_window_atom = XInternAtom(xdisplay, DECOR_SWITCH_WINDOW_ATOM_NAME,
-                                     FALSE);
-    mwm_hints_atom = XInternAtom(xdisplay, "_MOTIF_WM_HINTS", FALSE);
+                                     false);
+    mwm_hints_atom = XInternAtom(xdisplay, "_MOTIF_WM_HINTS", false);
     switcher_fg_atom = XInternAtom(xdisplay,
                                    DECOR_SWITCH_FOREGROUND_COLOR_ATOM_NAME,
-                                   FALSE);
-    wm_protocols_atom = XInternAtom(xdisplay, "WM_PROTOCOLS", FALSE);
+                                   false);
+    wm_protocols_atom = XInternAtom(xdisplay, "WM_PROTOCOLS", false);
     net_wm_context_help_atom =
-        XInternAtom(xdisplay, "_NET_WM_CONTEXT_HELP", FALSE);
+        XInternAtom(xdisplay, "_NET_WM_CONTEXT_HELP", false);
 
     toolkit_action_atom =
-        XInternAtom(xdisplay, "_COMPIZ_TOOLKIT_ACTION", FALSE);
+        XInternAtom(xdisplay, "_COMPIZ_TOOLKIT_ACTION", false);
     toolkit_action_window_menu_atom =
         XInternAtom(xdisplay, "_COMPIZ_TOOLKIT_ACTION_WINDOW_MENU",
-                    FALSE);
+                    false);
     toolkit_action_force_quit_dialog_atom =
         XInternAtom(xdisplay, "_COMPIZ_TOOLKIT_ACTION_FORCE_QUIT_DIALOG",
-                    FALSE);
+                    false);
 
-    emerald_sigusr1_atom = XInternAtom(xdisplay, "emerald-sigusr1", FALSE);
+    emerald_sigusr1_atom = XInternAtom(xdisplay, "emerald-sigusr1", false);
 
-    utf8_string_atom = XInternAtom(xdisplay, "UTF8_STRING", FALSE);
+    utf8_string_atom = XInternAtom(xdisplay, "UTF8_STRING", false);
 
     status = decor_acquire_dm_session(xdisplay, DefaultScreen(xdisplay),
                                       "emerald", replace, &dm_sn_timestamp);

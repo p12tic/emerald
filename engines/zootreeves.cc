@@ -103,7 +103,7 @@ void get_meta_info(EngineMetaInfo* emi)
     emi->version = g_strdup("0.1");
     emi->description = g_strdup(_("Evolved from the legacy engine"));
     emi->last_compat = g_strdup("0.0"); // old themes marked still compatible for testing-NeOS
-    emi->icon = gdk_pixbuf_new_from_inline(-1, my_pixbuf, TRUE, NULL);
+    emi->icon = gdk_pixbuf_new_from_inline(-1, my_pixbuf, true, NULL);
 }
 
 void
@@ -193,7 +193,7 @@ rounded_rectangle_independent(cairo_t* cr,
 
         radius2 = title_bar_height - radius_tri;
 
-        if (enable_button_part == TRUE) {
+        if (enable_button_part == true) {
             //Can use h to offset x because it is a square - would be radius - radius2
             cairo_arc_negative(cr, x + pane_1_width + dip_gap - radius_tri - radius2, y + radius_tri, radius2, M_PI * 2.5, M_PI * 2.0);
             cairo_get_current_point(cr, &cx, &cy);
@@ -206,7 +206,7 @@ rounded_rectangle_independent(cairo_t* cr,
     }
 
 
-    if (enable_dip == TRUE && !(corner & DIP_ROUND_TRI)) {
+    if (enable_dip == true && !(corner & DIP_ROUND_TRI)) {
 
         curve = 2;
 
@@ -219,7 +219,7 @@ rounded_rectangle_independent(cairo_t* cr,
         //cairo_arc_negative (cr, x +pane_1_width + (title_bar_height), cy, radius2, M_PI* (curve - 1), M_PI * 2.5);
 
 
-        if (enable_button_part == TRUE) {
+        if (enable_button_part == true) {
             cairo_get_current_point(cr, &cx, &cy);
             cairo_line_to(cr, cx, cy - radius2);
             cairo_get_current_point(cr, &cx, &cy);
@@ -233,7 +233,7 @@ rounded_rectangle_independent(cairo_t* cr,
     }
 
 
-    if (enable_button_part == TRUE) {
+    if (enable_button_part == true) {
         if (right_top_radius_on == 1) {
             if ((corner & CORNER_TOPRIGHT)) {
                 cairo_arc(cr, x + w - right_top_radius, y + right_top_radius, right_top_radius,
@@ -258,13 +258,13 @@ rounded_rectangle_independent(cairo_t* cr,
                   M_PI * 0.5, M_PI);
     else
 
-        if (enable_left_bar_dip_lower_part == FALSE && left_bar_dip == TRUE) {
+        if (enable_left_bar_dip_lower_part == false && left_bar_dip == true) {
             cairo_line_to(cr, x + (2 * left_bar_dip_radius), y + h);
         } else {
             cairo_line_to(cr, x, y + h);
         }
 
-    if (left_bar_dip == FALSE) {
+    if (left_bar_dip == false) {
         if (left_top_radius_on == 1) {
             if ((corner & CORNER_TOPLEFT)) {
                 cairo_arc(cr, x + left_top_radius, y + left_top_radius, left_top_radius, M_PI, M_PI * 1.5);
@@ -275,14 +275,14 @@ rounded_rectangle_independent(cairo_t* cr,
     }
 
 
-    if (left_bar_dip == TRUE) {
+    if (left_bar_dip == true) {
         left_bar_dip_offset = (((h - bottom_border_width - title_bar_height + 1)  / 100) * (100 - left_bar_dip_offset));
 
         cairo_get_current_point(cr, &cx, &cy);
         cairo_line_to(cr, cx, cy - bottom_border_width + 2);
         cairo_get_current_point(cr, &cx, &cy);
 
-        if (enable_left_bar_dip_lower_part == TRUE) {
+        if (enable_left_bar_dip_lower_part == true) {
             cairo_arc(cr, cx + left_bar_dip_radius, cy, left_bar_dip_radius, M_PI * 1.0, M_PI * 1.5);
 
             cairo_get_current_point(cr, &cx, &cy);
@@ -381,7 +381,7 @@ rounded_square(cairo_t* cr,
     double curve, width, height;
     double radius2;
 
-    if (left_bar_dip == TRUE) {
+    if (left_bar_dip == true) {
 
         left_bar_dip_offset = (h / 100) * left_bar_dip_offset;
         //printf("Left bar heigth = %f, Dip bar offset = %f\n", h, left_bar_dip_offset);
@@ -415,7 +415,7 @@ rounded_square(cairo_t* cr,
 
         //cairo_arc_negative (cr, cx, cy, radius, M_PI * (curve + 2.5), M_PI * 2.5);
 
-        if (enable_left_bar_dip_lower_part == TRUE) {
+        if (enable_left_bar_dip_lower_part == true) {
             cairo_line_to(cr, cx, cy + height - left_bar_dip_offset  - (4 * left_bar_dip_radius));
             cairo_get_current_point(cr, &cx, &cy);
             cairo_arc(cr, cx - left_bar_dip_radius, cy, left_bar_dip_radius, M_PI * 2.0, M_PI * (curve + 2.0));
@@ -566,10 +566,10 @@ fill_rounded_square(cairo_t*       cr,
 
     rounded_square(cr, x, y, w, h, corner, ws, radius_top_left, radius_top_right, radius_bottom_left, radius_bottom_right, radius_top_right_tri, radius_top_left_tri, always_allow, left_bar_dip, left_bar_dip_radius, enable_left_bar_dip_lower_part, left_bar_dip_offset);
 
-    bool pattern_vert = TRUE;
+    bool pattern_vert = true;
     if (pattern_size == 0) {
         pattern_size = h;
-        pattern_vert = FALSE;
+        pattern_vert = false;
     }
 
     if (gravity & SHADE_RIGHT) {
@@ -602,11 +602,11 @@ fill_rounded_square(cairo_t*       cr,
 
 
 
-    if (enable_pixmaps == FALSE) {
-        if (gradient_repeat_direction == 1 && pattern_vert == TRUE) {
+    if (enable_pixmaps == false) {
+        if (gradient_repeat_direction == 1 && pattern_vert == true) {
             pattern = cairo_pattern_create_linear(common_gradient_starting_point_x, common_gradient_starting_point_y, common_gradient_starting_point_x + pattern_size, common_gradient_starting_point_y);
             //pattern = cairo_pattern_create_linear (x + w, y + pattern_size, x, y);
-        } else if (gradient_repeat_direction == 2 && pattern_vert == TRUE) {
+        } else if (gradient_repeat_direction == 2 && pattern_vert == true) {
             pattern = cairo_pattern_create_linear(common_gradient_starting_point_x, common_gradient_starting_point_y, common_gradient_starting_point_x + pattern_size, common_gradient_starting_point_y + pattern_size);
         } else  {
             pattern = cairo_pattern_create_linear(common_gradient_starting_point_x, common_gradient_starting_point_y, common_gradient_starting_point_x, common_gradient_starting_point_y + pattern_size);
@@ -626,7 +626,7 @@ fill_rounded_square(cairo_t*       cr,
         cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
         cairo_set_source_surface(cr, surface, x - gradient_offset, y);
         pattern = cairo_pattern_reference(cairo_get_source(cr));
-        if (repeat_pixmap == TRUE) {
+        if (repeat_pixmap == true) {
             cairo_pattern_set_extend(pattern, CAIRO_EXTEND_REPEAT);
         } else {
             cairo_pattern_set_extend(pattern, CAIRO_EXTEND_NONE);
@@ -682,7 +682,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
     //x offset due to left dip bar
     int left_bar_dip_offset = 0;
     bool maximised;
-    bool enable_left_bar_dip = FALSE;
+    bool enable_left_bar_dip = false;
 
     cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
 
@@ -696,10 +696,10 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
 
     if (d->state & (WNCK_WINDOW_STATE_MAXIMIZED_HORIZONTALLY | WNCK_WINDOW_STATE_MAXIMIZED_VERTICALLY)) {
         corners = 0;
-        maximised = TRUE;
-        enable_left_bar_dip = FALSE;
+        maximised = true;
+        enable_left_bar_dip = false;
 
-        if (pws->enable_maximised_colors == TRUE) {
+        if (pws->enable_maximised_colors == true) {
             inner_color.alpha = pws->inner_maximised_alpha;
             inner_color.color = pws->inner_maximised_color;
             outer_color.alpha = pws->outer_maximised_alpha;
@@ -719,7 +719,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
         window_gap = 0.5;
 
     } else {
-        maximised = FALSE;
+        maximised = false;
         minimised_border = pws->minimised_border;
         //printf("Setting large border widths");
         window_gap = pws->window_gap;
@@ -728,21 +728,21 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
         inner_title_color = pfs->title_inner;
         outer_title_color = pfs->title_outer;
 
-        if (pws->enable_left_bar_dip == TRUE && !(d->state & (WNCK_WINDOW_STATE_SHADED))) {
-            enable_left_bar_dip = TRUE;
+        if (pws->enable_left_bar_dip == true && !(d->state & (WNCK_WINDOW_STATE_SHADED))) {
+            enable_left_bar_dip = true;
             left_bar_dip_offset = (2 * pws->left_bar_dip_radius);
 
-            if (pws->done_indent == FALSE && ws->tobj_layout[0] != '(') {
+            if (pws->done_indent == false && ws->tobj_layout[0] != '(') {
                 char* layout;
                 layout = g_strdup_printf("(-%i)%s", left_bar_dip_offset, ws->tobj_layout);
                 g_free(ws->tobj_layout);
                 ws->tobj_layout = layout;
-                pws->done_indent = TRUE;
+                pws->done_indent = true;
             }
 
             //sprintf(ws->tobj_layout, "(-%i)%s", left_bar_dip_offset, layout); 89
             //pango_layout_set_indent(d->layout, 20000);
-            //pws->round_bottom_left = FALSE;
+            //pws->round_bottom_left = false;
         }
     }
 
@@ -768,8 +768,8 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
     //printf("Frame width: %f - Pane Width: %f\n", width, pane_1_width);
     //fflush(stdout);
 
-    enable_dip = FALSE;
-    bool do_button_part = TRUE;
+    enable_dip = false;
+    bool do_button_part = true;
     double title_bar_dip_radius = 0;
     double title_bar_dip_radius_offset = 0;
 
@@ -778,19 +778,19 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
 
 //TIDY ALL THIS UP! -lazy
 //Maximised causes problems
-    if (maximised == FALSE && pws->enable_bar_dip_button_part == FALSE) {
-        do_button_part = FALSE;
+    if (maximised == false && pws->enable_bar_dip_button_part == false) {
+        do_button_part = false;
     }
 
 
-    if (pws->enable_title_bar_dip == TRUE && maximised == FALSE && ((pws->title_bar_dip_title_width + pws->title_bar_dip_button_width) < width)) {
-        enable_dip = TRUE;
+    if (pws->enable_title_bar_dip == true && maximised == false && ((pws->title_bar_dip_title_width + pws->title_bar_dip_button_width) < width)) {
+        enable_dip = true;
         title_bar_dip_radius = pws->title_bar_dip_radius;
-        if (pws->round_tri == TRUE) {
+        if (pws->round_tri == true) {
             title_bar_dip_radius_offset = top - 0.5 + minimised_border;
         }
     } else {
-        do_button_part = TRUE;
+        do_button_part = true;
     }
 
 
@@ -804,14 +804,14 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
     int gradient_repeat_direction = 0;
     alpha_color lower_frame_gradient_inner;
     alpha_color lower_frame_gradient_outer;
-    if ((pfs->gradient_repeat_enabled == TRUE && maximised == FALSE) | (pfs->gradient_repeat_enabled == TRUE && pws->gradient_repeat_disabled_maximised == FALSE && maximised == TRUE)) {
+    if ((pfs->gradient_repeat_enabled == true && maximised == false) | (pfs->gradient_repeat_enabled == true && pws->gradient_repeat_disabled_maximised == false && maximised == true)) {
         gradient_repeat_height = pfs->gradient_repeat_height;
         //The bottom gradient is reversed so you have to flip it round
         lower_frame_gradient_inner = outer_color;
         lower_frame_gradient_outer = inner_color;
-        if (pfs->gradient_repeat_direction_vertical == TRUE) {
+        if (pfs->gradient_repeat_direction_vertical == true) {
             gradient_repeat_direction = 1;
-        } else if (pfs->gradient_repeat_direction_diagonal == TRUE) {
+        } else if (pfs->gradient_repeat_direction_diagonal == true) {
             gradient_repeat_direction = 2;
         } else {
             gradient_repeat_direction = 0;
@@ -823,7 +823,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
     }
 
 
-    if (enable_dip == TRUE) {
+    if (enable_dip == true) {
 
 
 ////////////////////////////////Trim text//////////////////////////////////////////
@@ -847,14 +847,14 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
 
 
 ///////////////////////////////Pixmaps//////////////////////////////////////////
-        bool pixmaps_titlebarpart_enabled = FALSE;
-        bool pixmaps_buttonpart_enabled = FALSE;
-        if (pws->pixmaps.titlebarpart_enabled == TRUE) {
-            pixmaps_titlebarpart_enabled = TRUE;
+        bool pixmaps_titlebarpart_enabled = false;
+        bool pixmaps_buttonpart_enabled = false;
+        if (pws->pixmaps.titlebarpart_enabled == true) {
+            pixmaps_titlebarpart_enabled = true;
         }
 
-        if (pws->pixmaps.buttonpart_enabled == TRUE) {
-            pixmaps_buttonpart_enabled = TRUE;
+        if (pws->pixmaps.buttonpart_enabled == true) {
+            pixmaps_buttonpart_enabled = true;
         }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -868,9 +868,9 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                             (CORNER_TOPRIGHT | CORNER_TOPLEFT | DIP_ROUND_TRI)  & corners,
                             &inner_title_color, &outer_title_color,
                             SHADE_TOP, ws,
-                            pws->titlebar_radius, title_bar_dip_radius, 0, 0, title_bar_dip_radius, 0, 2, FALSE, 0, FALSE, 0, gradient_repeat_height, gradient_repeat_direction, x1, y1, pws->pixmaps.titlebar_surface, pixmaps_titlebarpart_enabled, pws->pixmaps.titlebarpart_repeat_enabled);
+                            pws->titlebar_radius, title_bar_dip_radius, 0, 0, title_bar_dip_radius, 0, 2, false, 0, false, 0, gradient_repeat_height, gradient_repeat_direction, x1, y1, pws->pixmaps.titlebar_surface, pixmaps_titlebarpart_enabled, pws->pixmaps.titlebarpart_repeat_enabled);
 
-        if (pws->enable_bar_dip_button_part == TRUE) {
+        if (pws->enable_bar_dip_button_part == true) {
             fill_rounded_square(cr,
                                 x_end - pws->title_bar_dip_button_width - left_bar_dip_offset + title_bar_dip_radius_offset,
                                 y1 + 0.5 - minimised_border,
@@ -879,7 +879,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                                 (CORNER_TOPLEFT | CORNER_TOPRIGHT | DIP_ROUND_TRI) & corners,
                                 &inner_title_color, &outer_title_color,
                                 SHADE_TOP, ws,
-                                title_bar_dip_radius, pws->titlebar_radius, 0, 0, 0, title_bar_dip_radius, 1, FALSE, 0, FALSE, 0, gradient_repeat_height, gradient_repeat_direction, x1, y1, pws->pixmaps.titlebar_surface_buttons, pixmaps_buttonpart_enabled, pws->pixmaps.buttonpart_repeat_enabled);
+                                title_bar_dip_radius, pws->titlebar_radius, 0, 0, 0, title_bar_dip_radius, 1, false, 0, false, 0, gradient_repeat_height, gradient_repeat_direction, x1, y1, pws->pixmaps.titlebar_surface_buttons, pixmaps_buttonpart_enabled, pws->pixmaps.buttonpart_repeat_enabled);
         }
 
 
@@ -894,13 +894,13 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                             (CORNER_TOPLEFT | CORNER_TOPRIGHT) & corners,
                             &inner_title_color, &outer_title_color,
                             SHADE_TOP, ws,
-                            pws->titlebar_radius, pws->titlebar_radius, 0, 0, 0, 0, 0, FALSE, 0, FALSE, 0, gradient_repeat_height, gradient_repeat_direction, x1, y1, pws->pixmaps.titlebar_surface_large, pws->pixmaps.titlebar_enabled, pws->pixmaps.titlebar_repeat_enabled);
+                            pws->titlebar_radius, pws->titlebar_radius, 0, 0, 0, 0, 0, false, 0, false, 0, gradient_repeat_height, gradient_repeat_direction, x1, y1, pws->pixmaps.titlebar_surface_large, pws->pixmaps.titlebar_enabled, pws->pixmaps.titlebar_repeat_enabled);
 
     }
 
 
 
-    if ((maximised == FALSE && pws->show_border_minimised == TRUE) | (maximised == TRUE && pws->show_border_maximised == TRUE)) {
+    if ((maximised == false && pws->show_border_minimised == true) | (maximised == true && pws->show_border_maximised == true)) {
 
 
 
@@ -912,7 +912,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                             0,
                             &lower_frame_gradient_outer, &lower_frame_gradient_inner,
                             SHADE_TOP, ws,
-                            10, 0, 0, 0, 0, 0, 0, enable_left_bar_dip, pws->left_bar_dip_radius, pws->enable_left_bar_dip_lower_part, pws->left_bar_dip_offset, gradient_repeat_height, gradient_repeat_direction, x1, y1, pws->pixmaps.titlebar_surface, FALSE, FALSE);
+                            10, 0, 0, 0, 0, 0, 0, enable_left_bar_dip, pws->left_bar_dip_radius, pws->enable_left_bar_dip_lower_part, pws->left_bar_dip_offset, gradient_repeat_height, gradient_repeat_direction, x1, y1, pws->pixmaps.titlebar_surface, false, false);
 
         fill_rounded_square(cr,
                             x_end - ws->win_extents.right,
@@ -922,12 +922,12 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                             0,
                             &lower_frame_gradient_outer, &lower_frame_gradient_inner,
                             SHADE_TOP, ws,
-                            0, 0, 0, 0, 0, 0, 0, FALSE, 0, FALSE, 0, gradient_repeat_height, gradient_repeat_direction, x1, y1, pws->pixmaps.titlebar_surface, FALSE, FALSE);
+                            0, 0, 0, 0, 0, 0, 0, false, 0, false, 0, gradient_repeat_height, gradient_repeat_direction, x1, y1, pws->pixmaps.titlebar_surface, false, false);
 
 
         //Have to decrease the size of the bottom right corner as the left dip bar is cutting into it
         int tmp_minus = 0;
-        if (pws->enable_left_bar_dip_lower_part == FALSE && enable_left_bar_dip == TRUE) {
+        if (pws->enable_left_bar_dip_lower_part == false && enable_left_bar_dip == true) {
             tmp_minus = (2 * pws->left_bar_dip_radius);
         }
 
@@ -939,7 +939,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                             (CORNER_BOTTOMLEFT | CORNER_BOTTOMRIGHT) & corners,
                             &outer_color, &inner_color,
                             SHADE_BOTTOM, ws,
-                            0, 0, 0, pws->frame_radius, pws->frame_radius, 0, 0, FALSE, 0, FALSE, 0, gradient_repeat_height, gradient_repeat_direction, x1, y1, pws->pixmaps.titlebar_surface, FALSE, FALSE);
+                            0, 0, 0, pws->frame_radius, pws->frame_radius, 0, 0, false, 0, false, 0, gradient_repeat_height, gradient_repeat_direction, x1, y1, pws->pixmaps.titlebar_surface, false, false);
 
 
     }
@@ -968,7 +968,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
     cairo_translate(cr, 1.0, 1.0);
 
     if (pfs->window_highlight.alpha != 0) {
-        if (enable_dip == TRUE) {
+        if (enable_dip == true) {
             rounded_rectangle_independent(cr,
                                           x1 + 0.5 - minimised_border - window_gap - left_bar_dip_offset,
                                           y1 - minimised_border,
@@ -977,7 +977,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                                           top - 0.5 + minimised_border,
                                           (CORNER_TOPLEFT | CORNER_TOPRIGHT | CORNER_BOTTOMLEFT |
                                            CORNER_BOTTOMRIGHT | DIP_ROUND_TRI) & corners, ws,
-                                          pws->titlebar_radius, pws->titlebar_radius, pws->frame_radius, pws->frame_radius, title_bar_dip_radius, minimised_border + pane_1_width - title_bar_dip_radius_offset, title_bar_dip_dip_width + (2 * title_bar_dip_radius_offset), TRUE, do_button_part, enable_left_bar_dip, minimised_border + ws->win_extents.bottom, pws->left_bar_dip_radius, pws->enable_left_bar_dip_lower_part, pws->left_bar_dip_offset);
+                                          pws->titlebar_radius, pws->titlebar_radius, pws->frame_radius, pws->frame_radius, title_bar_dip_radius, minimised_border + pane_1_width - title_bar_dip_radius_offset, title_bar_dip_dip_width + (2 * title_bar_dip_radius_offset), true, do_button_part, enable_left_bar_dip, minimised_border + ws->win_extents.bottom, pws->left_bar_dip_radius, pws->enable_left_bar_dip_lower_part, pws->left_bar_dip_offset);
         } else {
 
             rounded_rectangle_independent(cr,
@@ -988,7 +988,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                                           top - 0.5 + minimised_border,
                                           (CORNER_TOPLEFT | CORNER_TOPRIGHT | CORNER_BOTTOMLEFT |
                                            CORNER_BOTTOMRIGHT | DIP_ROUND_TRI) & corners, ws,
-                                          pws->titlebar_radius, pws->titlebar_radius, pws->frame_radius, pws->frame_radius, 0, 0, 0, FALSE, do_button_part, enable_left_bar_dip, minimised_border + ws->win_extents.bottom, pws->left_bar_dip_radius, pws->enable_left_bar_dip_lower_part, pws->left_bar_dip_offset);
+                                          pws->titlebar_radius, pws->titlebar_radius, pws->frame_radius, pws->frame_radius, 0, 0, 0, false, do_button_part, enable_left_bar_dip, minimised_border + ws->win_extents.bottom, pws->left_bar_dip_radius, pws->enable_left_bar_dip_lower_part, pws->left_bar_dip_offset);
 
         }
 
@@ -1005,7 +1005,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
         cairo_reset_clip(cr);
         cairo_translate(cr, -2.0, -2.0);
 
-        if (enable_dip == TRUE) {
+        if (enable_dip == true) {
             rounded_rectangle_independent(cr,
                                           x1 + 0.5 - minimised_border - window_gap - left_bar_dip_offset,
                                           y1 + 1.5 - minimised_border,
@@ -1014,7 +1014,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                                           top - 0.5 + minimised_border,
                                           (CORNER_TOPLEFT | CORNER_TOPRIGHT | CORNER_BOTTOMLEFT |
                                            CORNER_BOTTOMRIGHT | DIP_ROUND_TRI) & corners, ws,
-                                          pws->titlebar_radius, pws->titlebar_radius, pws->frame_radius, pws->frame_radius, title_bar_dip_radius, minimised_border + pane_1_width - title_bar_dip_radius_offset, title_bar_dip_dip_width + (2 * title_bar_dip_radius_offset), TRUE, do_button_part, enable_left_bar_dip, minimised_border + ws->win_extents.bottom, pws->left_bar_dip_radius, pws->enable_left_bar_dip_lower_part, pws->left_bar_dip_offset);
+                                          pws->titlebar_radius, pws->titlebar_radius, pws->frame_radius, pws->frame_radius, title_bar_dip_radius, minimised_border + pane_1_width - title_bar_dip_radius_offset, title_bar_dip_dip_width + (2 * title_bar_dip_radius_offset), true, do_button_part, enable_left_bar_dip, minimised_border + ws->win_extents.bottom, pws->left_bar_dip_radius, pws->enable_left_bar_dip_lower_part, pws->left_bar_dip_offset);
         } else {
 
             rounded_rectangle_independent(cr,
@@ -1025,7 +1025,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                                           top - 0.5 + minimised_border,
                                           (CORNER_TOPLEFT | CORNER_TOPRIGHT | CORNER_BOTTOMLEFT |
                                            CORNER_BOTTOMRIGHT | DIP_ROUND_TRI) & corners, ws,
-                                          pws->titlebar_radius, pws->titlebar_radius, pws->frame_radius, pws->frame_radius, 0, 0, 0, FALSE, do_button_part, enable_left_bar_dip, minimised_border + ws->win_extents.bottom, pws->left_bar_dip_radius, pws->enable_left_bar_dip_lower_part, pws->left_bar_dip_offset);
+                                          pws->titlebar_radius, pws->titlebar_radius, pws->frame_radius, pws->frame_radius, 0, 0, 0, false, do_button_part, enable_left_bar_dip, minimised_border + ws->win_extents.bottom, pws->left_bar_dip_radius, pws->enable_left_bar_dip_lower_part, pws->left_bar_dip_offset);
 
         }
 
@@ -1042,7 +1042,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
         cairo_reset_clip(cr);
         cairo_translate(cr, 1.0, 1.0);
 
-        if (enable_dip == TRUE) {
+        if (enable_dip == true) {
             rounded_rectangle_independent(cr,
                                           x1 + 0.5 - minimised_border - window_gap - left_bar_dip_offset,
                                           y1 + 0.5 - minimised_border,
@@ -1051,7 +1051,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                                           top - 0.5 + minimised_border,
                                           (CORNER_TOPLEFT | CORNER_TOPRIGHT | CORNER_BOTTOMLEFT |
                                            CORNER_BOTTOMRIGHT | DIP_ROUND_TRI) & corners, ws,
-                                          pws->titlebar_radius, pws->titlebar_radius, pws->frame_radius, pws->frame_radius, title_bar_dip_radius, minimised_border + pane_1_width - title_bar_dip_radius_offset, title_bar_dip_dip_width + (2 * title_bar_dip_radius_offset), TRUE, do_button_part, enable_left_bar_dip, minimised_border + ws->win_extents.bottom, pws->left_bar_dip_radius, pws->enable_left_bar_dip_lower_part, pws->left_bar_dip_offset);
+                                          pws->titlebar_radius, pws->titlebar_radius, pws->frame_radius, pws->frame_radius, title_bar_dip_radius, minimised_border + pane_1_width - title_bar_dip_radius_offset, title_bar_dip_dip_width + (2 * title_bar_dip_radius_offset), true, do_button_part, enable_left_bar_dip, minimised_border + ws->win_extents.bottom, pws->left_bar_dip_radius, pws->enable_left_bar_dip_lower_part, pws->left_bar_dip_offset);
         } else {
 
             rounded_rectangle_independent(cr,
@@ -1062,7 +1062,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                                           top - 0.5 + minimised_border,
                                           (CORNER_TOPLEFT | CORNER_TOPRIGHT | CORNER_BOTTOMLEFT |
                                            CORNER_BOTTOMRIGHT | DIP_ROUND_TRI) & corners, ws,
-                                          pws->titlebar_radius, pws->titlebar_radius, pws->frame_radius, pws->frame_radius, 0, 0, 0, FALSE, do_button_part, enable_left_bar_dip, minimised_border + ws->win_extents.bottom, pws->left_bar_dip_radius, pws->enable_left_bar_dip_lower_part, pws->left_bar_dip_offset);
+                                          pws->titlebar_radius, pws->titlebar_radius, pws->frame_radius, pws->frame_radius, 0, 0, 0, false, do_button_part, enable_left_bar_dip, minimised_border + ws->win_extents.bottom, pws->left_bar_dip_radius, pws->enable_left_bar_dip_lower_part, pws->left_bar_dip_offset);
 
         }
 
@@ -1187,28 +1187,28 @@ void init_engine(window_settings* ws)
     pws = malloc(sizeof(private_ws));
     ws->engine_ws = pws;
     bzero(pws, sizeof(private_ws));
-    pws->round_top_left = TRUE;
-    pws->round_top_right = TRUE;
-    pws->round_bottom_left = TRUE;
-    pws->round_bottom_right = TRUE;
-    pws->round_tri = TRUE;
-    pws->enable_maximised_colors = TRUE;
-    pws->show_border_minimised = TRUE;
-    pws->enable_bar_dip_button_part = TRUE;
-    pws->show_border_maximised = TRUE;
-    pws->enable_title_bar_dip = TRUE;
+    pws->round_top_left = true;
+    pws->round_top_right = true;
+    pws->round_bottom_left = true;
+    pws->round_bottom_right = true;
+    pws->round_tri = true;
+    pws->enable_maximised_colors = true;
+    pws->show_border_minimised = true;
+    pws->enable_bar_dip_button_part = true;
+    pws->show_border_maximised = true;
+    pws->enable_title_bar_dip = true;
     pws->minimised_border = 0;
-    pws->enable_left_bar_dip = TRUE;
-    pws->enable_left_bar_dip_lower_part = TRUE;
+    pws->enable_left_bar_dip = true;
+    pws->enable_left_bar_dip_lower_part = true;
     pws->left_bar_dip_offset = 0;
     pws->frame_radius = 5.0;
     pws->titlebar_radius = 5.0;
     pws->left_bar_dip_radius = 7.5;
-    pws->gradient_repeat_disabled_maximised = TRUE;
-    pws->pixmaps.buttonpart_repeat_enabled = FALSE;
-    pws->pixmaps.buttonpart_enabled = FALSE;
-    pws->pixmaps.titlebarpart_repeat_enabled = FALSE;
-    pws->pixmaps.titlebarpart_enabled = FALSE;
+    pws->gradient_repeat_disabled_maximised = true;
+    pws->pixmaps.buttonpart_repeat_enabled = false;
+    pws->pixmaps.buttonpart_enabled = false;
+    pws->pixmaps.titlebarpart_repeat_enabled = false;
+    pws->pixmaps.titlebarpart_enabled = false;
     pws->window_gap = 15.0;
     pws->title_bar_dip_title_width = 500;
     pws->title_bar_dip_button_width = 100;
@@ -1272,30 +1272,30 @@ void layout_layout_frame(GtkWidget* vbox)
 
 
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
-    gtk_box_pack_startC(hbox, gtk_label_new(_("Border Gap")), FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
+    gtk_box_pack_startC(hbox, gtk_label_new(_("Border Gap")), false, false, 0);
     junk = scaler_new(0, 20, 0.5);
-    gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
+    gtk_box_pack_startC(hbox, junk, true, true, 0);
     SettingItem::register_setting(junk, ST_FLOAT, SECT, "window_gap");
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
     junk = gtk_check_button_new_with_label(_("Show Border when maximised?"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "show_border_maximised");
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
     junk = gtk_check_button_new_with_label(_("Show when minimised?"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "show_border_minimised");
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
-    gtk_box_pack_startC(hbox, gtk_label_new(_("Minimised Border Size")), FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
+    gtk_box_pack_startC(hbox, gtk_label_new(_("Minimised Border Size")), false, false, 0);
     junk = scaler_new(0, 30, 1);
-    gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
+    gtk_box_pack_startC(hbox, junk, true, true, 0);
     SettingItem::register_setting(junk, ST_FLOAT, SECT, "minimised_border");
 
 
@@ -1308,30 +1308,30 @@ void layout_left_bar_frame(GtkWidget* vbox)
     GtkWidget* hbox;
     GtkWidget* junk;
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
     junk = gtk_check_button_new_with_label(_("Enable Left Bar Dip?"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "enable_left_bar_dip");
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
-    gtk_box_pack_startC(hbox, gtk_label_new(_("Left Bar Radius")), FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
+    gtk_box_pack_startC(hbox, gtk_label_new(_("Left Bar Radius")), false, false, 0);
     junk = scaler_new(0, 20, 1);
-    gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
+    gtk_box_pack_startC(hbox, junk, true, true, 0);
     SettingItem::register_setting(junk, ST_INT, SECT, "left_bar_dip_radius");
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
     junk = gtk_check_button_new_with_label(_("Enable Lower Bulge? (Useless at the moment, but will be used soon)"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "enable_left_bar_dip_lower_part");
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
-    gtk_box_pack_startC(hbox, gtk_label_new(_("Top Corner Offset (%)")), FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
+    gtk_box_pack_startC(hbox, gtk_label_new(_("Top Corner Offset (%)")), false, false, 0);
     junk = scaler_new(0, 90, 1);
-    gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
+    gtk_box_pack_startC(hbox, junk, true, true, 0);
     SettingItem::register_setting(junk, ST_INT, SECT, "left_bar_dip_offset");
 
 
@@ -1348,43 +1348,43 @@ void layout_title_bar_frame(GtkWidget* vbox)
 
 
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
     junk = gtk_check_button_new_with_label(_("Enable Title Bar Dip?"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "enable_title_bar_dip");
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
     junk = gtk_check_button_new_with_label(_("Enable Button Part?"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "enable_bar_dip_button_part");
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
-    gtk_box_pack_startC(hbox, gtk_label_new(_("Title Part Width")), FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
+    gtk_box_pack_startC(hbox, gtk_label_new(_("Title Part Width")), false, false, 0);
     junk = scaler_new(80, 800, 1);
-    gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
+    gtk_box_pack_startC(hbox, junk, true, true, 0);
     SettingItem::register_setting(junk, ST_INT, SECT, "title_bar_dip_title_width");
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
-    gtk_box_pack_startC(hbox, gtk_label_new(_("Button Part Width)")), FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
+    gtk_box_pack_startC(hbox, gtk_label_new(_("Button Part Width)")), false, false, 0);
     junk = scaler_new(10, 800, 1);
-    gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
+    gtk_box_pack_startC(hbox, junk, true, true, 0);
     SettingItem::register_setting(junk, ST_INT, SECT, "title_bar_dip_button_width");
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
-    gtk_box_pack_startC(hbox, gtk_label_new(_("Dip Corners Radius)")), FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
+    gtk_box_pack_startC(hbox, gtk_label_new(_("Dip Corners Radius)")), false, false, 0);
     junk = scaler_new(1, 20, 1);
-    gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
+    gtk_box_pack_startC(hbox, junk, true, true, 0);
     SettingItem::register_setting(junk, ST_INT, SECT, "title_bar_dip_radius");
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
     junk = gtk_check_button_new_with_label(_("Round Inside Corners As well?"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "round_tri");
 
 
@@ -1397,22 +1397,22 @@ void layout_maximised_colors(GtkWidget* vbox)
     GtkWidget* scroller;
     GtkWidget* w;
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
 
     junk = gtk_check_button_new_with_label(_("Enable Different Maximised Colors?"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "enable_maximised_colors");
 
     junk = gtk_check_button_new_with_label(_("Turn Off repeating gradients when maximised?"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "gradient_repeat_disabled_maximised");
 
     scroller = gtk_scrolled_window_new(NULL, NULL);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller),
                                    GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-    gtk_box_pack_startC(vbox, scroller, TRUE, TRUE, 0);
-    table_new(3, FALSE, FALSE);
+    gtk_box_pack_startC(vbox, scroller, true, true, 0);
+    table_new(3, false, false);
 
     gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scroller), GTK_WIDGET(get_current_table()));
 
@@ -1421,21 +1421,21 @@ void layout_maximised_colors(GtkWidget* vbox)
 
 
     w = gtk_label_new(_("Outer Frame Blend"));
-    table_append(w, FALSE);
+    table_append(w, false);
     w = gtk_color_button_new();
-    table_append(w, FALSE);
+    table_append(w, false);
     SettingItem::register_setting(w, ST_COLOR, SECT, "outer_maximised_color");
     w = scaler_new(0.0, 1.0, 0.01);
-    table_append(w, TRUE);
+    table_append(w, true);
     SettingItem::register_setting(w, ST_FLOAT, SECT, "outer_maximised_alpha");
 
     w = gtk_label_new(_("Inner Frame Blend"));
-    table_append(w, FALSE);
+    table_append(w, false);
     w = gtk_color_button_new();
-    table_append(w, FALSE);
+    table_append(w, false);
     SettingItem::register_setting(w, ST_COLOR, SECT, "inner_maximised_color");
     w = scaler_new(0.0, 1.0, 0.01);
-    table_append(w, TRUE);
+    table_append(w, true);
     SettingItem::register_setting(w, ST_FLOAT, SECT, "inner_maximised_alpha");
 }
 
@@ -1445,34 +1445,34 @@ void layout_corners_frame(GtkWidget* vbox)
     GtkWidget* junk;
 
     junk = gtk_check_button_new_with_label(_("Round Top Left Corner?"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "round_top_left");
 
     junk = gtk_check_button_new_with_label(_("Round Top Right Corner"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "round_top_right");
 
     junk = gtk_check_button_new_with_label(_("Round Bottom Left Corner"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "round_bottom_left");
 
     junk = gtk_check_button_new_with_label(_("Round Bottom Right Corner"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "round_bottom_right");
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
-    gtk_box_pack_startC(hbox, gtk_label_new(_("Frame Rounding Radius")), FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
+    gtk_box_pack_startC(hbox, gtk_label_new(_("Frame Rounding Radius")), false, false, 0);
     junk = scaler_new(0, 20, 0.5);
-    gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
+    gtk_box_pack_startC(hbox, junk, true, true, 0);
     SettingItem::register_setting(junk, ST_FLOAT, SECT, "frame_radius");
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
-    gtk_box_pack_startC(hbox, gtk_label_new(_("Titlebar Rounding Radius")), FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
+    gtk_box_pack_startC(hbox, gtk_label_new(_("Titlebar Rounding Radius")), false, false, 0);
 
     junk = scaler_new(0, 20, 0.5);
-    gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
+    gtk_box_pack_startC(hbox, junk, true, true, 0);
     SettingItem::register_setting(junk, ST_FLOAT, SECT, "titlebar_radius");
 
 }
@@ -1480,10 +1480,10 @@ void layout_corners_frame(GtkWidget* vbox)
 void add_border_slider(char* text, char* key, int value)
 {
     GtkWidget* w;
-    table_append(gtk_label_new(text), FALSE);
+    table_append(gtk_label_new(text), false);
 
     w = scaler_new(0, 20, 1);
-    table_append(w, TRUE);
+    table_append(w, true);
     gtk_range_set_value(GTK_RANGE(w), value);
     SettingItem::register_setting(w, ST_INT, "borders", key);
 }
@@ -1497,16 +1497,16 @@ void my_engine_settings(GtkWidget* hbox, bool active)
     GtkWidget* junk;
 
 
-    vbox = gtk_vbox_new(FALSE, 2);
-    gtk_box_pack_startC(hbox, vbox, TRUE, TRUE, 0);
-    gtk_box_pack_startC(vbox, gtk_label_new(active ? "Active Window" : "Inactive Window"), FALSE, FALSE, 0);
-    gtk_box_pack_startC(vbox, gtk_hseparator_new(), FALSE, FALSE, 0);
+    vbox = gtk_vbox_new(false, 2);
+    gtk_box_pack_startC(hbox, vbox, true, true, 0);
+    gtk_box_pack_startC(vbox, gtk_label_new(active ? "Active Window" : "Inactive Window"), false, false, 0);
+    gtk_box_pack_startC(vbox, gtk_hseparator_new(), false, false, 0);
     scroller = gtk_scrolled_window_new(NULL, NULL);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller),
                                    GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-    gtk_box_pack_startC(vbox, scroller, TRUE, TRUE, 0);
+    gtk_box_pack_startC(vbox, scroller, true, true, 0);
 
-    table_new(3, FALSE, FALSE);
+    table_new(3, false, false);
 
     gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scroller), GTK_WIDGET(get_current_table()));
 
@@ -1521,40 +1521,40 @@ void my_engine_settings(GtkWidget* hbox, bool active)
     table_append_separator();
 
     junk = gtk_label_new(_("Repeat Gradient?"));
-    table_append(junk, FALSE);
+    table_append(junk, false);
     junk = gtk_label_new("");
-    table_append(junk, FALSE);
+    table_append(junk, false);
     junk = gtk_check_button_new();
-    table_append(junk, TRUE);
+    table_append(junk, true);
     char* key_line;
     key_line = g_strdup_printf(active ? "active_%s" : "inactive_%s", "gradient_repeat_enabled");
     SettingItem::register_setting(junk, ST_BOOL, SECT, key_line);
 
     junk = gtk_label_new(_("Vertical Repeat?"));
-    table_append(junk, FALSE);
+    table_append(junk, false);
     junk = gtk_label_new("");
-    table_append(junk, FALSE);
+    table_append(junk, false);
     junk = gtk_check_button_new();
-    table_append(junk, TRUE);
+    table_append(junk, true);
     key_line = g_strdup_printf(active ? "active_%s" : "inactive_%s", "gradient_repeat_direction_vertical");
     SettingItem::register_setting(junk, ST_BOOL, SECT, key_line);
 
     junk = gtk_label_new(_("Diagonal Repeat?"));
-    table_append(junk, FALSE);
+    table_append(junk, false);
     junk = gtk_label_new("");
-    table_append(junk, FALSE);
+    table_append(junk, false);
     junk = gtk_check_button_new();
-    table_append(junk, TRUE);
+    table_append(junk, true);
     key_line = g_strdup_printf(active ? "active_%s" : "inactive_%s", "gradient_repeat_direction_diagonal");
     SettingItem::register_setting(junk, ST_BOOL, SECT, key_line);
 
 
     junk = gtk_label_new(_("Repeat Frequency"));
-    table_append(junk, FALSE);
+    table_append(junk, false);
     junk = gtk_label_new("");
-    table_append(junk, FALSE);
+    table_append(junk, false);
     junk = scaler_new(0, 20, 0.5);
-    table_append(junk, TRUE);
+    table_append(junk, true);
     key_line = g_strdup_printf(active ? "active_%s" : "inactive_%s", "gradient_repeat_height");
     SettingItem::register_setting(junk, ST_FLOAT, SECT, key_line);
     table_append_separator();
@@ -1575,11 +1575,11 @@ void my_engine_settings(GtkWidget* hbox, bool active)
 void layout_engine_colors(GtkWidget* vbox)
 {
     GtkWidget* hbox;
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, TRUE, TRUE, 0);
-    my_engine_settings(hbox, TRUE);
-    gtk_box_pack_startC(hbox, gtk_vseparator_new(), FALSE, FALSE, 0);
-    my_engine_settings(hbox, FALSE);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, true, true, 0);
+    my_engine_settings(hbox, true);
+    gtk_box_pack_startC(hbox, gtk_vseparator_new(), false, false, 0);
+    my_engine_settings(hbox, false);
 }
 
 void layout_pixmaps(GtkWidget* vbox)
@@ -1594,22 +1594,22 @@ void layout_pixmaps(GtkWidget* vbox)
 ///////////////////////
 
     junk = gtk_check_button_new_with_label(_("Enable Title Part Pixmap?"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "pixmaps_titlebarpart_enabled");
 
     junk = gtk_check_button_new_with_label(_("Repeat Title Part Pixmap?"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "pixmaps_titlebarpart_repeat_enabled");
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
 
     junk = gtk_label_new(_("Title Bar Part Pixmap"));
-    gtk_box_pack_startC(hbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(hbox, junk, false, false, 0);
 
     file_selector = gtk_file_chooser_button_new(_("Choose Titlebar Part Pixmap"),
                     GTK_FILE_CHOOSER_ACTION_OPEN);
-    gtk_box_pack_startC(hbox, file_selector, TRUE, TRUE, 0);
+    gtk_box_pack_startC(hbox, file_selector, true, true, 0);
     filter = gtk_file_filter_new();
     gtk_file_filter_add_pattern(filter, "*.png");
     gtk_file_filter_set_name(filter, "PNG Images");
@@ -1620,27 +1620,27 @@ void layout_pixmaps(GtkWidget* vbox)
 
     /* set =*/ SettingItem::register_img_file_setting(file_selector, "pixmaps", "titlebarpart", GTK_IMAGE(title_bar_image));
 ///////////////////////////
-    gtk_box_pack_startC(hbox, gtk_vseparator_new(), FALSE, FALSE, 0);
+    gtk_box_pack_startC(hbox, gtk_vseparator_new(), false, false, 0);
 ///////////////////////////
 
     junk = gtk_check_button_new_with_label(_("Enable Button Part Pixmap?"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "pixmaps_buttonpart_enabled");
 
     junk = gtk_check_button_new_with_label(_("Repeat Button Part Pixmap?"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "pixmaps_buttonpart_repeat_enabled");
 
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
 
     junk = gtk_label_new(_("Button Part Pixmap"));
-    gtk_box_pack_startC(hbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(hbox, junk, false, false, 0);
 
     file_selector = gtk_file_chooser_button_new(_("Choose Button Part Pixmap"),
                     GTK_FILE_CHOOSER_ACTION_OPEN);
-    gtk_box_pack_startC(hbox, file_selector, TRUE, TRUE, 0);
+    gtk_box_pack_startC(hbox, file_selector, true, true, 0);
     filter = gtk_file_filter_new();
     gtk_file_filter_add_pattern(filter, "*.png");
     gtk_file_filter_set_name(filter, "PNG Images");
@@ -1651,27 +1651,27 @@ void layout_pixmaps(GtkWidget* vbox)
 
     /*set =*/ SettingItem::register_img_file_setting(file_selector, "pixmaps", "buttonpart", GTK_IMAGE(title_bar_image));
 ///////////////////////////////////////
-    gtk_box_pack_startC(hbox, gtk_vseparator_new(), FALSE, FALSE, 0);
+    gtk_box_pack_startC(hbox, gtk_vseparator_new(), false, false, 0);
 ///////////////////////////
 
     junk = gtk_check_button_new_with_label(_("Enable Titlebar Pixmap?"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "pixmaps_titlebar_enabled");
 
     junk = gtk_check_button_new_with_label(_("Repeat Titlebar Pixmap?"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "pixmaps_titlebar_repeat_enabled");
 
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
 
     junk = gtk_label_new(_("Titlebar Pixmap"));
-    gtk_box_pack_startC(hbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(hbox, junk, false, false, 0);
 
     file_selector = gtk_file_chooser_button_new(_("Choose Titlebar Pixmap"),
                     GTK_FILE_CHOOSER_ACTION_OPEN);
-    gtk_box_pack_startC(hbox, file_selector, TRUE, TRUE, 0);
+    gtk_box_pack_startC(hbox, file_selector, true, true, 0);
     filter = gtk_file_filter_new();
     gtk_file_filter_add_pattern(filter, "*.png");
     gtk_file_filter_set_name(filter, "PNG Images");
@@ -1690,7 +1690,7 @@ void layout_engine_settings(GtkWidget* vbox)
 {
     GtkWidget* note;
     note = gtk_notebook_new();
-    gtk_box_pack_startC(vbox, note, TRUE, TRUE, 0);
+    gtk_box_pack_startC(vbox, note, true, true, 0);
     layout_engine_colors(build_notebook_page(_("Active/Inactive"), note));
     layout_maximised_colors(build_notebook_page(_("Maximised"), note));
     layout_corners_frame(build_notebook_page(_("Corners"), note));

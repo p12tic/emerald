@@ -50,7 +50,7 @@ void get_meta_info(EngineMetaInfo* emi)
     emi->version = g_strdup("0.1");
     emi->description = g_strdup(_("Based on original legacy"));
     emi->last_compat = g_strdup("0.0"); // old themes still compatible
-    emi->icon = gdk_pixbuf_new_from_inline(-1, my_pixbuf, TRUE, NULL);
+    emi->icon = gdk_pixbuf_new_from_inline(-1, my_pixbuf, true, NULL);
 }
 
 #ifdef SHADOW_FIX
@@ -224,15 +224,15 @@ void my_engine_settings(GtkWidget* hbox, bool active)
 {
     GtkWidget* vbox;
     GtkWidget* scroller;
-    vbox = gtk_vbox_new(FALSE, 2);
-    gtk_box_pack_startC(hbox, vbox, TRUE, TRUE, 0);
-    gtk_box_pack_startC(vbox, gtk_label_new(active ? "Active Window" : "Inactive Window"), FALSE, FALSE, 0);
-    gtk_box_pack_startC(vbox, gtk_hseparator_new(), FALSE, FALSE, 0);
+    vbox = gtk_vbox_new(false, 2);
+    gtk_box_pack_startC(hbox, vbox, true, true, 0);
+    gtk_box_pack_startC(vbox, gtk_label_new(active ? "Active Window" : "Inactive Window"), false, false, 0);
+    gtk_box_pack_startC(vbox, gtk_hseparator_new(), false, false, 0);
     scroller = gtk_scrolled_window_new(NULL, NULL);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-    gtk_box_pack_startC(vbox, scroller, TRUE, TRUE, 0);
+    gtk_box_pack_startC(vbox, scroller, true, true, 0);
 
-    table_new(3, FALSE, FALSE);
+    table_new(3, false, false);
 
     gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scroller), GTK_WIDGET(get_current_table()));
 
@@ -245,11 +245,11 @@ void my_engine_settings(GtkWidget* hbox, bool active)
 void layout_engine_colors(GtkWidget* vbox)
 {
     GtkWidget* hbox;
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, TRUE, TRUE, 0);
-    my_engine_settings(hbox, TRUE);
-    gtk_box_pack_startC(hbox, gtk_vseparator_new(), FALSE, FALSE, 0);
-    my_engine_settings(hbox, FALSE);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, true, true, 0);
+    my_engine_settings(hbox, true);
+    gtk_box_pack_startC(hbox, gtk_vseparator_new(), false, false, 0);
+    my_engine_settings(hbox, false);
 }
 
 extern "C"
@@ -257,6 +257,6 @@ void layout_engine_settings(GtkWidget* vbox)
 {
     GtkWidget* note;
     note = gtk_notebook_new();
-    gtk_box_pack_startC(vbox, note, TRUE, TRUE, 0);
+    gtk_box_pack_startC(vbox, note, true, true, 0);
     layout_engine_colors(build_notebook_page(_("Colors"), note));
 }

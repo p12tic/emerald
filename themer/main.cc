@@ -184,7 +184,7 @@ static void theme_list_append(char* value, char* dir, char* fil)
         gtk_list_store_set(ThemeList, &iter, 7, p, -1); // should own a ref to p
         g_object_unref(p);
     } else {
-        //p = gdk_pixbuf_new(GDK_COLORSPACE_RGB,TRUE,8,1,1);
+        //p = gdk_pixbuf_new(GDK_COLORSPACE_RGB,true,8,1,1);
         //p = gdk_pixbuf_new_from_file(,NULL);
         p = gtk_widget_render_icon(ThemeSelector, GTK_STOCK_MISSING_IMAGE, GTK_ICON_SIZE_LARGE_TOOLBAR, "themelist");
         gtk_list_store_set(ThemeList, &iter, 7, p, -1);
@@ -227,7 +227,7 @@ static void scroll_to_theme(char* thn)
         if (strcmp(s, thn) == 0) {
             GtkTreePath* p;
             p = gtk_tree_model_get_path(GTK_TREE_MODEL(ThemeList), &i);
-            gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(ThemeSelector), p, NULL, TRUE, 0.0, 0.0);
+            gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(ThemeSelector), p, NULL, true, 0.0, 0.0);
             gtk_tree_path_free(p);
         }
         g_free(s);
@@ -238,9 +238,9 @@ static void refresh_theme_list(char* thn)
 {
     char* path;
     gtk_list_store_clear(ThemeList);
-    theme_scan_dir(DATA_DIR "/emerald/themes/", FALSE);
+    theme_scan_dir(DATA_DIR "/emerald/themes/", false);
     path = g_strdup_printf("%s/.emerald/themes/", g_get_home_dir());
-    theme_scan_dir(path, TRUE);
+    theme_scan_dir(path, true);
     g_free(path);
     if (thn) {
         scroll_to_theme(thn);
@@ -294,7 +294,7 @@ static void cb_load(GtkWidget* w, void* d)
     GDir* dr;
     char* fn, *at, *mt, *xt, *gt;
     bool dist;
-    dist = FALSE;
+    dist = false;
     GtkTreeIter iter;
     GtkTreeModel* model;
     //first normalize the name
@@ -307,7 +307,7 @@ static void cb_load(GtkWidget* w, void* d)
     if (strlen(at) >= 1 && at[0] == '*') {
         if (strlen(at) >= 2) {
             mt = at + 2;
-            dist = TRUE;
+            dist = true;
         } else {
             error_dialog(_("Invalid Theme Name"));
             g_free(at);
@@ -366,8 +366,8 @@ static void cb_load(GtkWidget* w, void* d)
     }
     gtk_entry_set_text(GTK_ENTRY(EntryBox), mt);
     g_free(at);
-    set_changed(TRUE);
-    set_apply(FALSE);
+    set_changed(true);
+    set_apply(false);
     for (auto list = get_setting_list(); list; list = list->next) {
         SettingItem* st = list->data;
         st->read_setting((void*)f);
@@ -381,7 +381,7 @@ static void cb_load(GtkWidget* w, void* d)
             gtk_entry_set_text(GTK_ENTRY(Version), "Pre-0.8");
         }
     }
-    set_apply(TRUE);
+    set_apply(true);
     send_reload_signal();
     g_key_file_free(f);
     g_free(fn);
@@ -588,7 +588,7 @@ static void cb_delete(GtkWidget* w, void* d)
             g_free(pt);
         }
         info_dialog(_("Theme deleted"));
-        gtk_widget_set_sensitive(w, FALSE);
+        gtk_widget_set_sensitive(w, false);
         refresh_theme_list(NULL);
     } else {
         error_dialog(_("No such theme to delete"));
@@ -608,11 +608,11 @@ static void layout_button_box(GtkWidget* vbox, int b_t)
     GtkWidget* image;
     SettingItem* item;
 
-    table_append(gtk_label_new(b_names[b_t]), FALSE);
+    table_append(gtk_label_new(b_names[b_t]), false);
 
     filesel = gtk_file_chooser_button_new(g_strdup_printf("%s Button Pixmap", b_names[b_t]),
                                           GTK_FILE_CHOOSER_ACTION_OPEN);
-    table_append(filesel, FALSE);
+    table_append(filesel, false);
     imgfilter = gtk_file_filter_new();
     gtk_file_filter_set_name(imgfilter, "Images");
     gtk_file_filter_add_pixbuf_formats(imgfilter);
@@ -622,26 +622,26 @@ static void layout_button_box(GtkWidget* vbox, int b_t)
 
     item = SettingItem::register_img_file_setting(filesel, "buttons", b_types[b_t], GTK_IMAGE(image));
 
-    table_append(image, TRUE);
+    table_append(image, true);
 
     clearer = gtk_button_new_from_stock(GTK_STOCK_CLEAR);
     g_signal_connect(clearer, "clicked", G_CALLBACK(cb_clear_file), item);
-    table_append(clearer, FALSE);
+    table_append(clearer, false);
 }
 void layout_general_buttons_frame(GtkWidget* hbox)
 {
     GtkWidget* junk;
 
     junk = gtk_check_button_new_with_label(_("Use Pixmap Buttons"));
-    gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
+    gtk_box_pack_startC(hbox, junk, true, true, 0);
     SettingItem::register_setting(junk, ST_BOOL, "buttons", "use_pixmap_buttons");
 
     junk = gtk_check_button_new_with_label(_("Use Button Halo/Glow"));
-    gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
+    gtk_box_pack_startC(hbox, junk, true, true, 0);
     SettingItem::register_setting(junk, ST_BOOL, "buttons", "use_button_glow");
 
     junk = gtk_check_button_new_with_label(_("Use Button Halo/Glow For Inactive Windows"));
-    gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
+    gtk_box_pack_startC(hbox, junk, true, true, 0);
     SettingItem::register_setting(junk, ST_BOOL, "buttons", "use_button_inactive_glow");
 }
 void layout_button_pane(GtkWidget* vbox)
@@ -652,27 +652,27 @@ void layout_button_pane(GtkWidget* vbox)
     /* Yeah, the names should probably be renamed from hbox since it's now
      * a vbox...
      */
-    hbox = gtk_vbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
+    hbox = gtk_vbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
     layout_general_buttons_frame(hbox);
 
-    gtk_box_pack_startC(vbox, gtk_hseparator_new(), FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, gtk_hseparator_new(), false, false, 0);
 
-    gtk_box_pack_startC(vbox, gtk_label_new(_("Button Pixmaps")), FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, gtk_label_new(_("Button Pixmaps")), false, false, 0);
 
     scroller = gtk_scrolled_window_new(NULL, NULL);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller),
                                    GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-    gtk_box_pack_startC(vbox, scroller, TRUE, TRUE, 0);
+    gtk_box_pack_startC(vbox, scroller, true, true, 0);
 
-    table_new(4, FALSE, FALSE);
+    table_new(4, false, false);
     gtk_scrolled_window_add_with_viewport(
         GTK_SCROLLED_WINDOW(scroller), GTK_WIDGET(get_current_table()));
 
-    table_append(gtk_label_new(_("Button")), FALSE);
-    table_append(gtk_label_new(_("File")), FALSE);
-    table_append(gtk_label_new(_("Preview")), FALSE);
-    table_append(gtk_label_new(_("Clear")), FALSE);
+    table_append(gtk_label_new(_("Button")), false);
+    table_append(gtk_label_new(_("File")), false);
+    table_append(gtk_label_new(_("Preview")), false);
+    table_append(gtk_label_new(_("Clear")), false);
 
     for (i = 0; i < BX_COUNT; i++) {
         layout_button_box(vbox, i);
@@ -682,11 +682,11 @@ void layout_window_frame(GtkWidget* vbox, bool active)
 {
     GtkWidget* scrollwin;
     scrollwin = gtk_scrolled_window_new(NULL, NULL);
-    gtk_box_pack_startC(vbox, scrollwin, TRUE, TRUE, 0);
+    gtk_box_pack_startC(vbox, scrollwin, true, true, 0);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrollwin),
                                    GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
 
-    table_new(3, FALSE, FALSE);
+    table_new(3, false, false);
     gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrollwin),
                                           GTK_WIDGET(get_current_table()));
     make_labels(_("Colors"));
@@ -698,10 +698,10 @@ void layout_window_frame(GtkWidget* vbox, bool active)
 }
 void add_row(GtkWidget* vbox, GtkWidget* item, char* title)
 {
-    //gtk_box_pack_startC(hbox,gtk_label_new(title),FALSE,FALSE,0);
-    //gtk_box_pack_endC(hbox,item,TRUE,TRUE,0);
-    table_append(gtk_label_new(title), FALSE);
-    table_append(item, TRUE);
+    //gtk_box_pack_startC(hbox,gtk_label_new(title),false,false,0);
+    //gtk_box_pack_endC(hbox,item,true,true,0);
+    table_append(gtk_label_new(title), false);
+    table_append(item, true);
 }
 void add_color_button_row(GtkWidget* vbox, char* title, char* key, char* sect)
 {
@@ -728,8 +728,8 @@ void add_float_range_row(GtkWidget* vbox, char* title, char* key,
 }
 void layout_shadows_frame(GtkWidget* vbox)
 {
-    table_new(2, FALSE, FALSE);
-    gtk_box_pack_startC(vbox, get_current_table(), FALSE, FALSE, 0);
+    table_new(2, false, false);
+    gtk_box_pack_startC(vbox, get_current_table(), false, false, 0);
     add_color_button_row(vbox, _("Color"), "shadow_color", "shadow");
     add_float_range_row(vbox, _("Opacity"), "shadow_opacity", 0.01, 6.0, 0.01, "shadow");
     add_float_range_row(vbox, _("Radius"), "shadow_radius", 0.0, 48.0, 0.1, "shadow");
@@ -741,43 +741,43 @@ void layout_title_frame(GtkWidget* vbox)
     GtkWidget* hbox;
     GtkWidget* junk;
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
 
-    gtk_box_pack_startC(hbox, gtk_label_new(_("Title-Text Font")), FALSE, FALSE, 0);
+    gtk_box_pack_startC(hbox, gtk_label_new(_("Title-Text Font")), false, false, 0);
     junk = gtk_font_button_new();
-    gtk_box_pack_endC(hbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_endC(hbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_FONT, "titlebar", "titlebar_font");
 
 
-    table_new(2, FALSE, FALSE);
-    gtk_box_pack_startC(vbox, get_current_table(), FALSE, FALSE, 0);
-    table_append(gtk_label_new(_("Minimum Title-bar Height")), FALSE);
+    table_new(2, false, false);
+    gtk_box_pack_startC(vbox, get_current_table(), false, false, 0);
+    table_append(gtk_label_new(_("Minimum Title-bar Height")), false);
     junk = scaler_new(0, 64, 1);
     gtk_range_set_value(GTK_RANGE(junk), 17);
-    table_append(junk, TRUE);
+    table_append(junk, true);
     SettingItem::register_setting(junk, ST_INT, "titlebar", "min_titlebar_height");
 
-    table_append(gtk_label_new(_("Vertical Button Offset")), FALSE);
+    table_append(gtk_label_new(_("Vertical Button Offset")), false);
     junk = scaler_new(0, 64, 1);
     gtk_range_set_value(GTK_RANGE(junk), 1);
-    table_append(junk, TRUE);
+    table_append(junk, true);
     SettingItem::register_setting(junk, ST_INT, "buttons", "vertical_offset");
 
-    table_append(gtk_label_new(_("Horizontal Button Offset")), FALSE);
+    table_append(gtk_label_new(_("Horizontal Button Offset")), false);
     junk = scaler_new(0, 64, 1);
     gtk_range_set_value(GTK_RANGE(junk), 1);
-    table_append(junk, TRUE);
+    table_append(junk, true);
     SettingItem::register_setting(junk, ST_INT, "buttons", "horizontal_offset");
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
-    gtk_box_pack_startC(hbox, gtk_label_new(_("Title-bar Object Layout")), FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
+    gtk_box_pack_startC(hbox, gtk_label_new(_("Title-bar Object Layout")), false, false, 0);
     junk = gtk_combo_box_entry_new_text();
     gtk_combo_box_append_text(GTK_COMBO_BOX(junk), "IT::HNXC:Normal Layout");
     gtk_combo_box_append_text(GTK_COMBO_BOX(junk), "CNX:IT:HM:OSX Layout");
     SettingItem::register_setting(junk, ST_STRING_COMBO, "titlebar", "title_object_layout");
-    gtk_box_pack_startC(hbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(hbox, junk, false, false, 0);
 
     gtk_box_pack_startC(vbox, gtk_label_new(
                             _("Use colons to separate left, center, and right.\n"
@@ -788,18 +788,18 @@ void layout_title_frame(GtkWidget* vbox)
                               "Y=Sticky, (#)=# pixels space, ex: (5)\n")
                             //"U=On Top, D=On Bottom, S=Shade\n"
                             //"Y=Sticky (on All Desktops)\n"
-                        ), FALSE, FALSE, 0);
+                        ), false, false, 0);
 
     /*junk = gtk_check_button_new_with_label("Use active colors for whole active frame, not just titlebar.");
-    gtk_box_pack_startC(vbox,junk,FALSE,FALSE,0);
+    gtk_box_pack_startC(vbox,junk,false,false,0);
     SettingItem::register_setting(junk,ST_BOOL,SECT,"use_active_colors");*/
 }
 void add_meta_string_value(char* title, char* key)
 {
     GtkWidget* entry;
-    table_append(gtk_label_new(title), FALSE);
+    table_append(gtk_label_new(title), false);
     entry = gtk_entry_new();
-    table_append(entry, TRUE);
+    table_append(entry, true);
     SettingItem::register_setting(entry, ST_META_STRING, "theme", key);
 }
 static void cb_export(GtkWidget* w, void* p)
@@ -818,7 +818,7 @@ static void cb_export(GtkWidget* w, void* p)
     gtk_file_filter_add_pattern(filter, "*.emerald");
     gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
     gtk_file_chooser_set_do_overwrite_confirmation(
-        GTK_FILE_CHOOSER(dialog), TRUE);
+        GTK_FILE_CHOOSER(dialog), true);
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog),
                                         pth);
     g_free(pth);
@@ -842,28 +842,28 @@ void layout_file_frame(GtkWidget* vbox)
     GtkWidget* junk;
     GtkWidget* hbox;
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
 
-    gtk_box_pack_startC(hbox, gtk_label_new(_("Name:")), FALSE, FALSE, 0);
+    gtk_box_pack_startC(hbox, gtk_label_new(_("Name:")), false, false, 0);
     EntryBox = gtk_entry_new();
     gtk_entry_set_text(GTK_ENTRY(EntryBox), _("Untitled Theme"));
-    gtk_box_pack_startC(hbox, EntryBox, TRUE, TRUE, 0);
+    gtk_box_pack_startC(hbox, EntryBox, true, true, 0);
 
     junk = gtk_button_new_from_stock(GTK_STOCK_SAVE);
-    gtk_box_pack_startC(hbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(hbox, junk, false, false, 0);
     g_signal_connect(junk, "clicked", G_CALLBACK(cb_save), NULL);
 
     ExportButton = gtk_button_new_with_label(_("Export..."));
     gtk_button_set_image(GTK_BUTTON(ExportButton),
                          gtk_image_new_from_stock(GTK_STOCK_SAVE_AS, GTK_ICON_SIZE_BUTTON));
-    gtk_box_pack_startC(hbox, ExportButton, FALSE, FALSE, 0);
+    gtk_box_pack_startC(hbox, ExportButton, false, false, 0);
     g_signal_connect(ExportButton, "clicked", G_CALLBACK(cb_export), NULL);
 }
 void layout_info_frame(GtkWidget* vbox)
 {
-    table_new(2, FALSE, FALSE);
-    gtk_box_pack_startC(vbox, get_current_table(), FALSE, FALSE, 0);
+    table_new(2, false, false);
+    gtk_box_pack_startC(vbox, get_current_table(), false, false, 0);
     add_meta_string_value(_("Creator"), "creator");
     add_meta_string_value(_("Description"), "description");
     add_meta_string_value(_("Theme Version"), "theme_version");
@@ -871,29 +871,29 @@ void layout_info_frame(GtkWidget* vbox)
 
     table_append_separator();
 
-    table_append(gtk_label_new(_("Themer Version")), FALSE);
+    table_append(gtk_label_new(_("Themer Version")), false);
 
     Version = gtk_entry_new();
-    gtk_editable_set_editable(GTK_EDITABLE(Version), FALSE);
-    gtk_widget_set_sensitive(Version, FALSE);
-    table_append(Version, TRUE);
+    gtk_editable_set_editable(GTK_EDITABLE(Version), false);
+    gtk_widget_set_sensitive(Version, false);
+    table_append(Version, true);
 }
 void add_border_slider(char* text, char* key, int value)
 {
     GtkWidget* w;
-    table_append(gtk_label_new(text), FALSE);
+    table_append(gtk_label_new(text), false);
 
     w = scaler_new(0, 20, 1);
-    table_append(w, TRUE);
+    table_append(w, true);
     gtk_range_set_value(GTK_RANGE(w), value);
     SettingItem::register_setting(w, ST_INT, "borders", key);
 }
 void layout_borders_frame(GtkWidget* vbox)
 {
-    table_new(2, FALSE, FALSE);
-    gtk_box_pack_startC(vbox, get_current_table(), FALSE, FALSE, 0);
-    table_append(gtk_label_new(_("Border")), FALSE);
-    table_append(gtk_label_new(_("Size")), FALSE);
+    table_new(2, false, false);
+    gtk_box_pack_startC(vbox, get_current_table(), false, false, 0);
+    table_append(gtk_label_new(_("Border")), false);
+    table_append(gtk_label_new(_("Size")), false);
     add_border_slider(_("Top"), "top", 4);
     add_border_slider(_("Bottom"), "bottom", 6);
     add_border_slider(_("Left"), "left", 6);
@@ -909,30 +909,30 @@ void layout_borders_frame(GtkWidget* vbox)
                               "the title-bar height through either\n"
                               "the titlebar-min-height slider\n"
                               "or the titlebar font setting.\n")
-                        ), FALSE, FALSE, 0);
+                        ), false, false, 0);
 }
 void layout_left_frame_pane(GtkWidget* hbox)
 {
     GtkWidget* vbox;
-    vbox = gtk_vbox_new(FALSE, 2);
-    gtk_box_pack_startC(hbox, vbox, TRUE, TRUE, 0);
+    vbox = gtk_vbox_new(false, 2);
+    gtk_box_pack_startC(hbox, vbox, true, true, 0);
 
-    layout_shadows_frame(build_frame(vbox, _("Shadows"), FALSE));
+    layout_shadows_frame(build_frame(vbox, _("Shadows"), false));
 }
 void layout_right_frame_pane(GtkWidget* hbox)
 {
     GtkWidget* vbox;
-    vbox = gtk_vbox_new(FALSE, 2);
-    gtk_box_pack_startC(hbox, vbox, TRUE, TRUE, 0);
+    vbox = gtk_vbox_new(false, 2);
+    gtk_box_pack_startC(hbox, vbox, true, true, 0);
 
-    layout_borders_frame(build_frame(vbox, _("Frame Borders"), FALSE));
+    layout_borders_frame(build_frame(vbox, _("Frame Borders"), false));
 }
 void layout_frame_pane(GtkWidget* vbox)
 {
     GtkWidget* hbox;
 
-    hbox = gtk_hbox_new(TRUE, 2);
-    gtk_box_pack_startC(vbox, hbox, TRUE, TRUE, 0);
+    hbox = gtk_hbox_new(true, 2);
+    gtk_box_pack_startC(vbox, hbox, true, true, 0);
 
     layout_left_frame_pane(hbox);
     layout_right_frame_pane(hbox);
@@ -940,27 +940,27 @@ void layout_frame_pane(GtkWidget* vbox)
 void layout_left_global_pane(GtkWidget* hbox)
 {
     GtkWidget* vbox;
-    vbox = gtk_vbox_new(FALSE, 2);
-    gtk_box_pack_startC(hbox, vbox, TRUE, TRUE, 0);
+    vbox = gtk_vbox_new(false, 2);
+    gtk_box_pack_startC(hbox, vbox, true, true, 0);
 
-    layout_window_frame(build_frame(vbox, _("Active Window"), FALSE), TRUE);
-    layout_window_frame(build_frame(vbox, _("Inactive Window"), FALSE), FALSE);
+    layout_window_frame(build_frame(vbox, _("Active Window"), false), true);
+    layout_window_frame(build_frame(vbox, _("Inactive Window"), false), false);
     //layout stuff here.
 }
 void layout_right_global_pane(GtkWidget* hbox)
 {
     GtkWidget* vbox;
-    vbox = gtk_vbox_new(FALSE, 2);
-    gtk_box_pack_startC(hbox, vbox, TRUE, TRUE, 0);
+    vbox = gtk_vbox_new(false, 2);
+    gtk_box_pack_startC(hbox, vbox, true, true, 0);
 
-    layout_title_frame(build_frame(vbox, _("Title Bar"), FALSE));
+    layout_title_frame(build_frame(vbox, _("Title Bar"), false));
 }
 void layout_global_pane(GtkWidget* vbox)
 {
     GtkWidget* hbox;
 
-    hbox = gtk_hbox_new(TRUE, 2);
-    gtk_box_pack_startC(vbox, hbox, TRUE, TRUE, 0);
+    hbox = gtk_hbox_new(true, 2);
+    gtk_box_pack_startC(vbox, hbox, true, true, 0);
 
     layout_left_global_pane(hbox);
     layout_right_global_pane(hbox);
@@ -983,14 +983,14 @@ void layout_screenshot_frame(GtkWidget* vbox)
     gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrollwin), image);
     gtk_widget_set_size_request(scrollwin, 300, 160);
 
-    gtk_box_pack_startC(vbox, scrollwin, TRUE, TRUE, 0);
+    gtk_box_pack_startC(vbox, scrollwin, true, true, 0);
 
-    hbox = gtk_hbox_new(TRUE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(true, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
 
     filesel = gtk_file_chooser_button_new(_("Screenshot"),
                                           GTK_FILE_CHOOSER_ACTION_OPEN);
-    gtk_box_pack_startC(hbox, filesel, TRUE, TRUE, 0);
+    gtk_box_pack_startC(hbox, filesel, true, true, 0);
     imgfilter = gtk_file_filter_new();
     gtk_file_filter_set_name(imgfilter, _("Images"));
     gtk_file_filter_add_pixbuf_formats(imgfilter);
@@ -1000,27 +1000,27 @@ void layout_screenshot_frame(GtkWidget* vbox)
 
     clearer = gtk_button_new_from_stock(GTK_STOCK_CLEAR);
     g_signal_connect(clearer, "clicked", G_CALLBACK(cb_clear_file), item);
-    gtk_box_pack_startC(hbox, clearer, TRUE, TRUE, 0);
+    gtk_box_pack_startC(hbox, clearer, true, true, 0);
 }
 void layout_left_theme_pane(GtkWidget* hbox)
 {
     GtkWidget* vbox;
-    vbox = gtk_vbox_new(FALSE, 2);
-    gtk_box_pack_startC(hbox, vbox, TRUE, TRUE, 0);
-    layout_screenshot_frame(build_frame(vbox, _("Screenshot"), FALSE));
+    vbox = gtk_vbox_new(false, 2);
+    gtk_box_pack_startC(hbox, vbox, true, true, 0);
+    layout_screenshot_frame(build_frame(vbox, _("Screenshot"), false));
 }
 void layout_right_theme_pane(GtkWidget* hbox)
 {
     GtkWidget* vbox;
-    vbox = gtk_vbox_new(FALSE, 2);
-    gtk_box_pack_startC(hbox, vbox, TRUE, TRUE, 0);
-    layout_info_frame(build_frame(vbox, _("Information"), FALSE));
+    vbox = gtk_vbox_new(false, 2);
+    gtk_box_pack_startC(hbox, vbox, true, true, 0);
+    layout_info_frame(build_frame(vbox, _("Information"), false));
 }
 void layout_theme_pane(GtkWidget* vbox)
 {
     GtkWidget* hbox;
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, TRUE, TRUE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, true, true, 0);
     layout_left_theme_pane(hbox);
     layout_right_theme_pane(hbox);
 }
@@ -1033,96 +1033,96 @@ void layout_settings_pane(GtkWidget* vbox)
                             _("NOTE - These settings are not part of themes, "
                               "they are stored separately, and control various UI "
                               "preferences for Emerald.")
-                        ), FALSE, FALSE, 0);
-    gtk_box_pack_startC(vbox, gtk_hseparator_new(), FALSE, FALSE, 0);
+                        ), false, false, 0);
+    gtk_box_pack_startC(vbox, gtk_hseparator_new(), false, false, 0);
 
     junk = gtk_check_button_new_with_label(_("Show Tooltips for Buttons"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_SFILE_BOOL, "buttons", "enable_tooltips");
 
     junk = gtk_check_button_new_with_label(_("Use Decoration Cropping"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_SFILE_BOOL, "decorations", "use_decoration_cropping");
 
     junk = gtk_check_button_new_with_label(_("Use Button Fade"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_SFILE_BOOL, "buttons", "use_button_fade");
 
     junk = gtk_check_button_new_with_label(_("Use Button Fade Pulse"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_SFILE_BOOL, "buttons", "use_button_fade_pulse");
 
-    table_new(2, FALSE, FALSE);
-    gtk_box_pack_startC(vbox, get_current_table(), FALSE, FALSE, 0);
+    table_new(2, false, false);
+    gtk_box_pack_startC(vbox, get_current_table(), false, false, 0);
 
-    table_append(gtk_label_new(_("Button Fade Total Duration")), FALSE);
+    table_append(gtk_label_new(_("Button Fade Total Duration")), false);
     junk = scaler_new(1, 4000, 1);
     gtk_range_set_value(GTK_RANGE(junk), 250);
-    table_append(junk, TRUE);
+    table_append(junk, true);
     SettingItem::register_setting(junk, ST_SFILE_INT, "buttons", "button_fade_total_duration");
 
-    table_append(gtk_label_new(_("Button Fade Step Duration")), FALSE);
+    table_append(gtk_label_new(_("Button Fade Step Duration")), false);
     junk = scaler_new(1, 2000, 1);
     gtk_range_set_value(GTK_RANGE(junk), 50);
-    table_append(junk, TRUE);
+    table_append(junk, true);
     SettingItem::register_setting(junk, ST_SFILE_INT, "buttons", "button_fade_step_duration");
 
-    table_append(gtk_label_new(_("Button Pulse Wait Duration")), FALSE);
+    table_append(gtk_label_new(_("Button Pulse Wait Duration")), false);
     junk = scaler_new(0, 4000, 1);
     gtk_range_set_value(GTK_RANGE(junk), 0);
-    table_append(junk, TRUE);
+    table_append(junk, true);
     SettingItem::register_setting(junk, ST_SFILE_INT, "buttons", "button_fade_pulse_wait_duration");
 
-    table_append(gtk_label_new(_("Button Pulse Min Opacity %")), FALSE);
+    table_append(gtk_label_new(_("Button Pulse Min Opacity %")), false);
     junk = scaler_new(0, 100, 1);
     gtk_range_set_value(GTK_RANGE(junk), 0);
-    table_append(junk, TRUE);
+    table_append(junk, true);
     SettingItem::register_setting(junk, ST_SFILE_INT, "buttons", "button_fade_pulse_min_opacity");
 
-    table_append(gtk_label_new(_("Titlebar Double-Click Action")), FALSE);
+    table_append(gtk_label_new(_("Titlebar Double-Click Action")), false);
     combo = gtk_combo_box_new_text();
     for (i = 0; i < TITLEBAR_ACTION_COUNT; i++) {
         gtk_combo_box_append_text(GTK_COMBO_BOX(combo), titlebar_action_name[i]);
     }
     gtk_combo_box_set_active(GTK_COMBO_BOX(combo), 0);
-    table_append(combo, TRUE);
+    table_append(combo, true);
     SettingItem::register_setting(combo, ST_SFILE_INT_COMBO, "titlebars",
                      "double_click_action");
 
-    table_append(gtk_label_new(_("Button Hover Cursor")), FALSE);
+    table_append(gtk_label_new(_("Button Hover Cursor")), false);
     combo = gtk_combo_box_new_text();
     gtk_combo_box_append_text(GTK_COMBO_BOX(combo), _("Normal"));
     gtk_combo_box_append_text(GTK_COMBO_BOX(combo), _("Pointing Finger"));
     gtk_combo_box_set_active(GTK_COMBO_BOX(combo), 1);
-    table_append(combo, TRUE);
+    table_append(combo, true);
     SettingItem::register_setting(combo, ST_SFILE_INT_COMBO, "buttons",
                      "hover_cursor");
 
-    table_append(gtk_label_new(_("Compiz Decoration Blur Type")), FALSE);
+    table_append(gtk_label_new(_("Compiz Decoration Blur Type")), false);
     combo = gtk_combo_box_new_text();
     gtk_combo_box_append_text(GTK_COMBO_BOX(combo), _("None"));
     gtk_combo_box_append_text(GTK_COMBO_BOX(combo), _("Titlebar only"));
     gtk_combo_box_append_text(GTK_COMBO_BOX(combo), _("All decoration"));
     gtk_combo_box_set_active(GTK_COMBO_BOX(combo), BLUR_TYPE_NONE);
-    table_append(combo, TRUE);
+    table_append(combo, true);
     SettingItem::register_setting(combo, ST_SFILE_INT_COMBO, "decorations",
                      "blur_type");
 
-    /*table_append(gtk_label_new("Icon Click Action"),FALSE);
+    /*table_append(gtk_label_new("Icon Click Action"),false);
     combo = gtk_combo_box_new_text();
     gtk_combo_box_append_text(GTK_COMBO_BOX(combo),"None");
     gtk_combo_box_append_text(GTK_COMBO_BOX(combo),"Window Menu");
     gtk_combo_box_set_active(GTK_COMBO_BOX(combo),0);
-    table_append(combo,FALSE);
+    table_append(combo,false);
     SettingItem::register_setting(combo,ST_SFILE_INT_COMBO,"window_icon",
             "click_action");
 
-    table_append(gtk_label_new("Icon Double-Click Action"),FALSE);
+    table_append(gtk_label_new("Icon Double-Click Action"),false);
     combo = gtk_combo_box_new_text();
     gtk_combo_box_append_text(GTK_COMBO_BOX(combo),"None");
     gtk_combo_box_append_text(GTK_COMBO_BOX(combo),"Close Window");
     gtk_combo_box_set_active(GTK_COMBO_BOX(combo),0);
-    table_append(combo,FALSE);
+    table_append(combo,false);
     SettingItem::register_setting(combo,ST_SFILE_INT_COMBO,"window_icon",
             "double_click_action");*/
     //TODO - implement the emerald side of these, so for now they won't be here.
@@ -1130,9 +1130,9 @@ void layout_settings_pane(GtkWidget* vbox)
 void layout_engine_pane(GtkWidget* vbox)
 {
     GtkWidget* nvbox, * scwin;
-    nvbox = gtk_vbox_new(FALSE, 2);
+    nvbox = gtk_vbox_new(false, 2);
     scwin = gtk_scrolled_window_new(NULL, NULL);
-    gtk_box_pack_startC(vbox, scwin, TRUE, TRUE, 0);
+    gtk_box_pack_startC(vbox, scwin, true, true, 0);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scwin),
                                    GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
     gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scwin), nvbox);
@@ -1146,7 +1146,7 @@ void layout_lower_pane(GtkWidget* vbox)
     //layout_mid_pane(vbox);
 
     notebook = gtk_notebook_new();
-    gtk_box_pack_startC(vbox, notebook, TRUE, TRUE, 0);
+    gtk_box_pack_startC(vbox, notebook, true, true, 0);
 
     layout_engine_pane(build_notebook_page(_("Frame Engine"), notebook));
     layout_button_pane(build_notebook_page(_("Buttons"), notebook));
@@ -1163,10 +1163,10 @@ GtkWidget* build_lower_pane(GtkWidget* vbox)
     GtkWidget* my_vbox;
 
     expander = gtk_expander_new(_("Edit"));
-    gtk_box_pack_startC(vbox, expander, FALSE, FALSE, 0);
-    gtk_expander_set_expanded(GTK_EXPANDER(expander), FALSE);
+    gtk_box_pack_startC(vbox, expander, false, false, 0);
+    gtk_expander_set_expanded(GTK_EXPANDER(expander), false);
 
-    my_vbox = gtk_vbox_new(FALSE, 2);
+    my_vbox = gtk_vbox_new(false, 2);
     gtk_container_addC(expander, my_vbox);
 
     return my_vbox;
@@ -1186,7 +1186,7 @@ bool is_visible(GtkTreeModel* model, GtkTreeIter* iter, void* p)
     int i;
     const char* ch;
     if (strlen(ch = gtk_entry_get_text(e)) == 0) {
-        return TRUE;
+        return true;
     }
     ch = g_ascii_strup(ch, -1);
     for (i = 0; cols[i] >= 0; i++) {
@@ -1195,12 +1195,12 @@ bool is_visible(GtkTreeModel* model, GtkTreeIter* iter, void* p)
         at = g_ascii_strup(at, -1);
         if (strlen(at) && strstr(at, ch)) {
             g_free(at);
-            return TRUE;
+            return true;
         }
         g_free(at);
     }
     //0, 2, 3, 5
-    return FALSE;
+    return false;
 }
 void cb_clearbox(GtkWidget* w, void* p)
 {
@@ -1247,41 +1247,41 @@ GtkWidget* build_tree_view()
     GtkWidget* hbox;
     GtkWidget* clearbut;
 
-    vbox = gtk_vbox_new(FALSE, 2);
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
+    vbox = gtk_vbox_new(false, 2);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
 
-    gtk_box_pack_startC(hbox, gtk_label_new(_("Search:")), FALSE, FALSE, 0);
+    gtk_box_pack_startC(hbox, gtk_label_new(_("Search:")), false, false, 0);
 
     ThemeList = gtk_list_store_new(9, G_TYPE_STRING, G_TYPE_STRING,
                                    G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,
                                    G_TYPE_STRING, GDK_TYPE_PIXBUF, G_TYPE_STRING);
 
     searchbox = gtk_entry_new();
-    gtk_box_pack_startC(hbox, searchbox, TRUE, TRUE, 0);
+    gtk_box_pack_startC(hbox, searchbox, true, true, 0);
 
     clearbut = gtk_button_new_from_stock(GTK_STOCK_CLEAR);
     g_signal_connect(clearbut, "clicked", G_CALLBACK(cb_clearbox), searchbox);
-    gtk_box_pack_startC(hbox, clearbut, FALSE, FALSE, 0);
+    gtk_box_pack_startC(hbox, clearbut, false, false, 0);
 
-    gtk_box_pack_startC(hbox, gtk_vseparator_new(), FALSE, FALSE, 0);
+    gtk_box_pack_startC(hbox, gtk_vseparator_new(), false, false, 0);
 
     ReloadButton = gtk_button_new_from_stock(GTK_STOCK_REFRESH);
-    gtk_box_pack_startC(hbox, ReloadButton, FALSE, FALSE, 0);
+    gtk_box_pack_startC(hbox, ReloadButton, false, false, 0);
     g_signal_connect(ReloadButton, "clicked", G_CALLBACK(cb_refresh), NULL);
 
     DeleteButton = gtk_button_new_from_stock(GTK_STOCK_DELETE);
-    gtk_box_pack_startC(hbox, DeleteButton, FALSE, FALSE, 0);
-    gtk_widget_set_sensitive(DeleteButton, FALSE);
+    gtk_box_pack_startC(hbox, DeleteButton, false, false, 0);
+    gtk_widget_set_sensitive(DeleteButton, false);
     g_signal_connect(DeleteButton, "clicked", G_CALLBACK(cb_delete), NULL);
 
     ImportButton = gtk_button_new_with_label("Import...");
     gtk_button_set_image(GTK_BUTTON(ImportButton),
                          gtk_image_new_from_stock(GTK_STOCK_OPEN, GTK_ICON_SIZE_BUTTON));
-    gtk_box_pack_startC(hbox, ImportButton, FALSE, FALSE, 0);
+    gtk_box_pack_startC(hbox, ImportButton, false, false, 0);
     g_signal_connect(ImportButton, "clicked", G_CALLBACK(cb_import), NULL);
 
-    gtk_box_pack_startC(vbox, gtk_hseparator_new(), FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, gtk_hseparator_new(), false, false, 0);
 
     filt = GTK_TREE_MODEL_FILTER(
                gtk_tree_model_filter_new(GTK_TREE_MODEL(ThemeList), NULL));
@@ -1294,18 +1294,18 @@ GtkWidget* build_tree_view()
     g_signal_connect(searchbox, "changed", G_CALLBACK(cb_refilter), filt);
 
     ThemeSelector = gtk_tree_view_new_with_model(GTK_TREE_MODEL(sort));
-    gtk_tree_view_set_headers_clickable(GTK_TREE_VIEW(ThemeSelector), TRUE);
-    gtk_tree_view_set_reorderable(GTK_TREE_VIEW(ThemeSelector), TRUE);
+    gtk_tree_view_set_headers_clickable(GTK_TREE_VIEW(ThemeSelector), true);
+    gtk_tree_view_set_reorderable(GTK_TREE_VIEW(ThemeSelector), true);
 
     ThemeRenderer = gtk_cell_renderer_text_new();
     ThemeColumn = gtk_tree_view_column_new_with_attributes
                   ("Theme", ThemeRenderer, "markup", 8, NULL);
-    g_object_set(ThemeRenderer, "ellipsize", PANGO_ELLIPSIZE_END, "ellipsize-set", TRUE, NULL);
+    g_object_set(ThemeRenderer, "ellipsize", PANGO_ELLIPSIZE_END, "ellipsize-set", true, NULL);
     gtk_tree_view_column_set_sort_column_id(ThemeColumn, 8);
     gtk_tree_view_append_column(GTK_TREE_VIEW(ThemeSelector), ThemeColumn);
-    gtk_tree_view_column_set_resizable(ThemeColumn, TRUE);
-    gtk_tree_view_column_set_reorderable(ThemeColumn, TRUE);
-    gtk_tree_view_column_set_expand(ThemeColumn, TRUE);
+    gtk_tree_view_column_set_resizable(ThemeColumn, true);
+    gtk_tree_view_column_set_reorderable(ThemeColumn, true);
+    gtk_tree_view_column_set_expand(ThemeColumn, true);
 
     MetaRenderer = gtk_cell_renderer_pixbuf_new();
     g_object_set(MetaRenderer, "xalign", 0.0f, NULL);
@@ -1314,8 +1314,8 @@ GtkWidget* build_tree_view()
     //gtk_tree_view_column_set_sort_column_id(MetaColumn,7);
     gtk_tree_view_append_column(GTK_TREE_VIEW(ThemeSelector), MetaColumn);
     gtk_tree_view_column_set_max_width(MetaColumn, 400);
-    gtk_tree_view_column_set_resizable(MetaColumn, TRUE);
-    gtk_tree_view_column_set_reorderable(MetaColumn, TRUE);
+    gtk_tree_view_column_set_resizable(MetaColumn, true);
+    gtk_tree_view_column_set_reorderable(MetaColumn, true);
 
     /*MetaRenderer = gtk_cell_renderer_text_new();
     g_object_set(MetaRenderer,"wrap-mode",PANGO_WRAP_WORD,"wrap-width",30,NULL);
@@ -1323,24 +1323,24 @@ GtkWidget* build_tree_view()
         ("Version",MetaRenderer,"text",4,NULL);
     gtk_tree_view_column_set_sort_column_id(MetaColumn,4);
     gtk_tree_view_append_column(GTK_TREE_VIEW(ThemeSelector),MetaColumn);
-    gtk_tree_view_column_set_resizable(MetaColumn,FALSE);
-    gtk_tree_view_column_set_reorderable(MetaColumn,TRUE);*/
+    gtk_tree_view_column_set_resizable(MetaColumn,false);
+    gtk_tree_view_column_set_reorderable(MetaColumn,true);*/
 
     MetaRenderer = gtk_cell_renderer_text_new();
     MetaColumn = gtk_tree_view_column_new_with_attributes
                  ("Up-to-Date", MetaRenderer, "text", 1, NULL);
     gtk_tree_view_column_set_sort_column_id(MetaColumn, 1);
     gtk_tree_view_append_column(GTK_TREE_VIEW(ThemeSelector), MetaColumn);
-    gtk_tree_view_column_set_resizable(MetaColumn, TRUE);
-    gtk_tree_view_column_set_reorderable(MetaColumn, TRUE);
+    gtk_tree_view_column_set_resizable(MetaColumn, true);
+    gtk_tree_view_column_set_reorderable(MetaColumn, true);
 
     MetaRenderer = gtk_cell_renderer_text_new();
     MetaColumn = gtk_tree_view_column_new_with_attributes
                  ("Engine", MetaRenderer, "text", 6, NULL);
     gtk_tree_view_column_set_sort_column_id(MetaColumn, 6);
     gtk_tree_view_append_column(GTK_TREE_VIEW(ThemeSelector), MetaColumn);
-    gtk_tree_view_column_set_resizable(MetaColumn, TRUE);
-    gtk_tree_view_column_set_reorderable(MetaColumn, TRUE);
+    gtk_tree_view_column_set_resizable(MetaColumn, true);
+    gtk_tree_view_column_set_reorderable(MetaColumn, true);
 
     /*MetaRenderer = gtk_cell_renderer_text_new();
     g_object_set(MetaRenderer,"wrap-mode",PANGO_WRAP_WORD,"wrap-width",80,NULL);
@@ -1348,8 +1348,8 @@ GtkWidget* build_tree_view()
         ("Suggested Widget Theme",MetaRenderer,"text",5,NULL);
     gtk_tree_view_column_set_sort_column_id(MetaColumn,5);
     gtk_tree_view_append_column(GTK_TREE_VIEW(ThemeSelector),MetaColumn);
-    gtk_tree_view_column_set_resizable(MetaColumn,TRUE);
-    gtk_tree_view_column_set_reorderable(MetaColumn,TRUE);
+    gtk_tree_view_column_set_resizable(MetaColumn,true);
+    gtk_tree_view_column_set_reorderable(MetaColumn,true);
 
     MetaRenderer = gtk_cell_renderer_text_new();
     g_object_set(MetaRenderer,"wrap-mode",PANGO_WRAP_WORD,"wrap-width",80,NULL);
@@ -1357,8 +1357,8 @@ GtkWidget* build_tree_view()
         ("Creator",MetaRenderer,"text",2,NULL);
     gtk_tree_view_column_set_sort_column_id(MetaColumn,2);
     gtk_tree_view_append_column(GTK_TREE_VIEW(ThemeSelector),MetaColumn);
-    gtk_tree_view_column_set_resizable(MetaColumn,TRUE);
-    gtk_tree_view_column_set_reorderable(MetaColumn,TRUE);*/
+    gtk_tree_view_column_set_resizable(MetaColumn,true);
+    gtk_tree_view_column_set_reorderable(MetaColumn,true);*/
 
     /*MetaRenderer = gtk_cell_renderer_text_new();
     g_object_set(MetaRenderer,"wrap-mode",PANGO_WRAP_WORD,"wrap-width",100,NULL);
@@ -1366,7 +1366,7 @@ GtkWidget* build_tree_view()
         ("Description",MetaRenderer,"text",3,NULL);
     gtk_tree_view_column_set_sort_column_id(MetaColumn,3);
     gtk_tree_view_append_column(GTK_TREE_VIEW(ThemeSelector),MetaColumn);
-    gtk_tree_view_column_set_resizable(MetaColumn,TRUE);*/
+    gtk_tree_view_column_set_resizable(MetaColumn,true);*/
 
     ThemeSelect = gtk_tree_view_get_selection(
                       GTK_TREE_VIEW(ThemeSelector));
@@ -1380,7 +1380,7 @@ GtkWidget* build_tree_view()
     gtk_container_addC(scrollwin, ThemeSelector);
     //gtk_widget_set_size_request(scrollwin,500,200);
 
-    gtk_box_pack_startC(vbox, scrollwin, TRUE, TRUE, 0);
+    gtk_box_pack_startC(vbox, scrollwin, true, true, 0);
     return vbox;
 }
 void import_cache(GtkWidget* progbar)
@@ -1416,9 +1416,9 @@ bool watcher_func(void* p)
         gtk_widget_destroy(f->dialog);
         g_free(themecache);
         free(p);
-        return FALSE;
+        return false;
     }
-    return TRUE;
+    return true;
 }
 void fetch_svn()
 {
@@ -1433,9 +1433,9 @@ void fetch_svn()
     l = gtk_label_new(_("Fetching themes... \n"
                         "This may take time depending on \n"
                         "internet connection speed."));
-    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(w)->vbox), l, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(w)->vbox), l, false, false, 0);
     l = gtk_progress_bar_new();
-    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(w)->action_area), l, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(w)->action_area), l, true, true, 0);
     gtk_widget_show_all(w);
     g_spawn_async(NULL, themefetcher, NULL,
                   G_SPAWN_SEARCH_PATH | G_SPAWN_DO_NOT_REAP_CHILD,
@@ -1466,13 +1466,13 @@ void layout_upper_pane(GtkWidget* vbox)
 {
     //GtkWidget * hbox;
 
-    //hbox = gtk_hbox_new(FALSE,2);
-    //gtk_box_pack_startC(vbox,hbox,TRUE,TRUE,0);
+    //hbox = gtk_hbox_new(false,2);
+    //gtk_box_pack_startC(vbox,hbox,true,true,0);
 
-    gtk_box_pack_startC(vbox, build_tree_view(), TRUE, TRUE, 0);
+    gtk_box_pack_startC(vbox, build_tree_view(), true, true, 0);
 
-    //table_new(1,TRUE,FALSE);
-    //gtk_box_pack_startC(hbox,get_current_table(),FALSE,FALSE,0);
+    //table_new(1,true,false);
+    //gtk_box_pack_startC(hbox,get_current_table(),false,false,0);
 
 
 }
@@ -1484,49 +1484,49 @@ void layout_repo_pane(GtkWidget* vbox)
                             _("Here are the repositories that you can fetch Emerald Themes from. \n"
                               "Fetching themes would fetch and import themes from SVN repositories \n"
                               "You need Subversion package installed to use this feature."
-                             )), FALSE, FALSE, 0);
-    gtk_box_pack_startC(vbox, gtk_hseparator_new(), FALSE, FALSE, 0);
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, TRUE, TRUE, 0);
+                             )), false, false, 0);
+    gtk_box_pack_startC(vbox, gtk_hseparator_new(), false, false, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, true, true, 0);
 
 
-    table_new(2, TRUE, FALSE);
-    gtk_box_pack_startC(hbox, get_current_table(), FALSE, FALSE, 0);
+    table_new(2, true, false);
+    gtk_box_pack_startC(hbox, get_current_table(), false, false, 0);
 
     FetchButton = gtk_button_new_with_label("Fetch GPL'd Themes");
     gtk_button_set_image(GTK_BUTTON(FetchButton),
                          gtk_image_new_from_stock(GTK_STOCK_CONNECT, GTK_ICON_SIZE_BUTTON));
-    table_append(FetchButton, FALSE);
+    table_append(FetchButton, false);
     g_signal_connect(FetchButton, "clicked", G_CALLBACK(fetch_gpl_svn), NULL);
 
     rlabel = gtk_label_new(
                  _("This repository contains GPL'd themes that can be used under \n"
                    "the terms of GNU GPL licence v2.0 or later \n"));
-    table_append(rlabel, FALSE);
+    table_append(rlabel, false);
 
     FetchButton2 = gtk_button_new_with_label("Fetch non GPL'd Themes");
     gtk_button_set_image(GTK_BUTTON(FetchButton2),
                          gtk_image_new_from_stock(GTK_STOCK_CONNECT, GTK_ICON_SIZE_BUTTON));
-    table_append(FetchButton2, FALSE);
+    table_append(FetchButton2, false);
     g_signal_connect(FetchButton2, "clicked", G_CALLBACK(fetch_ngpl_svn), NULL);
 
     rlabel = gtk_label_new(
                  _("This repository contains non-GPL'd themes. They might infringe \n"
                    "copyrights and patent laws in some countries."));
-    table_append(rlabel, FALSE);
+    table_append(rlabel, false);
 
-    gtk_box_pack_startC(vbox, gtk_hseparator_new(), FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, gtk_hseparator_new(), false, false, 0);
 
     gtk_box_pack_startC(vbox, gtk_label_new(
                             _("To activate Non-GPL repository please run the following in shell and accept the server certificate permanently: \n"
                               "svn ls https://svn.generation.no/emerald-themes."
-                             )), FALSE, FALSE, 0);
+                             )), false, false, 0);
 }
 void layout_themes_pane(GtkWidget* vbox)
 {
     GtkWidget* notebook;
     notebook = gtk_notebook_new();
-    gtk_box_pack_startC(vbox, notebook, TRUE, TRUE, 0);
+    gtk_box_pack_startC(vbox, notebook, true, true, 0);
     layout_upper_pane(build_notebook_page(_("Themes"), notebook));
     layout_lower_pane(build_notebook_page(_("Edit Themes"), notebook));
 //  layout_repo_pane(build_notebook_page(_("Repositories"),notebook));
@@ -1572,26 +1572,26 @@ void layout_main_window()
     GtkWidget* vbox;
     GtkWidget* hbox;
 
-    vbox = gtk_vbox_new(FALSE, 2);
+    vbox = gtk_vbox_new(false, 2);
 
     notebook = gtk_notebook_new();
-    gtk_box_pack_startC(vbox, notebook, TRUE, TRUE, 0);
+    gtk_box_pack_startC(vbox, notebook, true, true, 0);
 
     layout_themes_pane(build_notebook_page(_("Themes Settings"), notebook));
     layout_settings_pane(build_notebook_page(_("Emerald Settings"), notebook));
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
     QuitButton = gtk_button_new_from_stock(GTK_STOCK_QUIT);
-    gtk_box_pack_endC(hbox, QuitButton, FALSE, FALSE, 0);
+    gtk_box_pack_endC(hbox, QuitButton, false, false, 0);
     g_signal_connect(QuitButton, "clicked", G_CALLBACK(cb_quit), NULL);
 
     gtk_container_addC(GTK_CONTAINER(mainWindow), vbox);
 }
 int main(int argc, char* argv[])
 {
-    set_changed(FALSE);
-    set_apply(FALSE);
+    set_changed(false);
+    set_apply(false);
     char* input_file = NULL;
     setlocale(LC_ALL, "");
     bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
@@ -1642,7 +1642,7 @@ int main(int argc, char* argv[])
 
     gtk_window_set_title(GTK_WINDOW(mainWindow), "Emerald Themer " VERSION);
 
-    gtk_window_set_resizable(GTK_WINDOW(mainWindow), TRUE);
+    gtk_window_set_resizable(GTK_WINDOW(mainWindow), true);
     gtk_window_set_default_size(GTK_WINDOW(mainWindow), 700, 500);
 
     g_signal_connect(G_OBJECT(mainWindow), "destroy", G_CALLBACK(cb_main_destroy), NULL);
@@ -1657,8 +1657,8 @@ int main(int argc, char* argv[])
     refresh_theme_list(NULL);
     copy_from_defaults_if_needed();
     init_settings();
-    set_changed(FALSE);
-    set_apply(TRUE);
+    set_changed(false);
+    set_apply(true);
 
     gtk_main();
     return 0;

@@ -73,7 +73,7 @@ void get_meta_info(EngineMetaInfo* emi)
     emi->version = g_strdup("0.2");
     emi->description = g_strdup(_("Multiple gradients with somewhat glassy features too"));
     emi->last_compat = g_strdup("0.0"); // old themes marked still compatible for now
-    emi->icon = gdk_pixbuf_new_from_inline(-1, my_pixbuf, TRUE, NULL);
+    emi->icon = gdk_pixbuf_new_from_inline(-1, my_pixbuf, true, NULL);
 }
 
 void
@@ -284,7 +284,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                              x2 - x1 - 1,
                              top_title_height + 1,
                              pfs->curve_offset,
-                             TRUE,
+                             true,
                              &pfs->title_left,
                              &pfs->title_middle,
                              &pfs->title_right);
@@ -295,7 +295,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                              x2 - x1 - 1,
                              bottom_title_height + 2,
                              pfs->curve_offset,
-                             FALSE,
+                             false,
                              &pfs->title_left_lower,
                              &pfs->title_middle_lower,
                              &pfs->title_right_lower);
@@ -340,7 +340,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                              x2 - x1 - 1,
                              ws->win_extents.bottom,
                              0,
-                             TRUE,
+                             true,
                              &pfs->title_left_lower,
                              &pfs->title_middle_lower,
                              &pfs->title_right_lower);
@@ -500,10 +500,10 @@ void init_engine(window_settings* ws)
     pws = malloc(sizeof(private_ws));
     ws->engine_ws = pws;
     bzero(pws, sizeof(private_ws));
-    pws->round_top_left = TRUE;
-    pws->round_top_right = TRUE;
-    pws->round_bottom_left = TRUE;
-    pws->round_bottom_right = TRUE;
+    pws->round_top_left = true;
+    pws->round_top_right = true;
+    pws->round_bottom_left = true;
+    pws->round_bottom_right = true;
     pws->corner_radius = 5.0;
 
     pfs = malloc(sizeof(private_fs));
@@ -512,7 +512,7 @@ void init_engine(window_settings* ws)
     pfs->title_notch_position = 0.5;
     pfs->curve_offset = 0.0;
     pfs->color_contrast = 0.9;
-    pfs->use_glow = FALSE;
+    pfs->use_glow = false;
     pfs->alpha_contrast = 0.9;
     pfs->glow_radius = 7.0;
     ACOLOR(title_left, 0.8, 0.8, 0.8, 0.8);
@@ -537,7 +537,7 @@ void init_engine(window_settings* ws)
     pfs->curve_offset = 0.0;
     pfs->color_contrast = 0.9;
     pfs->alpha_contrast = 0.9;
-    pfs->use_glow = FALSE;
+    pfs->use_glow = false;
     pfs->glow_radius = 7.0;
     ACOLOR(title_left, 0.8, 0.8, 0.8, 0.6);
     CCOLOR(title_left_lower, title_left);
@@ -568,28 +568,28 @@ void layout_corners_frame(GtkWidget* vbox)
     GtkWidget* junk;
 
     junk = gtk_check_button_new_with_label(_("Round Top Left Corner"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "round_top_left");
 
     junk = gtk_check_button_new_with_label(_("Round Top Right Corner"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "round_top_right");
 
     junk = gtk_check_button_new_with_label(_("Round Bottom Left Corner"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "round_bottom_left");
 
     junk = gtk_check_button_new_with_label(_("Round Bottom Right Corner"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
     SettingItem::register_setting(junk, ST_BOOL, SECT, "round_bottom_right");
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
 
-    gtk_box_pack_startC(hbox, gtk_label_new(_("Rounding Radius")), FALSE, FALSE, 0);
+    gtk_box_pack_startC(hbox, gtk_label_new(_("Rounding Radius")), false, false, 0);
 
     junk = scaler_new(0, 20, 0.5);
-    gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
+    gtk_box_pack_startC(hbox, junk, true, true, 0);
     SettingItem::register_setting(junk, ST_FLOAT, SECT, "radius");
 
 }
@@ -599,16 +599,16 @@ void my_engine_settings(GtkWidget* hbox,  bool active)
     GtkWidget* junk;
     GtkWidget* scroller;
 
-    vbox = gtk_vbox_new(FALSE, 2);
-    gtk_box_pack_startC(hbox, vbox, TRUE, TRUE, 0);
-    gtk_box_pack_startC(vbox, gtk_label_new(active ? "Active Window" : "Inactive Window"), FALSE, FALSE, 0);
-    gtk_box_pack_startC(vbox, gtk_hseparator_new(), FALSE, FALSE, 0);
+    vbox = gtk_vbox_new(false, 2);
+    gtk_box_pack_startC(hbox, vbox, true, true, 0);
+    gtk_box_pack_startC(vbox, gtk_label_new(active ? "Active Window" : "Inactive Window"), false, false, 0);
+    gtk_box_pack_startC(vbox, gtk_hseparator_new(), false, false, 0);
     scroller = gtk_scrolled_window_new(NULL, NULL);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller),
                                    GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-    gtk_box_pack_startC(vbox, scroller, TRUE, TRUE, 0);
+    gtk_box_pack_startC(vbox, scroller, true, true, 0);
 
-    table_new(3, FALSE, FALSE);
+    table_new(3, false, false);
 
     gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scroller), GTK_WIDGET(get_current_table()));
 
@@ -620,11 +620,11 @@ void my_engine_settings(GtkWidget* hbox,  bool active)
 
     table_append_separator();
     junk = gtk_label_new(_("Contrast"));
-    table_append(junk,  FALSE);
+    table_append(junk,  false);
     junk = gtk_label_new(_("(Color)"));
-    table_append(junk,  FALSE);
+    table_append(junk,  false);
     junk = scaler_new(0, 1, 0.01);
-    table_append(junk,  FALSE);
+    table_append(junk,  false);
     if (active) {
         SettingItem::register_setting(junk, ST_FLOAT, SECT, "active_color_contrast");
     } else {
@@ -632,11 +632,11 @@ void my_engine_settings(GtkWidget* hbox,  bool active)
     }
 
     junk = gtk_label_new(_("Contrast"));
-    table_append(junk, FALSE);
+    table_append(junk, false);
     junk = gtk_label_new(_("(Alpha)"));
-    table_append(junk, FALSE);
+    table_append(junk, false);
     junk = scaler_new(0, 1, 0.01);
-    table_append(junk, FALSE);
+    table_append(junk, false);
     if (active) {
         SettingItem::register_setting(junk, ST_FLOAT, SECT, "active_alpha_contrast");
     } else {
@@ -644,12 +644,12 @@ void my_engine_settings(GtkWidget* hbox,  bool active)
     }
 
     junk = gtk_label_new(_("Notch"));
-    table_append(junk, FALSE);
+    table_append(junk, false);
     junk = gtk_label_new(_("Position"));
-    table_append(junk, FALSE);
+    table_append(junk, false);
     junk = scaler_new(0, 1, 0.01);
     gtk_range_set_value(GTK_RANGE(junk), 0.5);
-    table_append(junk, FALSE);
+    table_append(junk, false);
     if (active) {
         SettingItem::register_setting(junk, ST_FLOAT, SECT, "active_title_notch_position");
     } else {
@@ -657,12 +657,12 @@ void my_engine_settings(GtkWidget* hbox,  bool active)
     }
 
     junk = gtk_label_new(_("Curve"));
-    table_append(junk, FALSE);
+    table_append(junk, false);
     junk = gtk_label_new(_("Offset"));
-    table_append(junk, FALSE);
+    table_append(junk, false);
     junk = scaler_new(-100, 100, 0.1);
     gtk_range_set_value(GTK_RANGE(junk), 0);
-    table_append(junk, FALSE);
+    table_append(junk, false);
     if (active) {
         SettingItem::register_setting(junk, ST_FLOAT, SECT, "active_curve_offset");
     } else {
@@ -672,8 +672,8 @@ void my_engine_settings(GtkWidget* hbox,  bool active)
     table_append_separator();
 
     junk = gtk_check_button_new_with_label(_("Use Glow"));
-    gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(junk), FALSE);
+    gtk_box_pack_startC(vbox, junk, false, false, 0);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(junk), false);
     if (active) {
         SettingItem::register_setting(junk, ST_BOOL, SECT, "active_use_glow");
     } else {
@@ -682,12 +682,12 @@ void my_engine_settings(GtkWidget* hbox,  bool active)
 
     add_color_alpha_value(_("Title Glow"), "glow_inner", SECT, active);
     junk = gtk_label_new("Glow");
-    table_append(junk, FALSE);
+    table_append(junk, false);
     junk = gtk_label_new(_("Radius"));
-    table_append(junk, FALSE);
+    table_append(junk, false);
     junk = scaler_new(0, 25, 0.1);
     gtk_range_set_value(GTK_RANGE(junk), 7.0);
-    table_append(junk, FALSE);
+    table_append(junk, false);
     if (active) {
         SettingItem::register_setting(junk, ST_FLOAT, SECT, "active_glow_radius");
     } else {
@@ -712,11 +712,11 @@ void layout_engine_colors(GtkWidget* vbox)
 {
     GtkWidget* hbox;
 
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, TRUE, TRUE, 0);
-    my_engine_settings(hbox, TRUE);
-    gtk_box_pack_startC(hbox, gtk_vseparator_new(), FALSE, FALSE, 0);
-    my_engine_settings(hbox, FALSE);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, true, true, 0);
+    my_engine_settings(hbox, true);
+    gtk_box_pack_startC(hbox, gtk_vseparator_new(), false, false, 0);
+    my_engine_settings(hbox, false);
 }
 
 extern "C"
@@ -725,7 +725,7 @@ void layout_engine_settings(GtkWidget* vbox)
     GtkWidget* note;
 
     note = gtk_notebook_new();
-    gtk_box_pack_startC(vbox, note, TRUE, TRUE, 0);
+    gtk_box_pack_startC(vbox, note, true, true, 0);
     layout_engine_colors(build_notebook_page(_("Colors"), note));
     layout_corners_frame(build_notebook_page(_("Frame"), note));
 }

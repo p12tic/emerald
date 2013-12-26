@@ -29,8 +29,8 @@ GtkListStore* EngineModel;
 GtkWidget* EngineContainer;
 //GtkWidget * PreviewImage[BX_COUNT];
 //GtkWidget * ButtonImage[BX_COUNT];
-bool apply = FALSE;
-bool changed = FALSE;
+bool apply = false;
+bool changed = false;
 GKeyFile* global_theme_file;
 GKeyFile* global_settings_file;
 #ifdef USE_DBUS
@@ -81,30 +81,30 @@ void add_color_alpha_value(const char* caption, const char* basekey,
                                basekey);
 
     w = gtk_label_new(caption);
-    table_append(w, FALSE);
+    table_append(w, false);
 
     w = gtk_color_button_new();
-    table_append(w, FALSE);
+    table_append(w, false);
     SettingItem::register_setting(w, ST_COLOR, sect, colorkey);
 
     w = scaler_new(0.0, 1.0, 0.01);
-    table_append(w, TRUE);
+    table_append(w, true);
     SettingItem::register_setting(w, ST_FLOAT, sect, alphakey);
     //we don't g_free because they are registered with SettingItem::register_setting
 }
 void make_labels(const char* header)
 {
-    table_append(gtk_label_new(header), FALSE);
-    table_append(gtk_label_new("Color"), FALSE);
-    table_append(gtk_label_new("Opacity"), FALSE);
+    table_append(gtk_label_new(header), false);
+    table_append(gtk_label_new("Color"), false);
+    table_append(gtk_label_new("Opacity"), false);
 }
 GtkWidget* build_frame(GtkWidget* vbox, const char* title, bool is_hbox)
 {
     GtkWidget* frame;
     GtkWidget* box;
     frame = gtk_frame_new(title);
-    gtk_box_pack_startC(vbox, frame, TRUE, TRUE, 0);
-    box = is_hbox ? gtk_hbox_new(FALSE, 2) : gtk_vbox_new(FALSE, 2);
+    gtk_box_pack_startC(vbox, frame, true, true, 0);
+    box = is_hbox ? gtk_hbox_new(false, 2) : gtk_vbox_new(false, 2);
     gtk_container_set_border_widthC(box, 8);
     gtk_container_addC(frame, box);
     return box;
@@ -248,7 +248,7 @@ void cb_apply_setting(GtkWidget* w, void* p)
     if (apply) {
         apply_settings();
     } else {
-        changed = TRUE;
+        changed = true;
     }
 }
 #ifdef USE_DBUS
@@ -289,7 +289,7 @@ void search_engine(EngineData* d, void* p)
     if (!fe->found) {
         if (!strcmp(d->canname, fe->canname)) {
             fe->d = d;
-            fe->found = TRUE;
+            fe->found = true;
         } else {
             fe->i++;
         }
@@ -299,7 +299,7 @@ bool get_engine_meta_info(const char* engine, EngineMetaInfo* inf)
 {
     FindEngine fe;
     fe.canname = engine;
-    fe.found = FALSE;
+    fe.found = false;
     fe.i = 0;
     fe.d = NULL;
     g_slist_foreach(EngineList, (GFunc) search_engine, &fe);
@@ -369,13 +369,13 @@ void layout_engine_list(GtkWidget* vbox)
 {
     GtkWidget* hbox;
     EngineCombo = gtk_combo_box_new();
-    hbox = gtk_hbox_new(FALSE, 2);
-    gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
-    gtk_box_pack_startC(hbox, gtk_label_new(_("Select\nEngine")), FALSE, FALSE, 0);
-    gtk_box_pack_startC(hbox, EngineCombo, FALSE, FALSE, 0);
-    gtk_box_pack_startC(vbox, gtk_hseparator_new(), FALSE, FALSE, 0);
+    hbox = gtk_hbox_new(false, 2);
+    gtk_box_pack_startC(vbox, hbox, false, false, 0);
+    gtk_box_pack_startC(hbox, gtk_label_new(_("Select\nEngine")), false, false, 0);
+    gtk_box_pack_startC(hbox, EngineCombo, false, false, 0);
+    gtk_box_pack_startC(vbox, gtk_hseparator_new(), false, false, 0);
     EngineContainer = gtk_alignment_new(0, 0, 1, 1); // really only needed for the bin-ness
-    gtk_box_pack_startC(vbox, EngineContainer, TRUE, TRUE, 0);
+    gtk_box_pack_startC(vbox, EngineContainer, true, true, 0);
 }
 static char* canonize_name(char* dlname)
 {
@@ -394,14 +394,14 @@ static void engine_comp(EngineData* d, void* p)
 {
     FindEngine* e = p;
     if (!strcmp(e->canname, d->canname)) {
-        e->found = TRUE;
+        e->found = true;
     }
 }
 static bool engine_is_unique(char* canname)
 {
     FindEngine e;
     e.canname = canname;
-    e.found = FALSE;
+    e.found = false;
     g_slist_foreach(EngineList, (GFunc)engine_comp, &e);
     return !e.found;
 }
@@ -450,7 +450,7 @@ static void append_engine(char* dlname)
 
             d->dlname = dlname;
             d->canname = can;
-            d->vbox = gtk_vbox_new(FALSE, 2);
+            d->vbox = gtk_vbox_new(false, 2);
             g_object_ref(d->vbox);
             lay(d->vbox);
             EngineList = g_slist_append(EngineList, d);
@@ -495,10 +495,10 @@ void init_engine_list()
     char* local_engine_dir = g_strjoin("/", g_get_home_dir(), ".emerald/engines", NULL);
     gtk_combo_box_set_model(GTK_COMBO_BOX(EngineCombo), GTK_TREE_MODEL(EngineModel));
     r = gtk_cell_renderer_pixbuf_new();
-    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(EngineCombo), r, FALSE);
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(EngineCombo), r, false);
     gtk_cell_layout_add_attribute(GTK_CELL_LAYOUT(EngineCombo), r, "pixbuf", ENGINE_COL_ICON);
     r = gtk_cell_renderer_text_new();
-    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(EngineCombo), r, TRUE);
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(EngineCombo), r, true);
     gtk_cell_layout_add_attribute(GTK_CELL_LAYOUT(EngineCombo), r, "markup", ENGINE_COL_MARKUP);
     engine_scan_dir(local_engine_dir);
     g_free(local_engine_dir);
@@ -509,7 +509,7 @@ void init_engine_list()
 GtkWidget* build_notebook_page(char* title, GtkWidget* notebook)
 {
     GtkWidget* vbox;
-    vbox = gtk_vbox_new(FALSE, 2);
+    vbox = gtk_vbox_new(false, 2);
     gtk_container_set_border_widthC(vbox, 8);
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook), vbox,
                              gtk_label_new(title));

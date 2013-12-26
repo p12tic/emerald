@@ -34,7 +34,7 @@ bool load_engine(char* engine_name, window_settings* ws)
     void* newengine;
     char* path;
     char* engine_ldname;
-    ws->stretch_sides = TRUE;
+    ws->stretch_sides = true;
 
     engine_ldname = g_strdup_printf("lib%s.so", engine_name);
     if (engine) {
@@ -74,7 +74,7 @@ bool load_engine(char* engine_name, window_settings* ws)
         e_init(ws);
     }
     g_free(engine_ldname);
-    return engine ? TRUE : FALSE;
+    return engine ? true : false;
 }
 void load_engine_settings(GKeyFile* f, window_settings* ws)
 {

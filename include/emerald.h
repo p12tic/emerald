@@ -169,7 +169,7 @@ typedef struct _window_settings {
     frame_settings* fs_act;
     frame_settings* fs_inact;
     int min_titlebar_height;
-    bool use_pixmap_buttons;// = FALSE;
+    bool use_pixmap_buttons;// = false;
     double  corner_radius;//    =   5.0;
     PangoAlignment title_text_align;// = PANGO_ALIGN_CENTER;
     GdkPixbuf* ButtonPix[S_COUNT* B_COUNT];

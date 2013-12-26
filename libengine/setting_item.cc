@@ -191,14 +191,14 @@ void SettingItem::set_engine_combo(char* val)
 {
     FindEngine fe;
     fe.canname = val;
-    fe.found = FALSE;
+    fe.found = false;
     fe.i = 0;
     g_slist_foreach(EngineList, (GFunc) search_engine, &fe);
     if (fe.found) {
         gtk_combo_box_set_active(GTK_COMBO_BOX(widget_), fe.i);
     } else {
         fe.canname = "legacy";
-        fe.found = FALSE;
+        fe.found = false;
         fe.i = 0;
         g_slist_foreach(EngineList, (GFunc) search_engine, &fe);
         if (fe.found) {
