@@ -446,7 +446,7 @@ void init_engine(window_settings* ws)
     private_ws* pws;
 
     // private window settings
-    pws = malloc(sizeof(private_ws));
+    pws = new private_ws;
     ws->engine_ws = pws;
     bzero(pws, sizeof(private_ws));
     pws->round_top_left = true;
@@ -457,7 +457,7 @@ void init_engine(window_settings* ws)
     pws->glow_height = 10;
 
     // private frame settings for active frames
-    pfs = malloc(sizeof(private_fs));
+    pfs = new private_fs;
     ws->fs_act->engine_fs = pfs;
     bzero(pfs, sizeof(private_fs));
     ACOLOR(base, 0.8, 0.8, 0.8, 0.5);
@@ -475,7 +475,7 @@ void init_engine(window_settings* ws)
     ACOLOR(contents_halo, 0.8, 0.8, 0.8, 0.8);
 
     // private frame settings for inactive frames
-    pfs = malloc(sizeof(private_fs));
+    pfs = new private_fs;
     bzero(pfs, sizeof(private_fs));
     ws->fs_inact->engine_fs = pfs;
     ACOLOR(base, 0.8, 0.8, 0.8, 0.3);
@@ -496,8 +496,8 @@ void init_engine(window_settings* ws)
 extern "C"
 void fini_engine(window_settings* ws)
 {
-    free(ws->fs_act->engine_fs);
-    free(ws->fs_inact->engine_fs);
+    delete ((private_fs*)ws->fs_act->engine_fs);
+    delete ((private_fs*)ws->fs_inact->engine_fs);
 }
 
 void layout_corners_frame(GtkWidget* vbox)
