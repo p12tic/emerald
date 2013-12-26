@@ -37,12 +37,12 @@ typedef struct _pixmaps {
     cairo_surface_t* titlebar_surface;
     cairo_surface_t* titlebar_surface_large;
     cairo_surface_t* titlebar_surface_buttons;
-    gboolean    buttonpart_enabled;
-    gboolean    buttonpart_repeat_enabled;
-    gboolean    titlebarpart_repeat_enabled;
-    gboolean    titlebarpart_enabled;
-    gboolean    titlebar_enabled;
-    gboolean    titlebar_repeat_enabled;
+    bool    buttonpart_enabled;
+    bool    buttonpart_repeat_enabled;
+    bool    titlebarpart_repeat_enabled;
+    bool    titlebarpart_enabled;
+    bool    titlebar_enabled;
+    bool    titlebar_repeat_enabled;
 
 } pixmaps;
 
@@ -54,9 +54,9 @@ typedef struct _private_fs {
     alpha_color window_halo;
     alpha_color window_frame_halo;
     alpha_color window_highlight;
-    gboolean    gradient_repeat_enabled;
-    gboolean    gradient_repeat_direction_vertical;
-    gboolean    gradient_repeat_direction_diagonal;
+    bool    gradient_repeat_enabled;
+    bool    gradient_repeat_direction_vertical;
+    bool    gradient_repeat_direction_diagonal;
     alpha_color window_shadow;
     alpha_color separator_line;
     alpha_color contents_highlight;
@@ -66,20 +66,20 @@ typedef struct _private_fs {
 } private_fs;
 
 typedef struct _private_ws {
-    gboolean done_indent;
-    gboolean round_top_left;
-    gboolean enable_maximised_colors;
-    gboolean round_top_right;
-    gboolean round_bottom_left;
-    gboolean round_bottom_right;
-    gboolean show_border_minimised;
-    gboolean round_tri;
-    gboolean show_border_maximised;
-    gboolean enable_bar_dip_button_part;
-    gboolean enable_title_bar_dip;
-    gboolean enable_left_bar_dip;
-    gboolean enable_left_bar_dip_lower_part;
-    gboolean gradient_repeat_disabled_maximised;
+    bool done_indent;
+    bool round_top_left;
+    bool enable_maximised_colors;
+    bool round_top_right;
+    bool round_bottom_left;
+    bool round_bottom_right;
+    bool show_border_minimised;
+    bool round_tri;
+    bool show_border_maximised;
+    bool enable_bar_dip_button_part;
+    bool enable_title_bar_dip;
+    bool enable_left_bar_dip;
+    bool enable_left_bar_dip_lower_part;
+    bool gradient_repeat_disabled_maximised;
     int     left_bar_dip_offset;
     double      outer_maximised_alpha;
     decor_color_t outer_maximised_color;
@@ -122,12 +122,12 @@ rounded_rectangle_independent(cairo_t* cr,
                               double  radius_tri,
                               int pane_1_width,
                               int dip_gap,
-                              gboolean enable_dip,
-                              gboolean enable_button_part,
-                              gboolean left_bar_dip,
+                              bool enable_dip,
+                              bool enable_button_part,
+                              bool left_bar_dip,
                               int bottom_border_width,
                               int left_bar_dip_radius,
-                              gboolean enable_left_bar_dip_lower_part,
+                              bool enable_left_bar_dip_lower_part,
                               double  left_bar_dip_offset
                              )
 {
@@ -329,9 +329,9 @@ rounded_square(cairo_t* cr,
                double  radius_top_right_tri,
                double  radius_top_left_tri,
                int always_allow,
-               gboolean left_bar_dip,
+               bool left_bar_dip,
                int left_bar_dip_radius,
-               gboolean enable_left_bar_dip_lower_part,
+               bool enable_left_bar_dip_lower_part,
                double left_bar_dip_offset
               )
 {
@@ -543,17 +543,17 @@ fill_rounded_square(cairo_t*       cr,
                     double  radius_top_right_tri,
                     double  radius_top_left_tri,
                     int always_allow,
-                    gboolean left_bar_dip,
+                    bool left_bar_dip,
                     int left_bar_dip_radius,
-                    gboolean enable_left_bar_dip_lower_part,
+                    bool enable_left_bar_dip_lower_part,
                     double left_bar_dip_offset,
                     int pattern_size,
                     int gradient_repeat_direction,
                     double common_gradient_starting_point_x,
                     double common_gradient_starting_point_y,
                     cairo_surface_t* surface,
-                    gboolean enable_pixmaps,
-                    gboolean repeat_pixmap
+                    bool enable_pixmaps,
+                    bool repeat_pixmap
                    )
 {
     cairo_pattern_t* pattern;
@@ -566,7 +566,7 @@ fill_rounded_square(cairo_t*       cr,
 
     rounded_square(cr, x, y, w, h, corner, ws, radius_top_left, radius_top_right, radius_bottom_left, radius_bottom_right, radius_top_right_tri, radius_top_left_tri, always_allow, left_bar_dip, left_bar_dip_radius, enable_left_bar_dip_lower_part, left_bar_dip_offset);
 
-    gboolean pattern_vert = TRUE;
+    bool pattern_vert = TRUE;
     if (pattern_size == 0) {
         pattern_size = h;
         pattern_vert = FALSE;
@@ -658,10 +658,10 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
 
 
 
-    gdouble pleft;
-    gdouble ptop;
-    gdouble pwidth;
-    gdouble pheight;
+    double pleft;
+    double ptop;
+    double pwidth;
+    double pheight;
     top = ws->win_extents.top + ws->titlebar_height;
 
     x1 = ws->left_space - ws->win_extents.left;
@@ -681,8 +681,8 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
     float window_gap = 0;
     //x offset due to left dip bar
     int left_bar_dip_offset = 0;
-    gboolean maximised;
-    gboolean enable_left_bar_dip = FALSE;
+    bool maximised;
+    bool enable_left_bar_dip = FALSE;
 
     cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
 
@@ -763,13 +763,13 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
     double x_end = x2 + window_gap;
     double pane_1_width = pws->title_bar_dip_title_width;
     double title_bar_dip_dip_width = width - (pws->title_bar_dip_title_width + pws->title_bar_dip_button_width);
-    gboolean enable_dip;
+    bool enable_dip;
 
     //printf("Frame width: %f - Pane Width: %f\n", width, pane_1_width);
     //fflush(stdout);
 
     enable_dip = FALSE;
-    gboolean do_button_part = TRUE;
+    bool do_button_part = TRUE;
     double title_bar_dip_radius = 0;
     double title_bar_dip_radius_offset = 0;
 
@@ -847,8 +847,8 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
 
 
 ///////////////////////////////Pixmaps//////////////////////////////////////////
-        gboolean pixmaps_titlebarpart_enabled = FALSE;
-        gboolean pixmaps_buttonpart_enabled = FALSE;
+        bool pixmaps_titlebarpart_enabled = FALSE;
+        bool pixmaps_buttonpart_enabled = FALSE;
         if (pws->pixmaps.titlebarpart_enabled == TRUE) {
             pixmaps_titlebarpart_enabled = TRUE;
         }
@@ -1477,7 +1477,7 @@ void layout_corners_frame(GtkWidget* vbox)
 
 }
 
-void add_border_slider(gchar* text, gchar* key, gint value)
+void add_border_slider(char* text, char* key, int value)
 {
     GtkWidget* w;
     table_append(gtk_label_new(text), FALSE);
@@ -1490,7 +1490,7 @@ void add_border_slider(gchar* text, gchar* key, gint value)
 
 
 
-void my_engine_settings(GtkWidget* hbox, gboolean active)
+void my_engine_settings(GtkWidget* hbox, bool active)
 {
     GtkWidget* vbox;
     GtkWidget* scroller;
@@ -1526,7 +1526,7 @@ void my_engine_settings(GtkWidget* hbox, gboolean active)
     table_append(junk, FALSE);
     junk = gtk_check_button_new();
     table_append(junk, TRUE);
-    gchar* key_line;
+    char* key_line;
     key_line = g_strdup_printf(active ? "active_%s" : "inactive_%s", "gradient_repeat_enabled");
     register_setting(junk, ST_BOOL, SECT, key_line);
 

@@ -39,7 +39,7 @@ enum btypes {
     B_T_COUNT
 };
 #ifdef NEED_BUTTON_BISTATES
-static const gboolean btbistate[B_T_COUNT] = {
+static const bool btbistate[B_T_COUNT] = {
     FALSE,
     TRUE,
     FALSE,
@@ -78,7 +78,7 @@ enum tbtypes {
 };
 #define BX_COUNT B_COUNT+2
 #ifdef NEED_BUTTON_ACTIONS
-static guint button_actions[B_T_COUNT] = {
+static unsigned button_actions[B_T_COUNT] = {
     WNCK_WINDOW_ACTION_CLOSE,
     WNCK_WINDOW_ACTION_MAXIMIZE,
     WNCK_WINDOW_ACTION_MINIMIZE,
@@ -90,7 +90,7 @@ static guint button_actions[B_T_COUNT] = {
 };
 #endif
 #ifdef NEED_BUTTON_FILE_NAMES
-static gchar* b_types[] = {
+static char* b_types[] = {
     "close",
     "max",
     "restore",
@@ -108,7 +108,7 @@ static gchar* b_types[] = {
 };
 #endif
 #ifdef NEED_BUTTON_NAMES
-static gchar* b_names[] = {
+static char* b_names[] = {
     "Close",
     "Maximize",
     "Restore",
@@ -132,7 +132,7 @@ enum {
     TITLEBAR_ACTION_COUNT
 };
 #ifdef NEED_TITLEBAR_ACTION_NAMES
-static gchar* titlebar_action_name[TITLEBAR_ACTION_COUNT] = {
+static char* titlebar_action_name[TITLEBAR_ACTION_COUNT] = {
     "Shade",
     "Maximize/Restore",
     "Minimize",

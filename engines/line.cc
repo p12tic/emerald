@@ -58,8 +58,8 @@ static void draw_shadow_background(decor_t* d, cairo_t* cr)
 {
     cairo_matrix_t matrix;
     double w, x2;
-    gint width, height;
-    gint left, right, top, bottom;
+    int width, height;
+    int left, right, top, bottom;
     window_settings* ws = d->fs->ws;
 
     if (!ws->large_shadow_pixmap) {
@@ -220,7 +220,7 @@ void fini_engine(window_settings* ws)
     free(ws->fs_inact->engine_fs);
 }
 
-void my_engine_settings(GtkWidget* hbox, gboolean active)
+void my_engine_settings(GtkWidget* hbox, bool active)
 {
     GtkWidget* vbox;
     GtkWidget* scroller;

@@ -9,11 +9,11 @@
 
 #define LAST_COMPAT_VER "0.1.0"
 
-typedef struct _FetcherInfo {
+struct FetcherInfo {
     GtkWidget* dialog;
     GtkWidget* progbar;
     GPid        pd;
-} FetcherInfo;
+};
 
 GtkWidget* ThemeSelector;
 GtkListStore* ThemeList;
@@ -35,16 +35,16 @@ GtkWidget* FetchButton;
 GtkWidget* FetchButton2;
 GtkWidget* ExportButton;
 GtkWidget* QuitButton;
-gchar* svnpath;
-gchar* themecache;
+char* svnpath;
+char* themecache;
 
-static void theme_list_append(gchar* value, gchar* dir, gchar* fil)
+static void theme_list_append(char* value, char* dir, char* fil)
 {
     GtkTreeIter iter;
-    gchar* path = g_strjoin("/", dir, fil, "theme.ini", NULL);
-    gchar* imgpath = g_strjoin("/", dir, fil, "theme.screenshot.png", NULL);
-    gchar* val;
-    gchar* val2;
+    char* path = g_strjoin("/", dir, fil, "theme.ini", NULL);
+    char* imgpath = g_strjoin("/", dir, fil, "theme.screenshot.png", NULL);
+    char* val;
+    char* val2;
     GdkPixbuf* p;
     EngineMetaInfo emi;
     GKeyFile* f = g_key_file_new();
@@ -54,11 +54,11 @@ static void theme_list_append(gchar* value, gchar* dir, gchar* fil)
     val = g_key_file_get_string(f, "engine", "engine", NULL);
     gtk_list_store_set(ThemeList, &iter, 6, val ? val : "", -1);
     if (val) {
-        gchar* tver;
-        gchar* ostr1;
-        gchar* ostr2;
-        gchar* ostr;
-        gchar* elc;
+        char* tver;
+        char* ostr1;
+        char* ostr2;
+        char* ostr;
+        char* elc;
         get_engine_meta_info(val, &emi);
         val2 = g_key_file_get_string(f, "engine_version", val, NULL);
         if (!val2) {
@@ -119,7 +119,7 @@ static void theme_list_append(gchar* value, gchar* dir, gchar* fil)
     g_free(path);
     {
         //create the Theme column data
-        gchar* format =
+        char* format =
             _("<b><big>%s</big></b>\n"
               "<i>%s</i>\n"
               "<small>"
@@ -138,10 +138,10 @@ static void theme_list_append(gchar* value, gchar* dir, gchar* fil)
                   "<b>Use With</b> %s\n"
                   "</small>");
         }
-        gchar* creator = g_key_file_get_string(f, "theme", "creator", NULL);
-        gchar* tver = g_key_file_get_string(f, "theme", "theme_version", NULL);
-        gchar* rwid = g_key_file_get_string(f, "theme", "suggested", NULL);
-        gchar* desc = g_key_file_get_string(f, "theme", "description", NULL);
+        char* creator = g_key_file_get_string(f, "theme", "creator", NULL);
+        char* tver = g_key_file_get_string(f, "theme", "theme_version", NULL);
+        char* rwid = g_key_file_get_string(f, "theme", "suggested", NULL);
+        char* desc = g_key_file_get_string(f, "theme", "description", NULL);
         if (creator && !strlen(creator)) {
             g_free(creator);
             creator = NULL;
@@ -192,17 +192,17 @@ static void theme_list_append(gchar* value, gchar* dir, gchar* fil)
     }
     g_free(imgpath);
 }
-static void theme_scan_dir(gchar* dir, gboolean writable)
+static void theme_scan_dir(char* dir, bool writable)
 {
     GDir* d;
     d = g_dir_open(dir, 0, NULL);
     if (d) {
-        gchar* n;
-        while ((n = (gchar*) g_dir_read_name(d))) {
-            gchar* fn = g_strdup_printf("%s/%s/theme.ini", dir, n);
+        char* n;
+        while ((n = (char*) g_dir_read_name(d))) {
+            char* fn = g_strdup_printf("%s/%s/theme.ini", dir, n);
             if (g_file_test(fn, G_FILE_TEST_IS_REGULAR)) {
                 //actually add it here
-                gchar* o;
+                char* o;
                 if (writable) {
                     o = g_strdup(n);
                 } else {
@@ -216,13 +216,13 @@ static void theme_scan_dir(gchar* dir, gboolean writable)
         g_dir_close(d);
     }
 }
-static void scroll_to_theme(gchar* thn)
+static void scroll_to_theme(char* thn)
 {
     GtkTreeIter i;
-    gboolean c;
+    bool c;
     c = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(ThemeList), &i);
     while (c) {
-        gchar* s;
+        char* s;
         gtk_tree_model_get(GTK_TREE_MODEL(ThemeList), &i, 0, &s, -1);
         if (strcmp(s, thn) == 0) {
             GtkTreePath* p;
@@ -234,9 +234,9 @@ static void scroll_to_theme(gchar* thn)
         c = gtk_tree_model_iter_next(GTK_TREE_MODEL(ThemeList), &i);
     }
 }
-static void refresh_theme_list(gchar* thn)
+static void refresh_theme_list(char* thn)
 {
-    gchar* path;
+    char* path;
     gtk_list_store_clear(ThemeList);
     theme_scan_dir(DATA_DIR "/emerald/themes/", FALSE);
     path = g_strdup_printf("%s/.emerald/themes/", g_get_home_dir());
@@ -246,11 +246,11 @@ static void refresh_theme_list(gchar* thn)
         scroll_to_theme(thn);
     }
 }
-static void cb_refresh(GtkWidget* w, gpointer p)
+static void cb_refresh(GtkWidget* w, void* p)
 {
     refresh_theme_list(NULL);
 }
-static gboolean confirm_dialog(gchar* val, gchar* val2)
+static bool confirm_dialog(char* val, char* val2)
 {
     GtkWidget* w;
     int ret;
@@ -264,7 +264,7 @@ static gboolean confirm_dialog(gchar* val, gchar* val2)
     gtk_widget_destroy(w);
     return (ret == GTK_RESPONSE_YES);
 }
-static void info_dialog(gchar* val)
+static void info_dialog(char* val)
 {
     GtkWidget* w;
     w = gtk_message_dialog_new(GTK_WINDOW(mainWindow),
@@ -276,7 +276,7 @@ static void info_dialog(gchar* val)
     gtk_dialog_run(GTK_DIALOG(w));
     gtk_widget_destroy(w);
 }
-static void error_dialog(gchar* val)
+static void error_dialog(char* val)
 {
     GtkWidget* w;
     w = gtk_message_dialog_new(GTK_WINDOW(mainWindow),
@@ -288,12 +288,12 @@ static void error_dialog(gchar* val)
     gtk_dialog_run(GTK_DIALOG(w));
     gtk_widget_destroy(w);
 }
-static void cb_load(GtkWidget* w, gpointer d)
+static void cb_load(GtkWidget* w, void* d)
 {
     GKeyFile* f;
     GDir* dr;
-    gchar* fn, *at, *mt, *xt, *gt;
-    gboolean dist;
+    char* fn, *at, *mt, *xt, *gt;
+    bool dist;
     dist = FALSE;
     GtkTreeIter iter;
     GtkTreeModel* model;
@@ -322,8 +322,8 @@ static void cb_load(GtkWidget* w, gpointer d)
     gtk_widget_set_sensitive(DeleteButton, !dist);
     xt = g_strdup_printf("%s/.emerald/theme/", g_get_home_dir());
     dr = g_dir_open(xt, 0, NULL);
-    while (dr && (gt = (gchar*)g_dir_read_name(dr))) {
-        gchar* ft;
+    while (dr && (gt = (char*)g_dir_read_name(dr))) {
+        char* ft;
         ft = g_strdup_printf("%s/%s", xt, gt);
         g_unlink(ft);
         g_free(ft);
@@ -339,10 +339,10 @@ static void cb_load(GtkWidget* w, gpointer d)
         at = g_strdup_printf("%s/.emerald/themes/%s/", g_get_home_dir(), mt);
     }
     dr = g_dir_open(at, 0, NULL);
-    while (dr && (gt = (gchar*)g_dir_read_name(dr))) {
-        gchar* nt;
+    while (dr && (gt = (char*)g_dir_read_name(dr))) {
+        char* nt;
         gsize len;
-        gchar* ft;
+        char* ft;
         ft = g_strdup_printf("%s/%s", at, gt);
         if (g_file_get_contents(ft, &nt, &len, NULL)) {
             g_free(ft);
@@ -370,7 +370,7 @@ static void cb_load(GtkWidget* w, gpointer d)
     set_apply(FALSE);
     g_slist_foreach(get_setting_list(), (GFunc) read_setting, f);
     {
-        gchar* c;
+        char* c;
         c = g_key_file_get_string(f, "theme", "version", NULL);
         if (c) {
             gtk_entry_set_text(GTK_ENTRY(Version), c);
@@ -383,11 +383,11 @@ static void cb_load(GtkWidget* w, gpointer d)
     g_key_file_free(f);
     g_free(fn);
 }
-static gchar* import_theme(gchar* file)
+static char* import_theme(char* file)
 {
     //first make sure we have our location
-    gchar* fn, * at, * ot, *pot, *rstr;
-    gint ex;
+    char* fn, * at, * ot, *pot, *rstr;
+    int ex;
     ot = g_strdup(file);
     pot = ot;
     if (!g_str_has_suffix(ot, ".emerald")) {
@@ -424,11 +424,11 @@ static gchar* import_theme(gchar* file)
 //   info_dialog(_("Theme Imported"));
     return rstr;
 }
-static void export_theme(gchar* file)
+static void export_theme(char* file)
 {
-    const gchar* themename = gtk_entry_get_text(GTK_ENTRY(EntryBox));
-    gchar* fn, *at, *ot;
-    gint ex;
+    const char* themename = gtk_entry_get_text(GTK_ENTRY(EntryBox));
+    char* fn, *at, *ot;
+    int ex;
     if (!themename || !strlen(themename) ||
             themename[0] == '*' || strchr(themename, '/')) {
         error_dialog(_("Invalid Theme Name\nCould Not Export"));
@@ -457,13 +457,13 @@ static void export_theme(gchar* file)
     g_free(at);
     info_dialog(_("Theme Exported"));
 }
-static void cb_save(GtkWidget* w, gpointer d)
+static void cb_save(GtkWidget* w, void* d)
 {
     GKeyFile* f;
-    gchar* fn, *at, *mt, *gt;
+    char* fn, *at, *mt, *gt;
     GDir* dr;
     //first normalize the name
-    if (!(at = (gchar*) gtk_entry_get_text(GTK_ENTRY(EntryBox)))) {
+    if (!(at = (char*) gtk_entry_get_text(GTK_ENTRY(EntryBox)))) {
         return;
     }
     if (strlen(at) >= 1 && at[0] == '*') {
@@ -498,11 +498,11 @@ static void cb_save(GtkWidget* w, gpointer d)
     } else if (!at) {
         error_dialog(_("Couldn't Form Theme"));
     } else {
-        gchar* xt;
+        char* xt;
         xt = g_strdup_printf("%s/.emerald/themes/%s/", g_get_home_dir(), mt);
         dr = g_dir_open(xt, 0, NULL);
-        while (dr && (gt = (gchar*)g_dir_read_name(dr))) {
-            gchar* ft;
+        while (dr && (gt = (char*)g_dir_read_name(dr))) {
+            char* ft;
             ft = g_strdup_printf("%s/%s", xt, gt);
             g_unlink(ft);
             g_free(ft);
@@ -512,10 +512,10 @@ static void cb_save(GtkWidget* w, gpointer d)
         }
         at = g_strdup_printf("%s/.emerald/theme/", g_get_home_dir());
         dr = g_dir_open(at, 0, NULL);
-        while (dr && (gt = (gchar*)g_dir_read_name(dr))) {
-            gchar* nt;
+        while (dr && (gt = (char*)g_dir_read_name(dr))) {
+            char* nt;
             gsize len;
-            gchar* ft;
+            char* ft;
             ft = g_strdup_printf("%s/%s", at, gt);
             if (g_file_get_contents(ft, &nt, &len, NULL)) {
                 g_free(ft);
@@ -537,11 +537,11 @@ static void cb_save(GtkWidget* w, gpointer d)
     g_free(fn);
     refresh_theme_list(NULL);
 }
-static void cb_delete(GtkWidget* w, gpointer d)
+static void cb_delete(GtkWidget* w, void* d)
 {
     GtkTreeIter iter;
     GtkTreeModel* model;
-    gchar* fn, *at;
+    char* fn, *at;
     //first normalize the name
     if (gtk_tree_selection_get_selected(ThemeSelect, &model, &iter)) {
         gtk_tree_model_get(model, &iter, 0, &at, -1);
@@ -567,10 +567,10 @@ static void cb_delete(GtkWidget* w, gpointer d)
             return;
         } else {
             GDir* dir;
-            gchar* ot, * mt, * pt;
+            char* ot, * mt, * pt;
             pt = g_strdup_printf("%s/.emerald/themes/%s/", g_get_home_dir(), at);
             dir = g_dir_open(pt, 0, NULL);
-            while (dir && (ot = (gchar*)g_dir_read_name(dir))) {
+            while (dir && (ot = (char*)g_dir_read_name(dir))) {
                 mt = g_strdup_printf("%s/%s", pt, ot);
                 g_unlink(mt);
                 g_free(mt);
@@ -590,11 +590,11 @@ static void cb_delete(GtkWidget* w, gpointer d)
     g_free(at);
     g_free(fn);
 }
-static void cb_main_destroy(GtkWidget* w, gpointer d)
+static void cb_main_destroy(GtkWidget* w, void* d)
 {
     gtk_main_quit();
 }
-static void layout_button_box(GtkWidget* vbox, gint b_t)
+static void layout_button_box(GtkWidget* vbox, int b_t)
 {
     GtkWidget* filesel;
     GtkFileFilter* imgfilter;
@@ -642,7 +642,7 @@ void layout_button_pane(GtkWidget* vbox)
 {
     GtkWidget* scroller;
     GtkWidget* hbox;
-    gint i;
+    int i;
     /* Yeah, the names should probably be renamed from hbox since it's now
      * a vbox...
      */
@@ -672,7 +672,7 @@ void layout_button_pane(GtkWidget* vbox)
         layout_button_box(vbox, i);
     }
 }
-void layout_window_frame(GtkWidget* vbox, gboolean active)
+void layout_window_frame(GtkWidget* vbox, bool active)
 {
     GtkWidget* scrollwin;
     scrollwin = gtk_scrolled_window_new(NULL, NULL);
@@ -684,36 +684,36 @@ void layout_window_frame(GtkWidget* vbox, gboolean active)
     gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrollwin),
                                           GTK_WIDGET(get_current_table()));
     make_labels(_("Colors"));
-    ACAV(_("Text Fill"), "text", "titlebar");
-    ACAV(_("Text Outline"), "text_halo", "titlebar");
+    add_color_alpha_value(_("Text Fill"), "text", "titlebar", active);
+    add_color_alpha_value(_("Text Outline"), "text_halo", "titlebar", active);
     table_append_separator();
-    ACAV(_("Button Fill"), "button", "buttons");
-    ACAV(_("Button Outline"), "button_halo", "buttons");
+    add_color_alpha_value(_("Button Fill"), "button", "buttons", active);
+    add_color_alpha_value(_("Button Outline"), "button_halo", "buttons", active);
 }
-void add_row(GtkWidget* vbox, GtkWidget* item, gchar* title)
+void add_row(GtkWidget* vbox, GtkWidget* item, char* title)
 {
     //gtk_box_pack_startC(hbox,gtk_label_new(title),FALSE,FALSE,0);
     //gtk_box_pack_endC(hbox,item,TRUE,TRUE,0);
     table_append(gtk_label_new(title), FALSE);
     table_append(item, TRUE);
 }
-void add_color_button_row(GtkWidget* vbox, gchar* title, gchar* key, gchar* sect)
+void add_color_button_row(GtkWidget* vbox, char* title, char* key, char* sect)
 {
     GtkWidget* color_button;
     color_button = gtk_color_button_new();
     register_setting(color_button, ST_COLOR, sect, key);
     add_row(vbox, color_button, title);
 }
-void add_int_range_row(GtkWidget* vbox, gchar* title, gchar* key,
-                       int start, int end, gchar* sect)
+void add_int_range_row(GtkWidget* vbox, char* title, char* key,
+                       int start, int end, char* sect)
 {
     GtkWidget* scaler;
     scaler = scaler_new(start, end, 1);
     register_setting(scaler, ST_INT, sect, key);
     add_row(vbox, scaler, title);
 }
-void add_float_range_row(GtkWidget* vbox, gchar* title, gchar* key,
-                         gdouble start, gdouble end, gdouble prec, gchar* sect)
+void add_float_range_row(GtkWidget* vbox, char* title, char* key,
+                         double start, double end, double prec, char* sect)
 {
     GtkWidget* scaler;
     scaler = scaler_new(start, end, prec);
@@ -788,7 +788,7 @@ void layout_title_frame(GtkWidget* vbox)
     gtk_box_pack_startC(vbox,junk,FALSE,FALSE,0);
     register_setting(junk,ST_BOOL,SECT,"use_active_colors");*/
 }
-void add_meta_string_value(gchar* title, gchar* key)
+void add_meta_string_value(char* title, char* key)
 {
     GtkWidget* entry;
     table_append(gtk_label_new(title), FALSE);
@@ -796,7 +796,7 @@ void add_meta_string_value(gchar* title, gchar* key)
     table_append(entry, TRUE);
     register_setting(entry, ST_META_STRING, "theme", key);
 }
-static void cb_export(GtkWidget* w, gpointer p)
+static void cb_export(GtkWidget* w, void* p)
 {
     //get a filename
     GtkWidget* dialog = gtk_file_chooser_dialog_new(
@@ -806,7 +806,7 @@ static void cb_export(GtkWidget* w, gpointer p)
                             GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
                             NULL
                         );
-    gchar* pth = g_strdup_printf("%s/Desktop/", g_get_home_dir());
+    char* pth = g_strdup_printf("%s/Desktop/", g_get_home_dir());
     GtkFileFilter* filter = gtk_file_filter_new();
     gtk_file_filter_set_name(filter, "Theme Packages");
     gtk_file_filter_add_pattern(filter, "*.emerald");
@@ -823,7 +823,7 @@ static void cb_export(GtkWidget* w, gpointer p)
     g_free(pth);
 
     if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
-        gchar* filename;
+        char* filename;
         filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
         export_theme(filename);
         g_free(filename);
@@ -872,7 +872,7 @@ void layout_info_frame(GtkWidget* vbox)
     gtk_widget_set_sensitive(Version, FALSE);
     table_append(Version, TRUE);
 }
-void add_border_slider(gchar* text, gchar* key, gint value)
+void add_border_slider(char* text, char* key, int value)
 {
     GtkWidget* w;
     table_append(gtk_label_new(text), FALSE);
@@ -1022,7 +1022,7 @@ void layout_settings_pane(GtkWidget* vbox)
 {
     GtkWidget* combo;
     GtkWidget* junk;
-    gint i;
+    int i;
     gtk_box_pack_startC(vbox, gtk_label_new(
                             _("NOTE - These settings are not part of themes, "
                               "they are stored separately, and control various UI "
@@ -1167,24 +1167,24 @@ GtkWidget* build_lower_pane(GtkWidget* vbox)
 }
 
 
-void cb_refilter(GtkWidget* w, gpointer p)
+void cb_refilter(GtkWidget* w, void* p)
 {
     GtkTreeModelFilter* filt = p;
     gtk_tree_model_filter_refilter(filt);
 }
 
-gboolean is_visible(GtkTreeModel* model, GtkTreeIter* iter, gpointer p)
+bool is_visible(GtkTreeModel* model, GtkTreeIter* iter, void* p)
 {
     GtkEntry* e = p;
-    static gint cols[] = {0, 2, 3, 5, -1};
-    gint i;
-    const gchar* ch;
+    static int cols[] = {0, 2, 3, 5, -1};
+    int i;
+    const char* ch;
     if (strlen(ch = gtk_entry_get_text(e)) == 0) {
         return TRUE;
     }
     ch = g_ascii_strup(ch, -1);
     for (i = 0; cols[i] >= 0; i++) {
-        gchar* at;
+        char* at;
         gtk_tree_model_get(model, iter, i, &at, -1);
         at = g_ascii_strup(at, -1);
         if (strlen(at) && strstr(at, ch)) {
@@ -1196,11 +1196,11 @@ gboolean is_visible(GtkTreeModel* model, GtkTreeIter* iter, gpointer p)
     //0, 2, 3, 5
     return FALSE;
 }
-void cb_clearbox(GtkWidget* w, gpointer p)
+void cb_clearbox(GtkWidget* w, void* p)
 {
     gtk_entry_set_text(GTK_ENTRY(p), "");
 }
-static void cb_import(GtkWidget* w, gpointer p)
+static void cb_import(GtkWidget* w, void* p)
 {
     //get a filename
     GtkWidget* dialog = gtk_file_chooser_dialog_new(
@@ -1209,7 +1209,7 @@ static void cb_import(GtkWidget* w, gpointer p)
                             GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
                             GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
                             NULL);
-    gchar* pth = g_strdup_printf("%s/Desktop/", g_get_home_dir());
+    char* pth = g_strdup_printf("%s/Desktop/", g_get_home_dir());
     GtkFileFilter* filter = gtk_file_filter_new();
     gtk_file_filter_set_name(filter, "Theme Packages");
     gtk_file_filter_add_pattern(filter, "*.emerald");
@@ -1218,8 +1218,8 @@ static void cb_import(GtkWidget* w, gpointer p)
                                         pth);
     g_free(pth);
     if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
-        gchar* filename;
-        gchar* thn;
+        char* filename;
+        char* thn;
         filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
         thn = import_theme(filename);
         g_free(filename);
@@ -1302,7 +1302,7 @@ GtkWidget* build_tree_view()
     gtk_tree_view_column_set_expand(ThemeColumn, TRUE);
 
     MetaRenderer = gtk_cell_renderer_pixbuf_new();
-    g_object_set(MetaRenderer, "xalign", (gfloat)0.0, NULL);
+    g_object_set(MetaRenderer, "xalign", 0.0f, NULL);
     MetaColumn = gtk_tree_view_column_new_with_attributes
                  ("Screenshot", MetaRenderer, "pixbuf", 7, NULL);
     //gtk_tree_view_column_set_sort_column_id(MetaColumn,7);
@@ -1382,10 +1382,10 @@ void import_cache(GtkWidget* progbar)
     GDir* d;
     d = g_dir_open(themecache, 0, NULL);
     if (d) {
-        gchar* n;
-        while ((n = (gchar*) g_dir_read_name(d))) {
+        char* n;
+        while ((n = (char*) g_dir_read_name(d))) {
 
-            gchar* fn;
+            char* fn;
             if (g_str_has_suffix(n, ".emerald")) {
                 fn = g_strconcat(themecache, "/", NULL);
                 fn = g_strconcat(fn, n, NULL);
@@ -1399,7 +1399,7 @@ void import_cache(GtkWidget* progbar)
     }
 }
 
-gboolean watcher_func(gpointer p)
+bool watcher_func(void* p)
 {
     FetcherInfo* f = p;
 
@@ -1416,7 +1416,7 @@ gboolean watcher_func(gpointer p)
 }
 void fetch_svn()
 {
-    gchar* themefetcher[] = {g_strdup("svn"), g_strdup("co"), g_strdup(svnpath), g_strdup(themecache), NULL };
+    char* themefetcher[] = {g_strdup("svn"), g_strdup("co"), g_strdup(svnpath), g_strdup(themecache), NULL };
     GtkWidget* w;
     GtkWidget* l;
     GPid pd;
@@ -1452,7 +1452,7 @@ void fetch_ngpl_svn()
     themecache = g_strconcat(g_get_home_dir(), "/.emerald/ngplthemecache", NULL);
     fetch_svn();
 }
-void cb_quit(GtkWidget* w, gpointer p)
+void cb_quit(GtkWidget* w, void* p)
 {
     gtk_widget_destroy(mainWindow);
 }
@@ -1537,7 +1537,7 @@ GtkWidget* create_filechooserdialog1(char* input)
                                     GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
                                     NULL);
 
-    gchar* pth = g_strdup_printf("%s", input);
+    char* pth = g_strdup_printf("%s", input);
     GtkFileFilter* filter = gtk_file_filter_new();
     gtk_file_filter_set_name(filter, "Theme Packages");
     gtk_file_filter_add_pattern(filter, "*.emerald");
@@ -1546,8 +1546,8 @@ GtkWidget* create_filechooserdialog1(char* input)
                                   pth);
     g_free(pth);
     if (gtk_dialog_run(GTK_DIALOG(dialog_startup)) == GTK_RESPONSE_ACCEPT) {
-        gchar* filename;
-        gchar* thn;
+        char* filename;
+        char* thn;
         filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog_startup));
         thn = import_theme(filename);
         g_free(filename);
@@ -1586,7 +1586,7 @@ int main(int argc, char* argv[])
 {
     set_changed(FALSE);
     set_apply(FALSE);
-    gchar* input_file = NULL;
+    char* input_file = NULL;
     setlocale(LC_ALL, "");
     bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
     bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");

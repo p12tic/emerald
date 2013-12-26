@@ -3,10 +3,13 @@
 #ifdef __SUNPRO_C
 #pragma align 4 (my_pixbuf)
 #endif
+
+#include <cstdint>
+
 #ifdef __GNUC__
-static const guint8 my_pixbuf[] __attribute__((__aligned__(4))) =
+static const std::uint8_t my_pixbuf[] __attribute__((__aligned__(4))) =
 #else
-static const guint8 my_pixbuf[] =
+static const std::uint8_t my_pixbuf[] =
 #endif
 {
     ""

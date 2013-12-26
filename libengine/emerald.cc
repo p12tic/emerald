@@ -23,8 +23,8 @@
 
 void copy_from_defaults_if_needed()
 {
-    gchar* opath = g_strdup_printf("%s/.emerald/theme", g_get_home_dir());
-    gchar* fcont;
+    char* opath = g_strdup_printf("%s/.emerald/theme", g_get_home_dir());
+    char* fcont;
     gsize len = 0;
     g_mkdir_with_parents(opath, 0755);
     g_free(opath);
@@ -41,10 +41,10 @@ void copy_from_defaults_if_needed()
         GDir* d;
         d = g_dir_open(DEFTHEMEDIR, 0, NULL);
         if (d) {
-            gchar* n;
+            char* n;
             while ((n = g_dir_read_name(d))) {
-                gchar* ipath = g_strdup_printf("%s/%s", DEFTHEMEDIR, n);
-                gchar* npath = g_strdup_printf("%s/.emerald/theme/%s", g_get_home_dir(), n);
+                char* ipath = g_strdup_printf("%s/%s", DEFTHEMEDIR, n);
+                char* npath = g_strdup_printf("%s/.emerald/theme/%s", g_get_home_dir(), n);
                 if (g_file_get_contents(ipath, &fcont, &len, NULL)) {
                     g_file_set_contents(npath, fcont, len, NULL);
                     g_free(fcont);
@@ -58,7 +58,7 @@ void copy_from_defaults_if_needed()
     g_free(opath);
 }
 
-gchar* make_filename(gchar* sect, gchar* key, gchar* ext)
+char* make_filename(char* sect, char* key, char* ext)
 {
     return g_strdup_printf("%s/.emerald/theme/%s.%s.%s", g_get_home_dir(), sect, key, ext);
 }
@@ -66,10 +66,10 @@ void cairo_set_source_alpha_color(cairo_t* cr, alpha_color* c)
 {
     cairo_set_source_rgba(cr, c->color.r, c->color.g, c->color.b, c->alpha);
 }
-void load_color_setting(GKeyFile* f, decor_color_t* color, gchar* key, gchar* sect)
+void load_color_setting(GKeyFile* f, decor_color_t* color, char* key, char* sect)
 {
     GdkColor c;
-    gchar* s = g_key_file_get_string(f, sect, key, NULL);
+    char* s = g_key_file_get_string(f, sect, key, NULL);
     if (s) {
         gdk_color_parse(s, &c);
         color->r = c.red / 65536.0;
@@ -78,10 +78,10 @@ void load_color_setting(GKeyFile* f, decor_color_t* color, gchar* key, gchar* se
         g_free(s);
     }
 }
-void load_shadow_color_setting(GKeyFile* f, gint sc[3], gchar* key, gchar* sect)
+void load_shadow_color_setting(GKeyFile* f, int sc[3], char* key, char* sect)
 {
     GdkColor c;
-    gchar* s = g_key_file_get_string(f, sect, key, NULL);
+    char* s = g_key_file_get_string(f, sect, key, NULL);
     if (s) {
         gdk_color_parse(s, &c);
         sc[0] = c.red;
@@ -90,33 +90,33 @@ void load_shadow_color_setting(GKeyFile* f, gint sc[3], gchar* key, gchar* sect)
         g_free(s);
     }
 }
-void load_float_setting(GKeyFile* f, gdouble* d, gchar* key, gchar* sect)
+void load_float_setting(GKeyFile* f, double* d, char* key, char* sect)
 {
-    gchar* s = g_key_file_get_string(f, sect, key, NULL);
+    char* s = g_key_file_get_string(f, sect, key, NULL);
     if (s) {
         *d = g_ascii_strtod(s, NULL);
         g_free(s);
     }
 }
-void load_int_setting(GKeyFile* f, gint* i, gchar* key, gchar* sect)
+void load_int_setting(GKeyFile* f, int* i, char* key, char* sect)
 {
     GError* e = NULL;
-    gint ii = g_key_file_get_integer(f, sect, key, &e);
+    int ii = g_key_file_get_integer(f, sect, key, &e);
     if (!e) {
         *i = ii;
     }
 }
-void load_bool_setting(GKeyFile* f, gboolean* b, gchar* key, gchar* sect)
+void load_bool_setting(GKeyFile* f, bool* b, char* key, char* sect)
 {
     GError* e = NULL;
-    gboolean bb = g_key_file_get_boolean(f, sect, key, &e);
+    bool bb = g_key_file_get_boolean(f, sect, key, &e);
     if (!e) {
         *b = bb;
     }
 }
-void load_font_setting(GKeyFile* f, PangoFontDescription** fd, gchar* key, gchar* sect)
+void load_font_setting(GKeyFile* f, PangoFontDescription** fd, char* key, char* sect)
 {
-    gchar* s = g_key_file_get_string(f, sect, key, NULL);
+    char* s = g_key_file_get_string(f, sect, key, NULL);
     if (s) {
         if (*fd) {
             pango_font_description_free(*fd);
@@ -125,9 +125,9 @@ void load_font_setting(GKeyFile* f, PangoFontDescription** fd, gchar* key, gchar
         g_free(s);
     }
 }
-void load_string_setting(GKeyFile* f, gchar** s, gchar* key, gchar* sect)
+void load_string_setting(GKeyFile* f, char** s, char* key, char* sect)
 {
-    gchar* st = g_key_file_get_string(f, sect, key, NULL);
+    char* st = g_key_file_get_string(f, sect, key, NULL);
     if (st) {
         if (*s) {
             g_free(*s);

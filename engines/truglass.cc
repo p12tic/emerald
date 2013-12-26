@@ -49,10 +49,10 @@ typedef struct _private_fs {
 } private_fs;
 
 typedef struct _private_ws {
-    gboolean round_top_left;
-    gboolean round_top_right;
-    gboolean round_bottom_left;
-    gboolean round_bottom_right;
+    bool round_top_left;
+    bool round_top_right;
+    bool round_bottom_left;
+    bool round_bottom_right;
     double  corner_radius;
     double  glow_height;
 } private_ws;
@@ -75,10 +75,10 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
     private_fs* pfs = fs->engine_fs;
     window_settings* ws = fs->ws;
     private_ws* pws = ws->engine_ws;
-    gdouble pleft;
-    gdouble ptop;
-    gdouble pwidth;
-    gdouble pheight;
+    double pleft;
+    double ptop;
+    double pwidth;
+    double pheight;
     top = ws->win_extents.top + ws->titlebar_height;
 
     x1 = ws->left_space - ws->win_extents.left;
@@ -540,7 +540,7 @@ void layout_corners_frame(GtkWidget* vbox)
     register_setting(junk, ST_FLOAT, SECT, "glow_height");
 }
 
-void my_engine_settings(GtkWidget* hbox,  gboolean active)
+void my_engine_settings(GtkWidget* hbox,  bool active)
 {
     GtkWidget* vbox;
     GtkWidget* scroller;

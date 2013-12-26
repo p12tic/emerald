@@ -33,7 +33,7 @@
 /*
  * pixmap data structs
  */
-static gchar* p_types[] = {
+static char* p_types[] = {
     "top",
     "top_left",
     "top_right",
@@ -46,7 +46,7 @@ static gchar* p_types[] = {
     "title_left",
     "title_right"
 };
-static gchar* names[] = {
+static char* names[] = {
     "Top",
     "Top Left",
     "Top Right",
@@ -74,9 +74,9 @@ enum {
 };
 typedef struct _pixmap_data {
     cairo_surface_t* surface;
-    gboolean use_scaled;
-    gboolean use_width;
-    gboolean use_height;
+    bool use_scaled;
+    bool use_width;
+    bool use_height;
     double width;
     double height;
 } pixmap_data;
@@ -93,11 +93,11 @@ typedef struct _private_fs {
 } private_fs;
 
 typedef struct _private_ws {
-    gboolean round_top_left;
-    gboolean round_top_right;
-    gboolean round_bottom_left;
-    gboolean round_bottom_right;
-    gboolean inactive_use_active_pixmaps;
+    bool round_top_left;
+    bool round_top_right;
+    bool round_bottom_left;
+    bool round_bottom_right;
+    bool inactive_use_active_pixmaps;
     double  top_corner_radius;
     double  bottom_corner_radius;
 } private_ws;
@@ -122,10 +122,10 @@ fill_rounded_rectangle_pixmap_blend(cairo_t*       cr,
                                     pixmap_data* pix,
                                     window_settings* ws,
                                     double    radius,
-                                    gboolean blend_only_if_pixmaps_available)
+                                    bool blend_only_if_pixmaps_available)
 {
     cairo_pattern_t* pattern;
-    gboolean blend = TRUE;
+    bool blend = TRUE;
     int iw, ih;
 
     if (cairo_surface_status(pix->surface) == CAIRO_STATUS_SUCCESS) {
@@ -165,10 +165,10 @@ fill_rounded_rectangle_pixmap_blend(cairo_t*       cr,
         fill_rounded_rectangle(cr, x, y, w, h, corner, c0, c1, gravity, ws, radius);
     }
 }
-static gint get_real_pos(window_settings* ws, gint tobj, decor_t* d)
+static int get_real_pos(window_settings* ws, int tobj, decor_t* d)
 {
-    gint width = d->width;
-    gint base = ws->left_space;
+    int width = d->width;
+    int base = ws->left_space;
     switch (d->tobj_item_state[tobj]) {
     case 1:
         base = (width - ws->left_space - ws->right_space - d->tobj_size[0] - d->tobj_size[2]) / 2
@@ -572,7 +572,7 @@ void layout_corners_frame(GtkWidget* vbox)
     gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
     register_setting(junk, ST_FLOAT, SECT, "bottom_radius");
 }
-void my_engine_settings(GtkWidget* hbox,  gboolean active)
+void my_engine_settings(GtkWidget* hbox,  bool active)
 {
     GtkWidget* vbox;
     GtkWidget* scroller;
@@ -608,7 +608,7 @@ void layout_engine_colors(GtkWidget* vbox)
     gtk_box_pack_startC(hbox, gtk_vseparator_new(), FALSE, FALSE, 0);
     my_engine_settings(hbox, FALSE);
 }
-static void layout_pixmap_box(GtkWidget* vbox, gint b_t, gboolean active)
+static void layout_pixmap_box(GtkWidget* vbox, int b_t, bool active)
 {
     GtkWidget* filesel;
     GtkWidget* scroller;
@@ -692,12 +692,12 @@ static void layout_pixmap_box(GtkWidget* vbox, gint b_t, gboolean active)
     }
 
 }
-void layout_engine_pixmaps(GtkWidget* vbox, gboolean active)
+void layout_engine_pixmaps(GtkWidget* vbox, bool active)
 {
     GtkWidget* scroller;
     GtkWidget* hbox;
     GtkWidget* junk;
-    gint i;
+    int i;
 
     hbox = gtk_hbox_new(TRUE, 2);
     gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);

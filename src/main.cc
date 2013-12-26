@@ -41,7 +41,7 @@
 void reload_all_settings(int sig);
 
 GdkPixmap* pdeb;
-static gboolean do_reload = FALSE;
+static bool do_reload = FALSE;
 
 static GdkPixmap* create_pixmap(int w, int h)
 {
@@ -72,7 +72,7 @@ static GdkPixmap* create_pixmap(int w, int h)
 }
 
 void engine_draw_frame(decor_t* d, cairo_t* cr);
-gboolean load_engine(gchar* engine_name, window_settings* ws);
+bool load_engine(char* engine_name, window_settings* ws);
 void load_engine_settings(GKeyFile* f, window_settings* ws);
 
 static Atom frame_window_atom;
@@ -122,24 +122,24 @@ static GtkWidget* style_window;
 
 static GHashTable* frame_table;
 static GtkWidget* action_menu = NULL;
-static gboolean action_menu_mapped = FALSE;
-static gint double_click_timeout = 250;
+static bool action_menu_mapped = FALSE;
+static int double_click_timeout = 250;
 
 static GtkWidget* tip_window;
 static GtkWidget* tip_label;
 static GTimeVal tooltip_last_popdown = { -1, -1 };
-static gint tooltip_timer_tag = 0;
+static int tooltip_timer_tag = 0;
 
 static GSList* draw_list = NULL;
-static guint draw_idle_id = 0;
+static unsigned draw_idle_id = 0;
 
-static gboolean enable_tooltips = TRUE;
-static gchar* engine = NULL;
+static bool enable_tooltips = TRUE;
+static char* engine = NULL;
 
-static gint get_b_offset(gint b)
+static int get_b_offset(int b)
 {
     static int boffset[B_COUNT + 1];
-    gint i, b_t = 0;
+    int i, b_t = 0;
 
     for (i = 0; i < B_COUNT; i++) {
         boffset[i] = b_t;
@@ -151,10 +151,10 @@ static gint get_b_offset(gint b)
     }
     return boffset[b];
 }
-static gint get_b_t_offset(gint b_t)
+static int get_b_t_offset(int b_t)
 {
     static int btoffset[B_T_COUNT];
-    gint i, b = 0;
+    int i, b = 0;
 
     for (i = 0; i < B_T_COUNT; i++) {
         btoffset[i] = b;
@@ -167,7 +167,7 @@ static gint get_b_t_offset(gint b_t)
 }
 
 window_settings* global_ws;
-static gint get_real_pos(window_settings* ws, gint tobj, decor_t* d)
+static int get_real_pos(window_settings* ws, int tobj, decor_t* d)
 {
     switch (d->tobj_item_state[tobj]) {
     case 1:
@@ -196,11 +196,11 @@ static void update_window_extents(window_settings* ws)
     // 0,       TT_H,       L_EXT+4,    B_EXT+4,    0,1,0,0
     // L_EXT+4, TT_H+4,     -8,         B_EXT,      0,1,1,0
     // L_EXT-4, TT_H,       R_EXT+4,    B_EXT+4,    1,1,0,0
-    gint l_ext = ws->win_extents.left;
-    gint r_ext = ws->win_extents.right;
-    gint t_ext = ws->win_extents.top;
-    gint b_ext = ws->win_extents.bottom;
-    gint tt_h = ws->titlebar_height;
+    int l_ext = ws->win_extents.left;
+    int r_ext = ws->win_extents.right;
+    int t_ext = ws->win_extents.top;
+    int b_ext = ws->win_extents.bottom;
+    int tt_h = ws->titlebar_height;
 
     /*pos_t newpos[3][3] = {
       {
@@ -344,7 +344,7 @@ my_set_window_quads(decor_quad_t* q,
                     int width,
                     int height,
                     window_settings* ws,
-                    gboolean max_horz, gboolean max_vert)
+                    bool max_horz, bool max_vert)
 {
     int nq;
     int mnq = 0;
@@ -484,7 +484,7 @@ static void decor_update_window_property(decor_t* d)
     unsigned int nQuad;
     decor_quad_t quads[N_QUADS_MAX];
     int                    w, h;
-    gint            stretch_offset;
+    int            stretch_offset;
     REGION            top, bottom, left, right;
 
     w = d->width;
@@ -568,7 +568,7 @@ static void decor_update_window_property(decor_t* d)
 static int
 set_switcher_quads(decor_quad_t* q, int width, int height, window_settings* ws)
 {
-    gint n, nQuad = 0;
+    int n, nQuad = 0;
 
     /* 1 top quads */
     q->p1.x = -ws->left_space;
@@ -639,9 +639,9 @@ set_switcher_quads(decor_quad_t* q, int width, int height, window_settings* ws)
 }
 
 static int
-set_shadow_quads(decor_quad_t* q, gint width, gint height, window_settings* ws)
+set_shadow_quads(decor_quad_t* q, int width, int height, window_settings* ws)
 {
-    gint n, nQuad = 0;
+    int n, nQuad = 0;
 
     /* top quads */
     n = decor_set_horz_quad_line(q,
@@ -703,8 +703,8 @@ static void draw_shadow_background(decor_t* d, cairo_t* cr)
 {
     cairo_matrix_t matrix;
     double w, h, x2, y2;
-    gint width, height;
-    gint left, right, top, bottom;
+    int width, height;
+    int left, right, top, bottom;
     window_settings* ws = d->fs->ws;
 
     if (!ws->large_shadow_pixmap) {
@@ -905,8 +905,8 @@ static void draw_min_button(cairo_t* cr, double s)
 
 typedef void (*draw_proc)(cairo_t* cr);
 static void
-get_button_pos(window_settings* ws, gint b_t,
-               decor_t* d, gdouble y1, gdouble* rx, gdouble* ry)
+get_button_pos(window_settings* ws, int b_t,
+               decor_t* d, double y1, double* rx, double* ry)
 {
     //y1 - 4.0 + ws->titlebar_height / 2,
     *ry = y1 + ws->button_offset;
@@ -914,7 +914,7 @@ get_button_pos(window_settings* ws, gint b_t,
 }
 static void
 button_state_paint(cairo_t* cr,
-                   alpha_color* color, alpha_color* color_2, guint state)
+                   alpha_color* color, alpha_color* color_2, unsigned state)
 {
     double alpha;
 
@@ -960,7 +960,7 @@ static int get_b_state(decor_t* d, int button)
 }
 static void
 draw_pixbuf(GdkPixbuf* pixbuf, cairo_t* cr,
-            gdouble x, gdouble y, gdouble x2, gdouble y2, gdouble alpha)
+            double x, double y, double x2, double y2, double alpha)
 {
     cairo_save(cr);
     cairo_rectangle(cr, x, y, x2 - x, y2 - y);
@@ -970,15 +970,15 @@ draw_pixbuf(GdkPixbuf* pixbuf, cairo_t* cr,
     cairo_restore(cr);
 }
 static void
-draw_button_with_glow_alpha_bstate(gint b_t, decor_t* d, cairo_t* cr,
-                                   gint y1, gdouble button_alpha,
-                                   gdouble glow_alpha, int b_state)
+draw_button_with_glow_alpha_bstate(int b_t, decor_t* d, cairo_t* cr,
+                                   int y1, double button_alpha,
+                                   double glow_alpha, int b_state)
 {
-    gint b = b_t;
-    gdouble x, y;
-    gdouble x2, y2;
-    gdouble glow_x, glow_y;                // glow top left coordinates
-    gdouble glow_x2, glow_y2;        // glow bottom right coordinates
+    int b = b_t;
+    double x, y;
+    double x2, y2;
+    double glow_x, glow_y;                // glow top left coordinates
+    double glow_x2, glow_y2;        // glow bottom right coordinates
     window_settings* ws = d->fs->ws;
 
     if (b_state < 0) {
@@ -1053,13 +1053,13 @@ draw_button_with_glow_alpha_bstate(gint b_t, decor_t* d, cairo_t* cr,
     }
 }
 static void
-draw_button_with_glow(gint b_t, decor_t* d, cairo_t* cr, gint y1,
-                      gboolean with_glow)
+draw_button_with_glow(int b_t, decor_t* d, cairo_t* cr, int y1,
+                      bool with_glow)
 {
     draw_button_with_glow_alpha_bstate(b_t, d, cr, y1, 1.0,
                                        (with_glow ? 1.0 : 0.0), -1);
 }
-static void draw_button(gint b_t, decor_t* d, cairo_t* cr, gint y1)
+static void draw_button(int b_t, decor_t* d, cairo_t* cr, int y1)
 {
     draw_button_with_glow_alpha_bstate(b_t, d, cr, y1, 1.0, 0.0, -1);
 }
@@ -1116,7 +1116,7 @@ static void draw_button_backgrounds(decor_t* d, int* necessary_update_type)
         }
         button_region_t* button_region = (d->active ? &d->button_region[b_t] :
                                           &d->button_region_inact[b_t]);
-        gint src_x = 0, src_y = 0, w = 0, h = 0, dest_x = 0, dest_y = 0;
+        int src_x = 0, src_y = 0, w = 0, h = 0, dest_x = 0, dest_y = 0;
 
         if (necessary_update_type[b_t] == 1) {
             w = button_region->base_x2 - button_region->base_x1;
@@ -1157,7 +1157,7 @@ static void draw_button_backgrounds(decor_t* d, int* necessary_update_type)
     }
 }
 
-gint draw_buttons_timer_func(gpointer data)
+int draw_buttons_timer_func(void* data)
 {
     button_fade_info_t* fade_info = (button_fade_info_t*) data;
     decor_t* d = (decor_t*)(fade_info->d);
@@ -1242,13 +1242,13 @@ gint draw_buttons_timer_func(gpointer data)
         }
         d->button_last_drawn_state[b_t] = fade_info->counters[b_t];
 
-        gdouble alpha;
+        double alpha;
 
         if (fade_info->counters[b_t] > 0)
             alpha = (MIN(fade_info->counters[b_t], num_steps + 1) -
-                     1) / (gdouble) num_steps;
+                     1) / (double) num_steps;
         else {
-            alpha = -fade_info->counters[b_t] / (gdouble) num_steps;
+            alpha = -fade_info->counters[b_t] / (double) num_steps;
         }
 
         if (fade_info->counters[b_t] < num_steps + 1) {      // not at max fade
@@ -1262,7 +1262,7 @@ gint draw_buttons_timer_func(gpointer data)
     }
     for (b_t = 0; b_t < B_T_COUNT; b_t++) {
         if (button_alphas[b_t] > 1e-4) {
-            gdouble glow_alpha = 0.0;
+            double glow_alpha = 0.0;
 
             if ((ws->use_button_glow && d->active) ||
                     (ws->use_button_inactive_glow && !d->active)) {
@@ -1278,7 +1278,7 @@ gint draw_buttons_timer_func(gpointer data)
     }
 
     // Check if the fade has come to an end
-    gboolean any_active_buttons = FALSE;
+    bool any_active_buttons = FALSE;
 
     for (b_t = 0; b_t < B_T_COUNT; b_t++)
         if (!BUTTON_NOT_VISIBLE(d, b_t) &&
@@ -1330,7 +1330,7 @@ static void draw_buttons_with_fade(decor_t* d, cairo_t* cr, double y1)
         }
     }
     button_fade_info_t* fade_info = &(d->button_fade_info);
-    gboolean button_pressed = FALSE;
+    bool button_pressed = FALSE;
 
     for (b_t = 0; b_t < B_T_COUNT; b_t++) {
         if (BUTTON_NOT_VISIBLE(d, b_t)) {
@@ -1369,14 +1369,14 @@ static void draw_buttons_with_fade(decor_t* d, cairo_t* cr, double y1)
         // this function is called twice, first with S_(IN)ACTIVE, then with S_(IN)ACTIVE_PRESS
         // where it should have been only once with S_(IN)ACTIVE_PRESS
     {
-        fade_info->d = (gpointer) d;
+        fade_info->d = (void*) d;
         fade_info->y1 = y1;
-        if (draw_buttons_timer_func((gpointer) fade_info) == TRUE) {      // call once now
+        if (draw_buttons_timer_func((void*) fade_info) == TRUE) {      // call once now
             // and start a new timer for the next step
             fade_info->timer =
                 g_timeout_add(ws->button_fade_step_duration,
                               draw_buttons_timer_func,
-                              (gpointer) fade_info);
+                              (void*) fade_info);
         }
     }
 }
@@ -1400,7 +1400,7 @@ static void draw_buttons_without_fade(decor_t* d, cairo_t* cr, double y1)
     draw_button_backgrounds(d, necessary_update_type);
 
     // Draw buttons
-    gint button_hovered_on = -1;
+    int button_hovered_on = -1;
 
     for (b_t = 0; b_t < B_T_COUNT; b_t++) {
         if (necessary_update_type[b_t] == 0) {
@@ -1425,11 +1425,11 @@ static void draw_buttons_without_fade(decor_t* d, cairo_t* cr, double y1)
 static void update_button_regions(decor_t* d)
 {
     window_settings* ws = d->fs->ws;
-    gint y1 = ws->top_space - ws->win_extents.top;
+    int y1 = ws->top_space - ws->win_extents.top;
 
-    gint b_t, b_t2;
-    gdouble x, y;
-    gdouble glow_x, glow_y;                // glow top left coordinates
+    int b_t, b_t2;
+    double x, y;
+    double glow_x, glow_y;                // glow top left coordinates
 
     for (b_t = 0; b_t < B_T_COUNT; b_t++) {
         if (BUTTON_NOT_VISIBLE(d, b_t)) {
@@ -1558,7 +1558,7 @@ static void update_button_regions(decor_t* d)
         memcpy(button_region_inact, button_region, sizeof(button_region_t));
     }
 }
-static void draw_window_decoration_real(decor_t* d, gboolean shadow_time)
+static void draw_window_decoration_real(decor_t* d, bool shadow_time)
 {
     cairo_t* cr;
     frame_settings* fs = d->fs;
@@ -1623,7 +1623,7 @@ static void draw_window_decoration_real(decor_t* d, gboolean shadow_time)
         // Copy button region backgrounds to buffers
         // for fast drawing of buttons from now on
         // when drawing is done for buttons
-        gboolean bg_pixmaps_update_needed = FALSE;
+        bool bg_pixmaps_update_needed = FALSE;
         int b_t;
 
         for (b_t = 0; b_t < B_T_COUNT; b_t++) {
@@ -1647,7 +1647,7 @@ static void draw_window_decoration_real(decor_t* d, gboolean shadow_time)
                 button_region_t* button_region =
                     (d->active ? &d->button_region[b_t] : &d->
                      button_region_inact[b_t]);
-                gint rx, ry, rw, rh;
+                int rx, ry, rw, rh;
 
                 if (ws->use_pixmap_buttons &&
                         ((ws->use_button_glow && d->active) ||
@@ -1691,12 +1691,12 @@ static void draw_window_decoration_real(decor_t* d, gboolean shadow_time)
         /*if (!shadow_time)
           {
         //workaround for slowness, will grab and rotate the two side-pieces
-        gint w, h;
+        int w, h;
         cairo_surface_t * csur;
         cairo_pattern_t * sr;
         cairo_matrix_t cm;
         cairo_destroy(cr);
-        gint topspace = ws->top_space + ws->titlebar_height;
+        int topspace = ws->top_space + ws->titlebar_height;
         cr = gdk_cairo_create (GDK_DRAWABLE (d->buffer_pixmap ? d->buffer_pixmap : d->pixmap));
         cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
 
@@ -1824,7 +1824,7 @@ static void draw_window_decoration(decor_t* d)
         draw_window_decoration_real(d, FALSE);
     }
     if (!d->only_change_active) {
-        gboolean save = d->active;
+        bool save = d->active;
         frame_settings* fs = d->fs;
 
         d->active = TRUE;
@@ -2206,7 +2206,7 @@ static void draw_switcher_decoration(decor_t* d)
     draw_switcher_foreground(d);
 }
 
-static gboolean draw_decor_list(void* data)
+static bool draw_decor_list(void* data)
 {
     GSList* list;
     decor_t* d;
@@ -2224,7 +2224,7 @@ static gboolean draw_decor_list(void* data)
     return FALSE;
 }
 
-static void queue_decor_draw_for_buttons(decor_t* d, gboolean for_buttons)
+static void queue_decor_draw_for_buttons(decor_t* d, bool for_buttons)
 {
     if (g_slist_find(draw_list, d)) {
         // handle possible previously queued drawing
@@ -2252,7 +2252,7 @@ static void queue_decor_draw(decor_t* d)
 static GdkPixmap* pixmap_new_from_pixbuf(GdkPixbuf* pixbuf)
 {
     GdkPixmap* pixmap;
-    guint width, height;
+    unsigned width, height;
     cairo_t* cr;
 
     width = gdk_pixbuf_get_width(pixbuf);
@@ -2384,7 +2384,7 @@ update_default_decorations(GdkScreen* screen, frame_settings* fs_act,
     }
 }
 
-static gboolean get_window_prop(Window xwindow, Atom atom, Window* val)
+static bool get_window_prop(Window xwindow, Atom atom, Window* val)
 {
     Atom type;
     int format;
@@ -2456,7 +2456,7 @@ static unsigned int get_mwm_prop(Window xwindow)
     return decor;
 }
 
-gint get_title_object_type(gchar obj)
+int get_title_object_type(char obj)
 {
     switch (obj) {
     case ':':                                        // state separator
@@ -2491,7 +2491,7 @@ gint get_title_object_type(gchar obj)
     return -2;
 }
 
-gint get_title_object_width(gchar obj, window_settings* ws, decor_t* d)
+int get_title_object_width(char obj, window_settings* ws, decor_t* d)
 {
     int i = get_title_object_type(obj);
 
@@ -2500,7 +2500,7 @@ gint get_title_object_width(gchar obj, window_settings* ws, decor_t* d)
         return -1;
     case TBT_TITLE:
         if (d->layout) {
-            gint w;
+            int w;
 
             pango_layout_get_pixel_size(d->layout, &w, NULL);
             return w + 2;
@@ -2519,20 +2519,20 @@ gint get_title_object_width(gchar obj, window_settings* ws, decor_t* d)
     }
 
 }
-void position_title_object(gchar obj, WnckWindow* win, window_settings* ws,
-                           gint x, gint s)
+void position_title_object(char obj, WnckWindow* win, window_settings* ws,
+                           int x, int s)
 {
     decor_t* d = g_object_get_data(G_OBJECT(win), "decor");
-    gint i = get_title_object_type(obj);
+    int i = get_title_object_type(obj);
 
     if (i < 0) {
         return;
     }
     if (i < B_T_COUNT) {
         Display* xdisplay;
-        gint w = ws->use_pixmap_buttons ? ws->c_icon_size[i].w : 16;
-        gint h = ws->use_pixmap_buttons ? ws->c_icon_size[i].h : 16;
-        gint y = ws->button_offset;
+        int w = ws->use_pixmap_buttons ? ws->c_icon_size[i].w : 16;
+        int h = ws->use_pixmap_buttons ? ws->c_icon_size[i].h : 16;
+        int y = ws->button_offset;
 
         xdisplay = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
         gdk_error_trap_push();
@@ -2559,13 +2559,13 @@ void layout_title_objects(WnckWindow* win)
 {
     decor_t* d = g_object_get_data(G_OBJECT(win), "decor");
     window_settings* ws = d->fs->ws;
-    gint x0, y0;
-    gint width, height;
-    guint i;
-    gint state = 0;
-    gint owidth;
-    gint x;
-    gboolean removed = FALSE;
+    int x0, y0;
+    int width, height;
+    unsigned i;
+    int state = 0;
+    int owidth;
+    int x;
+    bool removed = FALSE;
 
     d->tobj_size[0] = 0;
     d->tobj_size[1] = 0;
@@ -2634,8 +2634,8 @@ static void update_event_windows(WnckWindow* win)
 {
     Display* xdisplay;
     decor_t* d = g_object_get_data(G_OBJECT(win), "decor");
-    gint x0, y0, width, height, x, y, w, h;
-    gint i, j, k, l;
+    int x0, y0, width, height, x, y, w, h;
+    int i, j, k, l;
     window_settings* ws = d->fs->ws;
 
     xdisplay = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
@@ -2653,7 +2653,7 @@ static void update_event_windows(WnckWindow* win)
     gdk_error_trap_push();
 
     for (i = 0; i < 3; i++) {
-        static guint event_window_actions[3][3] = {
+        static unsigned event_window_actions[3][3] = {
             {
                 WNCK_WINDOW_ACTION_RESIZE,
                 WNCK_WINDOW_ACTION_RESIZE,
@@ -2707,11 +2707,11 @@ static const char* wnck_window_get_real_name(WnckWindow* win)
 #define wnck_window_get_name(w) wnck_window_get_real_name(w)
 #endif
 
-gint max_window_name_width(WnckWindow* win)
+int max_window_name_width(WnckWindow* win)
 {
     decor_t* d = g_object_get_data(G_OBJECT(win), "decor");
-    const gchar* name;
-    gint w;
+    const char* name;
+    int w;
     window_settings* ws = d->fs->ws;
 
     name = wnck_window_get_name(win);
@@ -2743,7 +2743,7 @@ gint max_window_name_width(WnckWindow* win)
 static void update_window_decoration_name(WnckWindow* win)
 {
     decor_t* d = g_object_get_data(G_OBJECT(win), "decor");
-    const gchar* name;
+    const char* name;
     glong name_length;
     PangoLayoutLine* line;
     window_settings* ws = d->fs->ws;
@@ -2755,7 +2755,7 @@ static void update_window_decoration_name(WnckWindow* win)
 
     name = wnck_window_get_name(win);
     if (name && (name_length = strlen(name))) {
-        gint w;
+        int w;
 
         pango_layout_set_auto_dir(d->layout, FALSE);
         pango_layout_set_text(d->layout, "", 0);
@@ -2882,14 +2882,14 @@ static void update_window_decoration_actions(WnckWindow* win)
     }
 }
 
-static gboolean update_window_decoration_size(WnckWindow* win)
+static bool update_window_decoration_size(WnckWindow* win)
 {
     decor_t* d = g_object_get_data(G_OBJECT(win), "decor");
     GdkPixmap* pixmap, *buffer_pixmap = NULL;
     GdkPixmap* ipixmap, *ibuffer_pixmap = NULL;
-    gint width, height;
-    gint w;
-    gint h;
+    int width, height;
+    int w;
+    int h;
 
     window_settings* ws = d->fs->ws;
 
@@ -2992,7 +2992,7 @@ static void add_frame_window(WnckWindow* win, Window frame)
     XSetWindowAttributes attr;
     gulong xid = wnck_window_get_xid(win);
     decor_t* d = g_object_get_data(G_OBJECT(win), "decor");
-    gint i, j;
+    int i, j;
 
     xdisplay = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
 
@@ -3060,11 +3060,11 @@ static void add_frame_window(WnckWindow* win, Window frame)
     }
 }
 
-static gboolean update_switcher_window(WnckWindow* win, Window selected)
+static bool update_switcher_window(WnckWindow* win, Window selected)
 {
     decor_t* d = g_object_get_data(G_OBJECT(win), "decor");
     GdkPixmap* pixmap, *buffer_pixmap = NULL;
-    gint height, width = 0;
+    int height, width = 0;
     WnckWindow* selected_win;
     window_settings* ws = d->fs->ws;
 
@@ -3100,7 +3100,7 @@ static gboolean update_switcher_window(WnckWindow* win, Window selected)
     if (selected_win) {
         glong name_length;
         PangoLayoutLine* line;
-        const gchar* name;
+        const char* name;
 
         if (d->name) {
             g_free(d->name);
@@ -3605,9 +3605,9 @@ static void show_tooltip(const char* text)
 {
     GdkDisplay* gdkdisplay;
     GtkRequisition requisition;
-    gint x, y, w, h;
+    int x, y, w, h;
     GdkScreen* screen;
-    gint monitor_num;
+    int monitor_num;
     GdkRectangle monitor;
 
     if (enable_tooltips) {
@@ -3659,7 +3659,7 @@ static void hide_tooltip(void)
     }
 }
 
-static gboolean tooltip_recently_shown(void)
+static bool tooltip_recently_shown(void)
 {
     GTimeVal now;
     glong msec;
@@ -3672,7 +3672,7 @@ static gboolean tooltip_recently_shown(void)
     return (msec < STICKY_REVERT_DELAY);
 }
 
-static gint tooltip_timeout(gpointer data)
+static int tooltip_timeout(void* data)
 {
     tooltip_timer_tag = 0;
 
@@ -3683,7 +3683,7 @@ static gint tooltip_timeout(gpointer data)
 
 static void tooltip_start_delay(const char* text)
 {
-    guint delay = DEFAULT_DELAY;
+    unsigned delay = DEFAULT_DELAY;
 
     if (tooltip_timer_tag) {
         return;
@@ -3694,10 +3694,10 @@ static void tooltip_start_delay(const char* text)
     }
 
     tooltip_timer_tag = g_timeout_add(delay,
-                                      tooltip_timeout, (gpointer) text);
+                                      tooltip_timeout, (void*) text);
 }
 
-static gint tooltip_paint_window(GtkWidget* tooltip)
+static int tooltip_paint_window(GtkWidget* tooltip)
 {
     GtkRequisition req;
 
@@ -3710,7 +3710,7 @@ static gint tooltip_paint_window(GtkWidget* tooltip)
     return FALSE;
 }
 
-static gboolean create_tooltip_window(void)
+static bool create_tooltip_window(void)
 {
     tip_window = gtk_window_new(GTK_WINDOW_POPUP);
 
@@ -3743,7 +3743,7 @@ static gboolean create_tooltip_window(void)
 
 static void
 handle_tooltip_event(WnckWindow* win,
-                     XEvent* xevent, guint state, const char* tip)
+                     XEvent* xevent, unsigned state, const char* tip)
 {
     switch (xevent->type) {
     case ButtonPress:
@@ -3823,11 +3823,11 @@ static void action_menu_map(WnckWindow* win, long button, Time time)
  * 0: nothing, hover, ButtonPress
  * XEvent Button code: ButtonRelease (mouse click)
  */
-static gint generic_button_event(WnckWindow* win, XEvent* xevent,
-                                 gint button, gint bpict)
+static int generic_button_event(WnckWindow* win, XEvent* xevent,
+                                 int button, int bpict)
 {
     // Display *xdisplay = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
-    const gchar* tooltips[B_COUNT] = {
+    const char* tooltips[B_COUNT] = {
         _("Close Window"),
         _("Maximize Window"),
         _("Restore Window"),
@@ -3843,8 +3843,8 @@ static gint generic_button_event(WnckWindow* win, XEvent* xevent,
     };
 
     decor_t* d = g_object_get_data(G_OBJECT(win), "decor");
-    guint state = d->button_states[button];
-    gint ret = 0;
+    unsigned state = d->button_states[button];
+    int ret = 0;
 
     // window_settings * ws = d->fs->ws;
 
@@ -3899,7 +3899,7 @@ static void close_button_event(WnckWindow* win, XEvent* xevent)
 
 static void max_button_event(WnckWindow* win, XEvent* xevent)
 {
-    gboolean maximized = wnck_window_is_maximized(win);
+    bool maximized = wnck_window_is_maximized(win);
 
     switch (generic_button_event(win,
                                  xevent,
@@ -4151,7 +4151,7 @@ static char* get_client_machine(Window xwindow)
 {
     Atom atom, type;
     gulong nitems, bytes_after;
-    gchar* str = NULL;
+    char* str = NULL;
     unsigned char* sstr = NULL;
     int format, result;
     char* retval;
@@ -4166,7 +4166,7 @@ static char* get_client_machine(Window xwindow)
                                 FALSE, XA_STRING, &type, &format, &nitems,
                                 &bytes_after, &sstr);
 
-    str = (gchar*) sstr;
+    str = (char*) sstr;
     gdk_error_trap_pop();
 
     if (result != Success) {
@@ -4191,7 +4191,7 @@ static void kill_window(WnckWindow* win)
 
     app = wnck_window_get_application(win);
     if (app) {
-        gchar buf[257], *client_machine;
+        char buf[257], *client_machine;
         int pid;
 
         pid = wnck_application_get_pid(app);
@@ -4217,7 +4217,7 @@ static void kill_window(WnckWindow* win)
 }
 
 static void
-force_quit_dialog_response(GtkWidget* dialog, gint response, void* data)
+force_quit_dialog_response(GtkWidget* dialog, int response, void* data)
 {
     WnckWindow* win = data;
     decor_t* d = g_object_get_data(G_OBJECT(win), "decor");
@@ -4236,8 +4236,8 @@ static void show_force_quit_dialog(WnckWindow* win, Time timestamp)
 {
     decor_t* d = g_object_get_data(G_OBJECT(win), "decor");
     GtkWidget* dialog;
-    gchar* str, *tmp;
-    const gchar* name;
+    char* str, *tmp;
+    const char* name;
 
     if (d->force_quit_dialog) {
         return;
@@ -4305,7 +4305,7 @@ static void hide_force_quit_dialog(WnckWindow* win)
 }
 
 static GdkFilterReturn
-event_filter_func(GdkXEvent* gdkxevent, GdkEvent* event, gpointer data)
+event_filter_func(GdkXEvent* gdkxevent, GdkEvent* event, void* data)
 {
     Display* xdisplay;
     GdkDisplay* gdkdisplay;
@@ -4358,7 +4358,7 @@ event_filter_func(GdkXEvent* gdkxevent, GdkEvent* event, gpointer data)
             win = wnck_window_get(xid);
             if (win) {
                 decor_t* d = g_object_get_data(G_OBJECT(win), "decor");
-                gboolean decorated = FALSE;
+                bool decorated = FALSE;
 
                 if (get_mwm_prop(xid) & (MWM_DECOR_ALL | MWM_DECOR_TITLE)) {
                     decorated = TRUE;
@@ -4456,7 +4456,7 @@ event_filter_func(GdkXEvent* gdkxevent, GdkEvent* event, gpointer data)
             decor_t* d = g_object_get_data(G_OBJECT(win), "decor");
 
             if (d->decorated) {
-                gint i, j;
+                int i, j;
 
                 for (i = 0; i < 3; i++)
                     for (j = 0; j < 3; j++)
@@ -4477,7 +4477,7 @@ event_filter_func(GdkXEvent* gdkxevent, GdkEvent* event, gpointer data)
 
 static GdkFilterReturn
 selection_event_filter_func(GdkXEvent* gdkxevent,
-                            GdkEvent* event, gpointer data)
+                            GdkEvent* event, void* data)
 {
     Display* xdisplay;
     GdkDisplay* gdkdisplay;
@@ -4918,9 +4918,9 @@ static void titlebar_font_changed(window_settings* ws)
     pango_font_metrics_unref(metrics);
 
 }
-static void load_buttons_image(window_settings* ws, gint y)
+static void load_buttons_image(window_settings* ws, int y)
 {
-    gchar* file;
+    char* file;
     int x, pix_width, pix_height, rel_button;
 
     rel_button = get_b_offset(y);
@@ -4952,12 +4952,12 @@ static void load_buttons_image(window_settings* ws, gint y)
 }
 static void load_buttons_glow_images(window_settings* ws)
 {
-    gchar* file1 = NULL;
-    gchar* file2 = NULL;
+    char* file1 = NULL;
+    char* file2 = NULL;
     int x, pix_width, pix_height;
     int pix_width2, pix_height2;
-    gboolean success1 = FALSE;
-    gboolean success2 = FALSE;
+    bool success1 = FALSE;
+    bool success2 = FALSE;
 
     if (ws->use_button_glow) {
         if (ws->ButtonGlowArray) {
@@ -5060,7 +5060,7 @@ static void load_buttons_glow_images(window_settings* ws)
 }
 void load_button_image_setting(window_settings* ws)
 {
-    gint i;
+    int i;
 
     for (i = 0; i < B_COUNT; i++) {
         load_buttons_image(ws, i);
@@ -5073,7 +5073,7 @@ void load_button_image_setting(window_settings* ws)
 }
 static void load_settings(window_settings* ws)
 {
-    gchar* path =
+    char* path =
         g_strjoin("/", g_get_home_dir(), ".emerald/settings.ini", NULL);
     GKeyFile* f = g_key_file_new();
 
@@ -5088,14 +5088,14 @@ static void load_settings(window_settings* ws)
     load_bool_setting(f, &ws->use_decoration_cropping,
                       "use_decoration_cropping", "decorations");
     load_bool_setting(f, &ws->use_button_fade, "use_button_fade", "buttons");
-    gint button_fade_step_duration = ws->button_fade_step_duration;
+    int button_fade_step_duration = ws->button_fade_step_duration;
 
     load_int_setting(f, &button_fade_step_duration,
                      "button_fade_step_duration", "buttons");
     if (button_fade_step_duration > 0) {
         ws->button_fade_step_duration = button_fade_step_duration;
     }
-    gint button_fade_total_duration = 250;
+    int button_fade_total_duration = 250;
 
     load_int_setting(f, &button_fade_total_duration,
                      "button_fade_total_duration", "buttons");
@@ -5105,14 +5105,14 @@ static void load_settings(window_settings* ws)
     if (ws->button_fade_num_steps == 0) {
         ws->button_fade_num_steps = 1;
     }
-    gboolean use_button_fade_pulse = FALSE;
+    bool use_button_fade_pulse = FALSE;
 
     load_bool_setting(f, &use_button_fade_pulse, "use_button_fade_pulse",
                       "buttons");
 
     ws->button_fade_pulse_wait_steps = 0;
     if (use_button_fade_pulse) {
-        gint button_fade_pulse_min_opacity = 0;
+        int button_fade_pulse_min_opacity = 0;
 
         load_int_setting(f, &button_fade_pulse_min_opacity,
                          "button_fade_pulse_min_opacity", "buttons");
@@ -5120,7 +5120,7 @@ static void load_settings(window_settings* ws)
             ws->button_fade_num_steps * (100 -
                                          button_fade_pulse_min_opacity) /
             100;
-        gint button_fade_pulse_wait_duration = 0;
+        int button_fade_pulse_wait_duration = 0;
 
         load_int_setting(f, &button_fade_pulse_wait_duration,
                          "button_fade_pulse_wait_duration", "buttons");
@@ -5244,7 +5244,7 @@ void reload_all_settings(int sig)
     }
 }
 #endif
-gboolean reload_if_needed(gpointer p)
+bool reload_if_needed(void* p)
 {
     if (do_reload) {
         do_reload = FALSE;
@@ -5261,8 +5261,8 @@ int main(int argc, char* argv[])
     WnckScreen* screen;
     int status;
 
-    gint i, j;
-    gboolean replace = FALSE;
+    int i, j;
+    bool replace = FALSE;
     PangoFontMetrics* metrics;
     PangoLanguage* lang;
     frame_settings* pfs;

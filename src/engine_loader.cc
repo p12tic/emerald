@@ -29,11 +29,11 @@ fini_engine_proc e_fini = NULL;
 load_settings_proc e_load = NULL;
 draw_frame_proc e_draw = NULL;
 
-gboolean load_engine(gchar* engine_name, window_settings* ws)
+bool load_engine(char* engine_name, window_settings* ws)
 {
     void* newengine;
-    gchar* path;
-    gchar* engine_ldname;
+    char* path;
+    char* engine_ldname;
     ws->stretch_sides = TRUE;
 
     engine_ldname = g_strdup_printf("lib%s.so", engine_name);

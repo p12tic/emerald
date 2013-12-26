@@ -56,14 +56,14 @@ typedef struct _private_fs {
     double  alpha_contrast;
     double  glow_radius;
     alpha_color glow_inner;
-    gboolean    use_glow;
+    bool    use_glow;
 } private_fs;
 
 typedef struct _private_ws {
-    gboolean round_top_left;
-    gboolean round_top_right;
-    gboolean round_bottom_left;
-    gboolean round_bottom_right;
+    bool round_top_left;
+    bool round_top_right;
+    bool round_bottom_left;
+    bool round_bottom_right;
     double  corner_radius;
 } private_ws;
 
@@ -83,7 +83,7 @@ draw_closed_curve(cairo_t* cr,
                   double  w,
                   double  h,
                   double ch,
-                  gboolean tophalf)
+                  bool tophalf)
 {
     cairo_move_to(cr, x, y);
     if (tophalf || ch == 0) {
@@ -110,7 +110,7 @@ draw_filled_closed_curve(cairo_t* cr,
                          double        w,
                          double        h,
                          double        ch,
-                         gboolean      tophalf,
+                         bool      tophalf,
                          alpha_color* c0,
                          alpha_color* c1,
                          alpha_color* c2)
@@ -192,10 +192,10 @@ void create_glow(decor_t* d, cairo_t* cr,
     cairo_fill(cr);
 }
 
-static gint get_real_pos(window_settings* ws, gint tobj, decor_t* d)
+static int get_real_pos(window_settings* ws, int tobj, decor_t* d)
 {
-    gint width = d->width;
-    gint base = ws->left_space;
+    int width = d->width;
+    int base = ws->left_space;
     switch (d->tobj_item_state[tobj]) {
     case 1:
         base = (width - ws->left_space - ws->right_space - d->tobj_size[0] - d->tobj_size[2]) / 2
@@ -224,10 +224,10 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
     private_fs* pfs = fs->engine_fs;
     window_settings* ws = fs->ws;
     private_ws* pws = ws->engine_ws;
-    gdouble pleft;
-    gdouble ptop;
-    gdouble pwidth;
-    gdouble pheight;
+    double pleft;
+    double ptop;
+    double pwidth;
+    double pheight;
     top = ws->win_extents.top + ws->titlebar_height;
 
     x1 = ws->left_space - ws->win_extents.left;
@@ -593,7 +593,7 @@ void layout_corners_frame(GtkWidget* vbox)
     register_setting(junk, ST_FLOAT, SECT, "radius");
 
 }
-void my_engine_settings(GtkWidget* hbox,  gboolean active)
+void my_engine_settings(GtkWidget* hbox,  bool active)
 {
     GtkWidget* vbox;
     GtkWidget* junk;

@@ -31,15 +31,15 @@ typedef enum _EngineCol {
     ENGINE_COL_COUNT
 } EngineCol;
 typedef struct _EngineData {
-    const gchar* canname;
-    gchar* dlname;
+    const char* canname;
+    char* dlname;
     GtkWidget* vbox;
     EngineMetaInfo meta;
 } EngineData;
 typedef struct _FindEngine {
-    const gchar* canname;
-    gboolean found;
-    gint i;
+    const char* canname;
+    bool found;
+    int i;
     EngineData* d;
 } FindEngine;
 GSList* SettingList = NULL;
@@ -49,19 +49,19 @@ GtkListStore* EngineModel;
 GtkWidget* EngineContainer;
 //GtkWidget * PreviewImage[BX_COUNT];
 //GtkWidget * ButtonImage[BX_COUNT];
-gboolean apply = FALSE;
-gboolean changed = FALSE;
+bool apply = FALSE;
+bool changed = FALSE;
 GKeyFile* global_theme_file;
 GKeyFile* global_settings_file;
 #ifdef USE_DBUS
 DBusConnection* dbcon;
 #endif
-gchar* active_engine = NULL;
+char* active_engine = NULL;
 
-static gchar* display_part(const gchar* p)
+static char* display_part(const char* p)
 {
-    gchar* name = g_strdup(p);
-    gchar* tmp;
+    char* name = g_strdup(p);
+    char* tmp;
 
     if ((tmp = g_strrstr(name, ":"))) {
         *tmp++ = 0;
@@ -81,7 +81,7 @@ GSList* get_setting_list()
 {
     return SettingList;
 }
-GtkWidget* scaler_new(gdouble low, gdouble high, gdouble prec)
+GtkWidget* scaler_new(double low, double high, double prec)
 {
     GtkWidget* w;
     w = gtk_hscale_new_with_range(low, high, prec);
@@ -90,11 +90,12 @@ GtkWidget* scaler_new(gdouble low, gdouble high, gdouble prec)
     gtk_widget_set_size_request(w, 100, -1);
     return w;
 }
-void add_color_alpha_value(gchar* caption, gchar* basekey, gchar* sect, gboolean active)
+void add_color_alpha_value(const char* caption, const char* basekey,
+                           const char* sect, bool active)
 {
     GtkWidget* w;
-    gchar* colorkey;
-    gchar* alphakey;
+    char* colorkey;
+    char* alphakey;
     colorkey = g_strdup_printf(active ? "active_%s" : "inactive_%s", basekey);
     alphakey = g_strdup_printf(active ? "active_%s_alpha" : "inactive_%s_alpha",
                                basekey);
@@ -111,13 +112,13 @@ void add_color_alpha_value(gchar* caption, gchar* basekey, gchar* sect, gboolean
     register_setting(w, ST_FLOAT, sect, alphakey);
     //we don't g_free because they are registered with register_setting
 }
-void make_labels(gchar* header)
+void make_labels(const char* header)
 {
     table_append(gtk_label_new(header), FALSE);
     table_append(gtk_label_new("Color"), FALSE);
     table_append(gtk_label_new("Opacity"), FALSE);
 }
-GtkWidget* build_frame(GtkWidget* vbox, gchar* title, gboolean is_hbox)
+GtkWidget* build_frame(GtkWidget* vbox, const char* title, bool is_hbox)
 {
     GtkWidget* frame;
     GtkWidget* box;
@@ -128,7 +129,8 @@ GtkWidget* build_frame(GtkWidget* vbox, gchar* title, gboolean is_hbox)
     gtk_container_addC(frame, box);
     return box;
 }
-SettingItem* register_img_file_setting(GtkWidget* widget, gchar* section, gchar* key, GtkImage* image)
+SettingItem* register_img_file_setting(GtkWidget* widget, const char* section,
+                                       const char* key, GtkImage* image)
 {
     SettingItem* item = register_setting(widget, ST_IMG_FILE, section, key);
     gtk_file_chooser_button_set_width_chars(GTK_FILE_CHOOSER_BUTTON(widget), 0);
@@ -139,7 +141,7 @@ SettingItem* register_img_file_setting(GtkWidget* widget, gchar* section, gchar*
                      item->preview);
     return item;
 }
-SettingItem* register_setting(GtkWidget* widget, SettingType type, gchar* section, gchar* key)
+SettingItem* register_setting(GtkWidget* widget, SettingType type, char* section, char* key)
 {
     SettingItem* item;
     item = malloc(sizeof(SettingItem));
@@ -203,12 +205,12 @@ SettingItem* register_setting(GtkWidget* widget, SettingType type, gchar* sectio
     return item;
 }
 
-static gint current_table_width;
+static int current_table_width;
 static GtkTable* current_table;
-static gint current_table_col;
-static gint current_table_row;
+static int current_table_col;
+static int current_table_row;
 
-void table_new(gint width, gboolean same, gboolean labels)
+void table_new(int width, bool same, bool labels)
 {
     //WARNING - clobbers all the current_table_ vars.
     current_table = GTK_TABLE(gtk_table_new(width, 1, same));
@@ -218,7 +220,7 @@ void table_new(gint width, gboolean same, gboolean labels)
     current_table_row = 0;
     current_table_width = width;
 }
-void table_append(GtkWidget* child, gboolean stretch)
+void table_append(GtkWidget* child, bool stretch)
 {
     gtk_table_attach(current_table, child, current_table_col, current_table_col + 1,
                      current_table_row, current_table_row + 1,
@@ -291,9 +293,9 @@ void send_reload_signal()
         XSync(dpy, False);
     } else {
         /* The old way */
-        gchar* args[] =
-        {"killall", "-u", (gchar*)g_get_user_name(), "-SIGUSR1", "emerald", NULL};
-        gchar* ret = NULL;
+        char* args[] =
+        {"killall", "-u", (char*)g_get_user_name(), "-SIGUSR1", "emerald", NULL};
+        char* ret = NULL;
         if (!g_spawn_sync(NULL, args, NULL, G_SPAWN_STDERR_TO_DEV_NULL | G_SPAWN_SEARCH_PATH,
                           NULL, NULL, &ret, NULL, NULL, NULL) || !ret) {
             g_warning("Couldn't find running emerald, no reload signal sent.");
@@ -303,9 +305,9 @@ void send_reload_signal()
 }
 void apply_settings()
 {
-    gchar* file = g_strjoin("/", g_get_home_dir(), ".emerald/theme/theme.ini", NULL);
-    gchar* path = g_strjoin("/", g_get_home_dir(), ".emerald/theme/", NULL);
-    gchar* at;
+    char* file = g_strjoin("/", g_get_home_dir(), ".emerald/theme/theme.ini", NULL);
+    char* path = g_strjoin("/", g_get_home_dir(), ".emerald/theme/", NULL);
+    char* at;
     g_slist_foreach(SettingList, (GFunc) write_setting, global_theme_file);
     g_key_file_set_string(global_theme_file, "theme", "version", VERSION);
     g_mkdir_with_parents(path, 00755);
@@ -318,11 +320,11 @@ void apply_settings()
     g_free(path);
     send_reload_signal();
 }
-void cb_apply_setting(GtkWidget* w, gpointer p)
+void cb_apply_setting(GtkWidget* w, void* p)
 {
     SettingItem* item = p;
     if (item->type == ST_IMG_FILE) {
-        gchar* s;
+        char* s;
         if (!(s = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(item->widget)))) {
             return;    // for now just ignore setting it to an invalid name
         }
@@ -334,7 +336,7 @@ void cb_apply_setting(GtkWidget* w, gpointer p)
         item->fvalue = s;
         check_file(item, s);
     }
-    write_setting(p, (gpointer) global_theme_file);
+    write_setting(p, (void*) global_theme_file);
     if (apply) {
         apply_settings();
     } else {
@@ -348,7 +350,7 @@ void setup_dbus()
     dbus_connection_setup_with_g_main(dbcon, NULL);
 }
 #endif
-void write_setting(SettingItem* item, gpointer p)
+void write_setting(SettingItem* item, void* p)
 {
     GKeyFile* f = (GKeyFile*) p;
     switch (item->type) {
@@ -376,7 +378,7 @@ void write_setting(SettingItem* item, gpointer p)
     case ST_IMG_FILE:
         //g_key_file_set_string(f,item->section,item->key,get_img_file(item));
     {
-        gchar* s = g_strdup_printf("%s/.emerald/theme/%s.%s.png", g_get_home_dir(), item->section, item->key);
+        char* s = g_strdup_printf("%s/.emerald/theme/%s.%s.png", g_get_home_dir(), item->section, item->key);
         GdkPixbuf* pbuf = gtk_image_get_pixbuf(item->image);
         if (pbuf) {
             gdk_pixbuf_savev(pbuf, s, "png", NULL, NULL, NULL);
@@ -388,7 +390,7 @@ void write_setting(SettingItem* item, gpointer p)
     break;
     case ST_ENGINE_COMBO: {
         EngineMetaInfo emi;
-        const gchar* active_engine = get_engine_combo(item);
+        const char* active_engine = get_engine_combo(item);
         if (get_engine_meta_info(active_engine, &emi)) {
             g_key_file_set_string(f, "engine_version", active_engine, emi.version);
         }
@@ -424,9 +426,9 @@ void write_setting(SettingItem* item, gpointer p)
 }
 void write_setting_file()
 {
-    gchar* file = g_strjoin("/", g_get_home_dir(), ".emerald/settings.ini", NULL);
-    gchar* path = g_strjoin("/", g_get_home_dir(), ".emerald/", NULL);
-    gchar* at;
+    char* file = g_strjoin("/", g_get_home_dir(), ".emerald/settings.ini", NULL);
+    char* path = g_strjoin("/", g_get_home_dir(), ".emerald/", NULL);
+    char* at;
     g_mkdir_with_parents(path, 00755);
     at = g_key_file_to_data(global_settings_file, NULL, NULL);
     if (at) {
@@ -437,14 +439,14 @@ void write_setting_file()
     g_free(path);
 }
 
-gchar* globalStr = NULL;
-gchar globalFloatStr[G_ASCII_DTOSTR_BUF_SIZE + 1];
+char* globalStr = NULL;
+char globalFloatStr[G_ASCII_DTOSTR_BUF_SIZE + 1];
 
-gboolean get_bool(SettingItem* item)
+bool get_bool(SettingItem* item)
 {
     return gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(item->widget));
 }
-gdouble get_float(SettingItem* item)
+double get_float(SettingItem* item)
 {
     if (!strcmp(G_OBJECT_TYPE_NAME(item->widget), "GtkSpinButton")) {
         return gtk_spin_button_get_value((GtkSpinButton*)item->widget);
@@ -452,17 +454,17 @@ gdouble get_float(SettingItem* item)
         return gtk_range_get_value(GTK_RANGE(item->widget));
     }
 }
-gint get_int(SettingItem* item)
+int get_int(SettingItem* item)
 {
     return get_float(item);
 }
-const gchar* get_float_str(SettingItem* item)
+const char* get_float_str(SettingItem* item)
 {
     g_ascii_dtostr(globalFloatStr, G_ASCII_DTOSTR_BUF_SIZE,
                    get_float(item));
     return globalFloatStr;
 }
-const gchar* get_color(SettingItem* item)
+const char* get_color(SettingItem* item)
 {
     GdkColor c;
     if (globalStr) {
@@ -472,15 +474,15 @@ const gchar* get_color(SettingItem* item)
     globalStr = g_strdup_printf("#%02x%02x%02x", c.red >> 8, c.green >> 8, c.blue >> 8);
     return globalStr;
 }
-const gchar* get_font(SettingItem* item)
+const char* get_font(SettingItem* item)
 {
     return gtk_font_button_get_font_name(GTK_FONT_BUTTON(item->widget));
 }
-const gchar* get_string(SettingItem* item)
+const char* get_string(SettingItem* item)
 {
     return gtk_entry_get_text(GTK_ENTRY(item->widget));
 }
-void check_file(SettingItem* item, gchar* f)
+void check_file(SettingItem* item, char* f)
 {
     GdkPixbuf* p;
     p = gdk_pixbuf_new_from_file(f, NULL);
@@ -495,13 +497,13 @@ void check_file(SettingItem* item, gchar* f)
         g_object_unref(p);
     }
 }
-const gchar* get_img_file(SettingItem* item)
+const char* get_img_file(SettingItem* item)
 {
     return item->fvalue;
 }
-const gchar* get_string_combo(SettingItem* item)
+const char* get_string_combo(SettingItem* item)
 {
-    const gchar* s;
+    const char* s;
     s = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(item->widget))));
     if (strlen(s)) {
         return s;
@@ -509,15 +511,15 @@ const gchar* get_string_combo(SettingItem* item)
     s = "IT::HNXC:Default Layout (Blank Entry)";
     return s;
 }
-void show_engine_named(EngineData* d, gpointer p)
+void show_engine_named(EngineData* d, void* p)
 {
-    gchar* nam = p;
+    char* nam = p;
     if (!strcmp(nam, d->canname)) {
         gtk_container_add(GTK_CONTAINER(EngineContainer), d->vbox);
         gtk_widget_show_all(EngineContainer);
     }
 }
-void do_engine(const gchar* nam)
+void do_engine(const char* nam)
 {
     GtkWidget* w;
     if (active_engine && !strcmp(active_engine, nam)) {
@@ -530,10 +532,10 @@ void do_engine(const gchar* nam)
     if ((w = gtk_bin_get_child(GTK_BIN(EngineContainer)))) {
         gtk_container_remove(GTK_CONTAINER(EngineContainer), w);
     }
-    g_slist_foreach(EngineList, (GFunc) show_engine_named, (gpointer) nam);
+    g_slist_foreach(EngineList, (GFunc) show_engine_named, (void*) nam);
 
 }
-void search_engine(EngineData* d, gpointer p)
+void search_engine(EngineData* d, void* p)
 {
     FindEngine* fe = p;
     if (!fe->found) {
@@ -545,7 +547,7 @@ void search_engine(EngineData* d, gpointer p)
         }
     }
 }
-gboolean get_engine_meta_info(const gchar* engine, EngineMetaInfo* inf)
+bool get_engine_meta_info(const char* engine, EngineMetaInfo* inf)
 {
     FindEngine fe;
     fe.canname = engine;
@@ -558,7 +560,7 @@ gboolean get_engine_meta_info(const gchar* engine, EngineMetaInfo* inf)
     }
     return fe.found;
 }
-void set_engine_combo(SettingItem* item, gchar* val)
+void set_engine_combo(SettingItem* item, char* val)
 {
     FindEngine fe;
     fe.canname = val;
@@ -578,9 +580,9 @@ void set_engine_combo(SettingItem* item, gchar* val)
     }
     do_engine(fe.canname);
 }
-const gchar* get_engine_combo(SettingItem* item)
+const char* get_engine_combo(SettingItem* item)
 {
-    static gchar* s = NULL;
+    static char* s = NULL;
     GtkTreeIter i;
     if (s) {
         g_free(s);
@@ -595,14 +597,14 @@ const gchar* get_engine_combo(SettingItem* item)
     }
     return s;
 }
-gint get_sf_int_combo(SettingItem* item)
+int get_sf_int_combo(SettingItem* item)
 {
     return gtk_combo_box_get_active(GTK_COMBO_BOX(item->widget));
 }
-void update_preview(GtkFileChooser* fc, gchar* filename, GtkImage* img)
+void update_preview(GtkFileChooser* fc, char* filename, GtkImage* img)
 {
     GdkPixbuf* pixbuf;
-    gboolean have_preview;
+    bool have_preview;
     pixbuf = gdk_pixbuf_new_from_file(filename, NULL);
     have_preview = (pixbuf != NULL);
     gtk_image_set_from_pixbuf(GTK_IMAGE(img), pixbuf);
@@ -611,25 +613,25 @@ void update_preview(GtkFileChooser* fc, gchar* filename, GtkImage* img)
     }
     gtk_file_chooser_set_preview_widget_active(fc, have_preview);
 }
-void update_preview_cb(GtkFileChooser* file_chooser, gpointer data)
+void update_preview_cb(GtkFileChooser* file_chooser, void* data)
 {
-    gchar* filename;
+    char* filename;
     filename = gtk_file_chooser_get_preview_filename(file_chooser);
     update_preview(file_chooser, filename, GTK_IMAGE(data));
     g_free(filename);
 }
-void set_img_file(SettingItem* item, gchar* f)
+void set_img_file(SettingItem* item, char* f)
 {
     g_free(item->fvalue);
     item->fvalue = g_strdup(f);
     gtk_file_chooser_select_filename(GTK_FILE_CHOOSER(item->widget), f);
     check_file(item, f);
 }
-void set_bool(SettingItem* item, gboolean b)
+void set_bool(SettingItem* item, bool b)
 {
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(item->widget), b);
 }
-void set_float(SettingItem* item, gdouble f)
+void set_float(SettingItem* item, double f)
 {
     if (!strcmp(G_OBJECT_TYPE_NAME(item->widget), "GtkSpinButton")) {
         gtk_spin_button_set_value((GtkSpinButton*)item->widget, f);
@@ -637,43 +639,43 @@ void set_float(SettingItem* item, gdouble f)
         gtk_range_set_value(GTK_RANGE(item->widget), f);
     }
 }
-void set_int(SettingItem* item, gint i)
+void set_int(SettingItem* item, int i)
 {
     set_float(item, i);
 }
-void set_float_str(SettingItem* item, gchar* s)
+void set_float_str(SettingItem* item, char* s)
 {
     set_float(item, g_ascii_strtod(s, NULL));
 }
-void set_color(SettingItem* item, gchar* s)
+void set_color(SettingItem* item, char* s)
 {
     GdkColor c;
     gdk_color_parse(s, &c);
     gtk_color_button_set_color(GTK_COLOR_BUTTON(item->widget), &c);
 }
-void set_font(SettingItem* item, gchar* f)
+void set_font(SettingItem* item, char* f)
 {
     gtk_font_button_set_font_name(GTK_FONT_BUTTON(item->widget), f);
 }
-void set_string(SettingItem* item, gchar* s)
+void set_string(SettingItem* item, char* s)
 {
     gtk_entry_set_text(GTK_ENTRY(item->widget), s);
 }
-void set_string_combo(SettingItem* item, gchar* s)
+void set_string_combo(SettingItem* item, char* s)
 {
     gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(item->widget))), s);
 }
-void set_sf_int_combo(SettingItem* item, gint i)
+void set_sf_int_combo(SettingItem* item, int i)
 {
     gtk_combo_box_set_active(GTK_COMBO_BOX(item->widget), i);
 }
-void read_setting(SettingItem* item, gpointer* p)
+void read_setting(SettingItem* item, void** p)
 {
     GKeyFile* f = (GKeyFile*) p;
     GError* e = NULL;
-    gboolean b;
-    gint i;
-    gchar* s;
+    bool b;
+    int i;
+    char* s;
     switch (item->type) {
     case ST_BOOL:
         b = g_key_file_get_boolean(f, item->section, item->key, &e);
@@ -774,7 +776,7 @@ void read_setting(SettingItem* item, gpointer* p)
 }
 void init_settings()
 {
-    gchar* file = g_strjoin("/", g_get_home_dir(), ".emerald/theme/theme.ini", NULL);
+    char* file = g_strjoin("/", g_get_home_dir(), ".emerald/theme/theme.ini", NULL);
     g_key_file_load_from_file(global_theme_file, file, G_KEY_FILE_KEEP_COMMENTS, NULL);
     g_free(file);
     file = g_strjoin("/", g_get_home_dir(), ".emerald/settings.ini", NULL);
@@ -783,15 +785,15 @@ void init_settings()
     g_slist_foreach(SettingList, (GFunc) read_setting, global_theme_file);
 }
 
-void set_changed(gboolean schanged)
+void set_changed(bool schanged)
 {
     changed = schanged;
 }
-void set_apply(gboolean sapply)
+void set_apply(bool sapply)
 {
     apply = sapply;
 }
-void cb_clear_file(GtkWidget* button, gpointer p)
+void cb_clear_file(GtkWidget* button, void* p)
 {
     SettingItem* item = p;
     check_file(item, "");
@@ -819,10 +821,10 @@ void layout_engine_list(GtkWidget* vbox)
     EngineContainer = gtk_alignment_new(0, 0, 1, 1); // really only needed for the bin-ness
     gtk_box_pack_startC(vbox, EngineContainer, TRUE, TRUE, 0);
 }
-static gchar* canonize_name(gchar* dlname)
+static char* canonize_name(char* dlname)
 {
-    gchar* end;
-    gchar* begin = g_strrstr(dlname, "/lib");
+    char* end;
+    char* begin = g_strrstr(dlname, "/lib");
     if (!begin) {
         return g_strdup("");
     }
@@ -832,14 +834,14 @@ static gchar* canonize_name(gchar* dlname)
     end[0] = '\0';
     return begin;
 }
-static void engine_comp(EngineData* d, gpointer p)
+static void engine_comp(EngineData* d, void* p)
 {
     FindEngine* e = p;
     if (!strcmp(e->canname, d->canname)) {
         e->found = TRUE;
     }
 }
-static gboolean engine_is_unique(gchar* canname)
+static bool engine_is_unique(char* canname)
 {
     FindEngine e;
     e.canname = canname;
@@ -847,10 +849,10 @@ static gboolean engine_is_unique(gchar* canname)
     g_slist_foreach(EngineList, (GFunc)engine_comp, &e);
     return !e.found;
 }
-static void append_engine(gchar* dlname)
+static void append_engine(char* dlname)
 {
-    gchar* can;
-    gchar* err;
+    char* can;
+    char* err;
     (void) dlerror();
     void* hand = dlopen(dlname, RTLD_NOW);
     err = dlerror();
@@ -872,7 +874,7 @@ static void append_engine(gchar* dlname)
             get_meta_info_proc meta;
             EngineData* d = malloc(sizeof(EngineData));
             GtkTreeIter i;
-            const gchar* format =
+            const char* format =
                 "<b>%s</b> (%s)\n"
                 "<i><small>%s</small></i>";
             meta = dlsym(hand, "get_meta_info");
@@ -908,17 +910,17 @@ static void append_engine(gchar* dlname)
     }
     dlclose(hand);
 }
-static void engine_scan_dir(gchar* dir)
+static void engine_scan_dir(char* dir)
 {
     GDir* d;
     d = g_dir_open(dir, 0, NULL);
     if (d) {
-        gchar* n;
+        char* n;
         GPatternSpec* ps;
         ps = g_pattern_spec_new("lib*.so");
-        while ((n = (gchar*) g_dir_read_name(d))) {
+        while ((n = (char*) g_dir_read_name(d))) {
             if (g_pattern_match_string(ps, n)) {
-                gchar* dln = g_strjoin("/", dir, n, NULL);
+                char* dln = g_strjoin("/", dir, n, NULL);
                 append_engine(dln);
             }
         }
@@ -934,7 +936,7 @@ void init_engine_list()
 
     EngineModel = gtk_list_store_new(ENGINE_COL_COUNT, G_TYPE_STRING,
                                      G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, GDK_TYPE_PIXBUF);
-    gchar* local_engine_dir = g_strjoin("/", g_get_home_dir(), ".emerald/engines", NULL);
+    char* local_engine_dir = g_strjoin("/", g_get_home_dir(), ".emerald/engines", NULL);
     gtk_combo_box_set_model(GTK_COMBO_BOX(EngineCombo), GTK_TREE_MODEL(EngineModel));
     r = gtk_cell_renderer_pixbuf_new();
     gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(EngineCombo), r, FALSE);
@@ -948,7 +950,7 @@ void init_engine_list()
 
     register_setting(EngineCombo, ST_ENGINE_COMBO, "engine", "engine");
 }
-GtkWidget* build_notebook_page(gchar* title, GtkWidget* notebook)
+GtkWidget* build_notebook_page(char* title, GtkWidget* notebook)
 {
     GtkWidget* vbox;
     vbox = gtk_vbox_new(FALSE, 2);

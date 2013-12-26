@@ -154,31 +154,31 @@ typedef struct _frame_settings frame_settings;
 
 typedef struct _window_settings {
     void* engine_ws;
-    gint button_offset;
-    gint button_hoffset;
-    gchar* tobj_layout;
+    int button_offset;
+    int button_hoffset;
+    char* tobj_layout;
 
-    gint double_click_action;
-    gint button_hover_cursor;
+    int double_click_action;
+    int button_hover_cursor;
 
-    gboolean round_top_left;
-    gboolean round_top_right;
-    gboolean round_bottom_left;
-    gboolean round_bottom_right;
+    bool round_top_left;
+    bool round_top_right;
+    bool round_bottom_left;
+    bool round_bottom_right;
 
     frame_settings* fs_act;
     frame_settings* fs_inact;
-    gint min_titlebar_height;
-    gboolean use_pixmap_buttons;// = FALSE;
+    int min_titlebar_height;
+    bool use_pixmap_buttons;// = FALSE;
     double  corner_radius;//    =   5.0;
     PangoAlignment title_text_align;// = PANGO_ALIGN_CENTER;
     GdkPixbuf* ButtonPix[S_COUNT* B_COUNT];
     GdkPixbuf* ButtonArray[B_COUNT];
 
-    gboolean    use_button_glow;
-    gboolean    use_button_inactive_glow;
-    gboolean    use_decoration_cropping;
-    gboolean    use_button_fade;
+    bool    use_button_glow;
+    bool    use_button_inactive_glow;
+    bool    use_decoration_cropping;
+    bool    use_button_fade;
     GdkPixbuf* ButtonGlowPix[B_COUNT];
     GdkPixbuf* ButtonGlowArray;
     GdkPixbuf* ButtonInactiveGlowArray;
@@ -193,37 +193,37 @@ typedef struct _window_settings {
     { 0, 6, 16, 16,   1, 0, 0, 0 },
     { 0, 6, 16, 16,   1, 0, 0, 0 },
     };*/
-    gdouble shadow_radius;
-    gdouble shadow_opacity;
-    gint    shadow_color[3];
-    gint    shadow_offset_x;
-    gint    shadow_offset_y;
+    double shadow_radius;
+    double shadow_opacity;
+    int    shadow_color[3];
+    int    shadow_offset_x;
+    int    shadow_offset_y;
     decor_extents_t shadow_extents;//   = { 0, 0, 0, 0 };
     decor_extents_t win_extents;//      = { 6, 6, 4, 6 };
     pos_t pos[3][3];
-    gint left_space;//   = 6;
-    gint right_space;//  = 6;
-    gint top_space;//    = 4;
-    gint bottom_space;// = 6;
+    int left_space;//   = 6;
+    int right_space;//  = 6;
+    int top_space;//    = 4;
+    int bottom_space;// = 6;
 
-    gint left_corner_space;//   = 0;
-    gint right_corner_space;//  = 0;
-    gint top_corner_space;//    = 0;
-    gint bottom_corner_space;// = 0;
+    int left_corner_space;//   = 0;
+    int right_corner_space;//  = 0;
+    int top_corner_space;//    = 0;
+    int bottom_corner_space;// = 0;
 
-    gint titlebar_height;// = 17; //Titlebar Height
+    int titlebar_height;// = 17; //Titlebar Height
 
-    gint normal_top_corner_space;//      = 0;
+    int normal_top_corner_space;//      = 0;
 
-    gint shadow_left_space;//   = 0;
-    gint shadow_right_space;//  = 0;
-    gint shadow_top_space;//    = 0;
-    gint shadow_bottom_space;// = 0;
+    int shadow_left_space;//   = 0;
+    int shadow_right_space;//  = 0;
+    int shadow_top_space;//    = 0;
+    int shadow_bottom_space;// = 0;
 
-    gint shadow_left_corner_space;//   = 0;
-    gint shadow_right_corner_space;//  = 0;
-    gint shadow_top_corner_space;//    = 0;
-    gint shadow_bottom_corner_space;// = 0;
+    int shadow_left_corner_space;//   = 0;
+    int shadow_right_corner_space;//  = 0;
+    int shadow_top_corner_space;//    = 0;
+    int shadow_bottom_corner_space;// = 0;
 
 
     GdkPixmap* shadow_pixmap;// = NULL;
@@ -233,7 +233,7 @@ typedef struct _window_settings {
 
     cairo_pattern_t* shadow_pattern;// = NULL;
 
-    gint            text_height;
+    int            text_height;
 
     PangoFontDescription* font_desc;
     PangoContext* pango_context;
@@ -241,11 +241,11 @@ typedef struct _window_settings {
     decor_extents_t switcher_extents;// = { 0, 0, 0, 0 };
     GdkPixmap* switcher_pixmap;// = NULL;
     GdkPixmap* switcher_buffer_pixmap;// = NULL;
-    gint      switcher_width;
-    gint      switcher_height;
+    int      switcher_width;
+    int      switcher_height;
 
-    gint switcher_top_corner_space;//    = 0;
-    gint switcher_bottom_corner_space;// = 0;
+    int switcher_top_corner_space;//    = 0;
+    int switcher_bottom_corner_space;// = 0;
 
     struct _icon_size {
         int w, h;
@@ -253,8 +253,8 @@ typedef struct _window_settings {
     c_glow_size; // one glow size for all buttons
     // (buttons will be centered in their glows)
     // active and inactive glow pixmaps are assumed to be of same size
-    gboolean stretch_sides;
-    gint blur_type;// = BLUR_TYPE_NONE;
+    bool stretch_sides;
+    int blur_type;// = BLUR_TYPE_NONE;
 
 } window_settings;
 
@@ -268,51 +268,51 @@ struct _frame_settings {
 };
 
 typedef struct _rectangle {
-    gint        x1, y1, x2, y2;
+    int        x1, y1, x2, y2;
 } rectangle_t;
 
 typedef struct _button_fade_info {
-    gpointer* d;  // needed by the timer function
+    void** d;  // needed by the timer function
     cairo_t* cr;
     double    y1;
     int  counters[B_T_COUNT]; // 0: not fading, > 0: fading in, < 0: fading out
     // max value:  ws->button_fade_num_steps+1 (1 is reserved to indicate
     //                                          fade-in initiation)
     // min value: -ws->button_fade_num_steps
-    gboolean pulsating[B_T_COUNT];
-    gint    timer;
-    gboolean first_draw;
+    bool pulsating[B_T_COUNT];
+    int    timer;
+    bool first_draw;
 } button_fade_info_t;
 
 typedef struct _button_region_t {
-    gint        base_x1, base_y1, base_x2, base_y2; // button coords with no glow
-    gint        glow_x1, glow_y1, glow_x2, glow_y2; // glow coordinates
+    int        base_x1, base_y1, base_x2, base_y2; // button coords with no glow
+    int        glow_x1, glow_y1, glow_x2, glow_y2; // glow coordinates
 
     // holds whether this button's glow overlap with the other button's non-glow (base) area
-    gboolean    overlap_buttons[B_T_COUNT];
+    bool    overlap_buttons[B_T_COUNT];
     GdkPixmap* bg_pixmap;
 } button_region_t;
 
 typedef struct _decor {
     Window        event_windows[3][3];
     Window        button_windows[B_T_COUNT];
-    guint         button_states[B_T_COUNT];
-    gint tobj_pos[3];
-    gint tobj_size[3];
-    gint tobj_item_pos[11];
-    gint tobj_item_state[11];
-    gint tobj_item_width[11];
+    unsigned         button_states[B_T_COUNT];
+    int tobj_pos[3];
+    int tobj_size[3];
+    int tobj_item_pos[11];
+    int tobj_item_state[11];
+    int tobj_item_width[11];
     GdkPixmap*         pixmap;
     GdkPixmap*         buffer_pixmap;
     GdkGC*         gc;
-    gint          width;
-    gint          height;
-    gint              client_width;
-    gint              client_height;
-    gboolean          decorated;
-    gboolean          active;
+    int          width;
+    int          height;
+    int              client_width;
+    int              client_height;
+    bool          decorated;
+    bool          active;
     PangoLayout*       layout;
-    gchar*         name;
+    char*         name;
     cairo_pattern_t*   icon;
     GdkPixmap*         icon_pixmap;
     GdkPixbuf*         icon_pixbuf;
@@ -324,13 +324,13 @@ typedef struct _decor {
     void (*draw)(struct _decor* d);
     button_region_t   button_region[B_T_COUNT];
     rectangle_t       min_drawn_buttons_region; // minimal rectangle enclosing all drawn regions
-    gboolean          draw_only_buttons_region;
-    gint              button_last_drawn_state[B_T_COUNT]; // last drawn state or fade counter
+    bool          draw_only_buttons_region;
+    int              button_last_drawn_state[B_T_COUNT]; // last drawn state or fade counter
     button_fade_info_t button_fade_info;
     GdkPixmap* p_active, * p_active_buffer;
     GdkPixmap* p_inactive, * p_inactive_buffer;
     button_region_t   button_region_inact[B_T_COUNT];
-    gboolean only_change_active;
+    bool only_change_active;
 } decor_t;
 
 #define LFACSS(zc,sec) \
