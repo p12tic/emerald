@@ -55,12 +55,14 @@ engines/zootreeves_icon.h
 include/Makefile.am
 include/emerald.h
 include/engine.h
+include/keyfile.h
 include/libengine.h
 include/setting_item.h
 include/titlebar.h
 libengine/Makefile.am
 libengine/emerald.cc
 libengine/emeraldengine.pc.in
+libengine/keyfile.cc
 libengine/setting_item.cc
 libengine/themer.cc
 misc/Makefile.am
