@@ -48,6 +48,8 @@
 #include <pango/pango-context.h>
 #include <pango/pangocairo.h>
 
+#include "keyfile.h"
+
 #include <dlfcn.h>
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -59,8 +61,8 @@
 #include <sys/types.h>
 #include <signal.h>
 #include <sys/wait.h>
-#include<libintl.h>
-#include<locale.h>
+#include <libintl.h>
+#include <locale.h>
 #define _(String) gettext (String)
 #define gettext_noop(String) String
 #define N_(String) gettext_noop (String)

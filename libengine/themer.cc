@@ -21,6 +21,7 @@
 #include <signal.h>
 #include <list>
 #include <cstring>
+#include <memory>
 
 EngineColumns g_engine_columns;
 std::list<SettingItem> g_setting_list;
@@ -30,8 +31,10 @@ Glib::RefPtr<Gtk::ListStore> engine_model_;
 Gtk::Alignment* engine_container_;
 bool apply = false;
 bool changed = false;
-GKeyFile* global_theme_file;
-GKeyFile* global_settings_file;
+
+std::shared_ptr<KeyFile> global_theme_file;
+std::shared_ptr<KeyFile> global_settings_file;
+
 #ifdef USE_DBUS
 DBusConnection* dbcon;
 #endif
@@ -218,17 +221,13 @@ void apply_settings()
 {
     char* file = g_strjoin("/", g_get_home_dir(), ".emerald/theme/theme.ini", NULL);
     char* path = g_strjoin("/", g_get_home_dir(), ".emerald/theme/", NULL);
-    char* at;
     for (auto& item : g_setting_list) {
-        item.write_setting(global_theme_file);
+        item.write_setting(*global_theme_file);
     }
-    g_key_file_set_string(global_theme_file, "theme", "version", VERSION);
+    global_theme_file->set_string("theme", "version", VERSION);
     g_mkdir_with_parents(path, 00755);
-    at = g_key_file_to_data(global_theme_file, NULL, NULL);
-    if (at) {
-        g_file_set_contents(file, at, -1, NULL);
-        g_free(at);
-    }
+    std::string at = global_theme_file->to_data();
+    g_file_set_contents(file, at.c_str(), -1, NULL);
     g_free(file);
     g_free(path);
     send_reload_signal();
@@ -246,7 +245,7 @@ void cb_apply_setting(SettingItem* item)
         item->fvalue_ = s;
         item->check_file(s.c_str());
     }
-    item->write_setting((void*) global_theme_file);
+    item->write_setting(*global_theme_file);
     if (apply) {
         apply_settings();
     } else {
@@ -309,13 +308,15 @@ void update_preview_cb(Gtk::FileChooser* chooser, Gtk::Image* img)
 void init_settings()
 {
     char* file = g_strjoin("/", g_get_home_dir(), ".emerald/theme/theme.ini", NULL);
-    g_key_file_load_from_file(global_theme_file, file, G_KEY_FILE_KEEP_COMMENTS, NULL);
+    global_theme_file.reset(new KeyFile);
+    global_theme_file->load_from_file(file, Glib::KEY_FILE_KEEP_COMMENTS);
     g_free(file);
     file = g_strjoin("/", g_get_home_dir(), ".emerald/settings.ini", NULL);
-    g_key_file_load_from_file(global_settings_file, file, G_KEY_FILE_KEEP_COMMENTS, NULL);
+    global_settings_file.reset(new KeyFile);
+    global_settings_file->load_from_file(file, Glib::KEY_FILE_KEEP_COMMENTS);
     g_free(file);
     for (auto& item : g_setting_list) {
-        item.read_setting((void*)global_theme_file);
+        item.read_setting(*global_theme_file);
     }
 }
 
@@ -332,16 +333,18 @@ void cb_clear_file(SettingItem* item)
     item->check_file("");
     item->fvalue_ = "";
     gtk_file_chooser_unselect_all(GTK_FILE_CHOOSER(item->widget_));
-    item->write_setting(global_theme_file);
+    item->write_setting(*global_theme_file);
     if (apply) {
         apply_settings();
     }
 }
+
 void init_key_files()
 {
-    global_theme_file = g_key_file_new();
-    global_settings_file = g_key_file_new();
+    global_theme_file.reset(new KeyFile{});
+    global_settings_file.reset(new KeyFile{});
 }
+
 void layout_engine_list(Gtk::Box& vbox)
 {
     engine_combo_ = Gtk::manage(new Gtk::ComboBox{});

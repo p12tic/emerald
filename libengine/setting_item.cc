@@ -21,39 +21,39 @@
 #include "libengine.h"
 #include <list>
 #include <cstdlib>
+#include <memory>
 
-extern GKeyFile* global_theme_file;
-extern GKeyFile* global_settings_file;
+extern std::shared_ptr<KeyFile> global_theme_file;
+extern std::shared_ptr<KeyFile> global_settings_file;
 extern std::list<SettingItem> g_setting_list;
 extern std::list<EngineData> g_engine_list;
 
 char* globalStr = NULL;
 char globalFloatStr[G_ASCII_DTOSTR_BUF_SIZE + 1];
 
-void SettingItem::write_setting(void* p)
+void SettingItem::write_setting(const KeyFile& f)
 {
-    GKeyFile* f = (GKeyFile*) p;
     switch (type_) {
     case ST_BOOL:
-        g_key_file_set_boolean(f, section_, key_, get_bool());
+        f.set_boolean(section_, key_, get_bool());
         break;
     case ST_INT:
-        g_key_file_set_integer(f, section_, key_, get_int());
+        f.set_integer(section_, key_, get_int());
         break;
     case ST_FLOAT:
-        g_key_file_set_string(f, section_, key_, get_float_str());
+        f.set_string(section_, key_, get_float_str());
         break;
     case ST_COLOR:
-        g_key_file_set_string(f, section_, key_, get_color());
+        f.set_string(section_, key_, get_color());
         break;
     case ST_FONT:
-        g_key_file_set_string(f, section_, key_, get_font().c_str());
+        f.set_string(section_, key_, get_font());
         break;
     case ST_META_STRING:
-        g_key_file_set_string(f, section_, key_, get_string().c_str());
+        f.set_string(section_, key_, get_string());
         break;
     case ST_STRING_COMBO:
-        g_key_file_set_string(f, section_, key_, get_string_combo().c_str());
+        f.set_string(section_, key_, get_string_combo());
         break;
     case ST_IMG_FILE:
         //g_key_file_set_string(f,section_,key_,get_img_file(item));
@@ -72,30 +72,27 @@ void SettingItem::write_setting(void* p)
         EngineMetaInfo emi;
         const char* active_engine = get_engine_combo();
         if (get_engine_meta_info(active_engine, &emi)) {
-            g_key_file_set_string(f, "engine_version", active_engine, emi.version);
+            f.set_string("engine_version", active_engine, emi.version);
         }
-        g_key_file_set_string(f, section_, key_, active_engine);
+        f.set_string(section_, key_, active_engine);
         do_engine(active_engine);
     }
     break;
     case ST_SFILE_INT:
-        if (f == global_theme_file) {
-            g_key_file_set_integer(global_settings_file, section_,
-                                   key_, get_int());
+        if (&f == global_theme_file.get()) {
+            f.set_integer(section_, key_, get_int());
             write_setting_file();
         }
         break;
     case ST_SFILE_BOOL:
-        if (f == global_theme_file) {
-            g_key_file_set_boolean(global_settings_file, section_,
-                                   key_, get_bool());
+        if (&f == global_theme_file.get()) {
+            f.set_boolean(section_, key_, get_bool());
             write_setting_file();
         }
         break;
     case ST_SFILE_INT_COMBO:
-        if (f == global_theme_file) {
-            g_key_file_set_integer(global_settings_file, section_,
-                                   key_, get_sf_int_combo());
+        if (&f == global_theme_file.get()) {
+            f.set_integer(section_, key_, get_sf_int_combo());
             write_setting_file();
         }
         break;
@@ -108,13 +105,9 @@ void SettingItem::write_setting_file()
 {
     char* file = g_strjoin("/", g_get_home_dir(), ".emerald/settings.ini", NULL);
     char* path = g_strjoin("/", g_get_home_dir(), ".emerald/", NULL);
-    char* at;
     g_mkdir_with_parents(path, 00755);
-    at = g_key_file_to_data(global_settings_file, NULL, NULL);
-    if (at) {
-        g_file_set_contents(file, at, -1, NULL);
-        g_free(at);
-    }
+    Glib::ustring at = global_settings_file->to_data();
+    g_file_set_contents(file, at.c_str(), -1, NULL);
     g_free(file);
     g_free(path);
 }
@@ -300,62 +293,62 @@ void SettingItem::set_sf_int_combo(int i)
     ((Gtk::ComboBox*) widget_)->set_active(i);
 }
 
-void SettingItem::read_setting(void** p)
+void SettingItem::read_setting(const KeyFile& f)
 {
-    GKeyFile* f = (GKeyFile*) p;
     GError* e = NULL;
     bool b;
     int i;
     char* s;
     switch (type_) {
-    case ST_BOOL:
-        b = g_key_file_get_boolean(f, section_, key_, &e);
-        if (!e) {
-            set_bool(b);
+    case ST_BOOL: {
+        auto opt = f.get_boolean_opt(section_, key_);
+        if (opt) {
+            set_bool(*opt);
         }
         break;
+    }
     case ST_INT:
-    case ST_FLOAT:
-        i = g_key_file_get_integer(f, section_, key_, &e);
-        if (!e) {
-            set_int(i);
+    case ST_FLOAT: {
+        auto opt = f.get_integer_opt(section_, key_);
+        if (opt) {
+            set_int(*opt);
             break;
         }
-        s = g_key_file_get_string(f, section_, key_, &e);
-        if (!e && s) {
-            set_float_str(s);
-            g_free(s);
+        auto opt2 = f.get_string_opt(section_, key_);
+        if (opt2) {
+            set_float_str(opt2->c_str());
         }
         break;
-    case ST_COLOR:
-        s = g_key_file_get_string(f, section_, key_, &e);
-        if (!e && s) {
-            set_color(s);
-            g_free(s);
+    }
+    case ST_COLOR: {
+        auto opt = f.get_string_opt(section_, key_);
+        if (opt) {
+            set_color(opt->c_str());
         }
         break;
-    case ST_FONT:
-        s = g_key_file_get_string(f, section_, key_, &e);
-        if (!e && s) {
-            set_font(s);
-            g_free(s);
+    }
+    case ST_FONT: {
+        auto opt = f.get_string_opt(section_, key_);
+        if (opt) {
+            set_font(opt->c_str());
         }
         break;
-    case ST_META_STRING:
-        s = g_key_file_get_string(f, section_, key_, &e);
-        if (!e && s) {
-            set_string(s);
-            g_free(s);
+    }
+    case ST_META_STRING: {
+        auto opt = f.get_string_opt(section_, key_);
+        if (opt) {
+            set_string(opt->c_str());
         }
         break;
-    case ST_STRING_COMBO:
-        s = g_key_file_get_string(f, section_, key_, &e);
-        if (!e && s) {
-            set_string_combo(s);
-            g_free(s);
+    }
+    case ST_STRING_COMBO: {
+        auto opt = f.get_string_opt(section_, key_);
+        if (opt) {
+            set_string_combo(opt->c_str());
         }
         break;
-    case ST_IMG_FILE:
+    }
+    case ST_IMG_FILE: {
         /*s = g_key_file_get_string(f,section_,key_,&e);
         if (!e && s)
         {
@@ -366,40 +359,41 @@ void SettingItem::read_setting(void** p)
         set_img_file(s);
         g_free(s);
         break;
-    case ST_ENGINE_COMBO:
-        s = g_key_file_get_string(f, section_, key_, &e);
-        if (!e && s) {
-            set_engine_combo(s);
-            g_free(s);
+    }
+    case ST_ENGINE_COMBO: {
+        auto opt = f.get_string_opt(section_, key_);
+        if (opt) {
+            set_engine_combo(opt->c_str());
         }
         break;
-    case ST_SFILE_INT:
-        if (f == global_theme_file) {
-            i = g_key_file_get_integer(global_settings_file,
-                                       section_, key_, &e);
-            if (!e) {
-                set_int(i);
+    }
+    case ST_SFILE_INT: {
+        if (&f == global_theme_file.get()) {
+            auto opt = f.get_integer_opt(section_, key_);
+            if (opt) {
+                set_int(*opt);
             }
         }
         break;
-    case ST_SFILE_BOOL:
-        if (f == global_theme_file) {
-            b = g_key_file_get_boolean(global_settings_file,
-                                       section_, key_, &e);
-            if (!e) {
-                set_bool(b);
+    }
+    case ST_SFILE_BOOL: {
+        if (&f == global_theme_file.get()) {
+            auto opt = f.get_boolean_opt(section_, key_);
+            if (opt) {
+                set_bool(*opt);
             }
         }
         break;
-    case ST_SFILE_INT_COMBO:
-        if (f == global_theme_file) {
-            i = g_key_file_get_integer(global_settings_file,
-                                       section_, key_, &e);
-            if (!e) {
-                set_sf_int_combo(i);
+    }
+    case ST_SFILE_INT_COMBO: {
+        if (&f == global_theme_file.get()) {
+            auto opt = f.get_integer_opt(section_, key_);
+            if (opt) {
+                set_sf_int_combo(*opt);
             }
         }
         break;
+    }
     default:
         break;
         //unhandled types

@@ -40,7 +40,7 @@ enum SettingType {
 class SettingItem {
 public:
 
-    void write_setting(void* p);
+    void write_setting(const KeyFile& f);
     static void write_setting_file();
     bool get_bool();
     double get_float();
@@ -63,7 +63,7 @@ public:
     void set_string(const char* s);
     void set_string_combo(const char* s);
     void set_sf_int_combo(int i);
-    void read_setting(void** p);
+    void read_setting(const KeyFile& f);
     const char* get_engine_combo();
 
     static SettingItem* register_img_file_setting(Gtk::FileChooserButton& widget, const char* section,

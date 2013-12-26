@@ -6,17 +6,17 @@
 #include <list>
 
 void copy_from_defaults_if_needed();
-void load_color_setting(GKeyFile* f, decor_color_t* color, const char* key,
+void load_color_setting(const KeyFile& f, decor_color_t* color, const char* key,
                         const char* sect);
-void load_shadow_color_setting(GKeyFile* f, int sc[3], const char* key,
+void load_shadow_color_setting(const KeyFile& f, int sc[3], const char* key,
                                const char* sect);
-void load_float_setting(GKeyFile* f, double* d, const char* key,
+void load_float_setting(const KeyFile& f, double* d, const char* key,
                         const char* sect);
-void load_int_setting(GKeyFile* f, int* i, const char* key, const char* sect);
-void load_bool_setting(GKeyFile* f, bool* b, const char* key, const char* sect);
-void load_font_setting(GKeyFile* f, PangoFontDescription** fd,
+void load_int_setting(const KeyFile& f, int* i, const char* key, const char* sect);
+void load_bool_setting(const KeyFile& f, bool* b, const char* key, const char* sect);
+void load_font_setting(const KeyFile& f, PangoFontDescription** fd,
                        const char* key, const char* sect);
-void load_string_setting(GKeyFile* f, char** s, const char* key, const char* sect);
+void load_string_setting(const KeyFile& f, char** s, const char* key, const char* sect);
 void cairo_set_source_alpha_color(cairo_t* cr, alpha_color* c);
 #define PFACS(zc) \
     load_color_setting(f,&((private_fs *)ws->fs_act->engine_fs)->zc.color,"active_" #zc ,SECT);\

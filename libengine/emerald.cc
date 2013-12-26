@@ -66,79 +66,81 @@ void cairo_set_source_alpha_color(cairo_t* cr, alpha_color* c)
 {
     cairo_set_source_rgba(cr, c->color.r, c->color.g, c->color.b, c->alpha);
 }
-void load_color_setting(GKeyFile* f, decor_color_t* color, const char* key,
+
+void load_color_setting(const KeyFile& f, decor_color_t* color, const char* key,
                         const char* sect)
 {
     GdkColor c;
-    char* s = g_key_file_get_string(f, sect, key, NULL);
+    auto s = f.get_string_opt(sect, key);
     if (s) {
-        gdk_color_parse(s, &c);
+        gdk_color_parse(s->c_str(), &c);
         color->r = c.red / 65536.0;
         color->g = c.green / 65536.0;
         color->b = c.blue / 65536.0;
-        g_free(s);
     }
 }
-void load_shadow_color_setting(GKeyFile* f, int sc[3], const char* key,
+
+void load_shadow_color_setting(const KeyFile& f, int sc[3], const char* key,
                                const char* sect)
 {
     GdkColor c;
-    char* s = g_key_file_get_string(f, sect, key, NULL);
+    auto s = f.get_string_opt(sect, key);
     if (s) {
-        gdk_color_parse(s, &c);
+        gdk_color_parse(s->c_str(), &c);
         sc[0] = c.red;
         sc[1] = c.green;
         sc[2] = c.blue;
-        g_free(s);
     }
 }
-void load_float_setting(GKeyFile* f, double* d, const char* key, const char* sect)
+
+void load_float_setting(const KeyFile& f, double* d, const char* key, const char* sect)
 {
-    char* s = g_key_file_get_string(f, sect, key, NULL);
+    auto s = f.get_string_opt(sect, key);
     if (s) {
-        *d = g_ascii_strtod(s, NULL);
-        g_free(s);
+        *d = g_ascii_strtod(s->c_str(), NULL);
     }
 }
-void load_int_setting(GKeyFile* f, int* i, const char* key, const char* sect)
+
+void load_int_setting(const KeyFile& f, int* i, const char* key, const char* sect)
 {
-    GError* e = NULL;
-    int ii = g_key_file_get_integer(f, sect, key, &e);
-    if (!e) {
-        *i = ii;
+    auto ii = f.get_integer_opt(sect, key);
+    if (!ii) {
+        *i = *ii;
     }
 }
-void load_bool_setting(GKeyFile* f, bool* b, const char* key, const char* sect)
+
+void load_bool_setting(const KeyFile& f, bool* b, const char* key, const char* sect)
 {
-    GError* e = NULL;
-    bool bb = g_key_file_get_boolean(f, sect, key, &e);
-    if (!e) {
-        *b = bb;
+    auto bb = f.get_boolean_opt(sect, key);
+    if (bb) {
+        *b = *bb;
     }
 }
-void load_font_setting(GKeyFile* f, PangoFontDescription** fd, const char* key,
+
+void load_font_setting(const KeyFile& f, PangoFontDescription** fd, const char* key,
                        const char* sect)
 {
-    char* s = g_key_file_get_string(f, sect, key, NULL);
+    auto s = f.get_string_opt(sect, key);
     if (s) {
         if (*fd) {
             pango_font_description_free(*fd);
         }
-        *fd = pango_font_description_from_string(s);
-        g_free(s);
+        *fd = pango_font_description_from_string(s->c_str());
     }
 }
-void load_string_setting(GKeyFile* f, char** s, const char* key,
+
+void load_string_setting(const KeyFile& f, char** s, const char* key,
                          const char* sect)
 {
-    char* st = g_key_file_get_string(f, sect, key, NULL);
-    if (st) {
+    auto ss = f.get_string_opt(sect, key);
+    if (ss) {
         if (*s) {
             g_free(*s);
         }
-        *s = st;
+        *s = g_strdup(ss->c_str());
     }
 }
+
 void
 rounded_rectangle(cairo_t* cr,
                   double  x,

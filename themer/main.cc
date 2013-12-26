@@ -6,6 +6,7 @@
 #define NEED_TITLEBAR_ACTION_NAMES
 #include <emerald.h>
 #include <engine.h>
+#include <keyfile.h>
 #include <gtkmm.h>
 #include <functional>
 
@@ -63,87 +64,86 @@ const char* themecache;
 static void theme_list_append(const char* value, const char* dir,
                               const char* fil)
 {
-    char* path = g_strjoin("/", dir, fil, "theme.ini", NULL);
+    std::string path = std::string(dir) + "/" + fil + "/theme.ini";
     std::string imgpath = std::string(dir) + "/" + fil + "/theme.screenshot.png";
-    char* val;
-    char* val2;
-    GdkPixbuf* p;
+
     EngineMetaInfo emi;
-    GKeyFile* f = g_key_file_new();
-    g_key_file_load_from_file(f, path, G_KEY_FILE_NONE, NULL);
+
+    KeyFile f;
+    if (!f.load_from_file(path)) {
+        return;
+    }
 
     Gtk::TreeModel::Row row = *(theme_model_->append());
     row[theme_columns_.name] = value;
-    val = g_key_file_get_string(f, "engine", "engine", NULL);
-    row[theme_columns_.engine] = val ? val : "";
 
-    if (val) {
-        const char* tver;
-        const char* ostr1;
-        const char* ostr2;
-        const char* ostr;
-        const char* elc;
-        get_engine_meta_info(val, &emi);
-        val2 = g_key_file_get_string(f, "engine_version", val, NULL);
-        if (!val2) {
-            val2 = g_strdup("0.0.0");
-        }
-        tver = g_key_file_get_string(f, "theme", "version", NULL);
-        if (!tver) {
-            tver = g_strup("0.0.0");
-        }
-        elc = emi.last_compat;
-        if (!emi.last_compat) {
-            elc = "0.0.0";
-        }
-        ostr1 = g_strdup_printf(strverscmp(val2, elc) >= 0 ?
-                                "Engine: YES (%s)\n" : "Engine: NO (%s)\n", val2);
-        ostr2 = g_strdup_printf(strverscmp(tver, LAST_COMPAT_VER) >= 0 ?
-                                "Emerald: YES (%s)" : "Emerald: NO (%s)", tver);
-        ostr = g_strdup_printf("%s%s", ostr1, ostr2);
-        g_free(ostr1);
-        g_free(ostr2);
-        row[theme_columns_.engine_version] = ostr;
-        g_free(ostr);
-        g_free(tver);
-        g_free(val2);
+    auto engine_o = f.get_string_opt("engine", "engine");
+    row[theme_columns_.engine] = engine_o ? *engine_o : "";
+
+    std::string ver_str;
+    if (engine_o) {
+        get_engine_meta_info(engine_o->c_str(), &emi);
+        auto ver_o = f.get_string_opt("engine_version", *engine_o);
+        std::string ver = ver_o ? *ver_o : "0.0.0"; //val2
+
+        auto th_ver_o = f.get_string_opt("theme", "version");
+        std::string th_ver = th_ver_o ? *th_ver_o : "0.0.0"; // tver
+
+        std::string elc = emi.last_compat ? emi.last_compat : "0.0.0";
+
+        bool is_en_uptodate = strverscmp(ver.c_str(), elc.c_str()) >= 0;
+        bool is_th_uptodate = strverscmp(th_ver.c_str(), LAST_COMPAT_VER) >= 0;
+
+        ver_str = std::string("Engine: ") + (is_en_uptodate ? "YES" : "NO") +
+                " (" + ver + ")\n";
+        ver_str += std::string("Emerald: ") + (is_th_uptodate ? "YES" : "NO") +
+                " (" + th_ver + ")\n";
+
     } else {
-        val = g_key_file_get_string(f, "theme", "version", NULL);
-        if (!val) {
-            val = g_strdup("0.0.0");
-        }
-        val2 = g_strdup_printf(strverscmp(val, LAST_COMPAT_VER) >= 0 ?
-                               "No Engine\nEmerald: YES (%s)" : "No Engine\nEmerald: NO (%s)", val ? val : "NONE");
-        row[theme_columns_.engine_version] = val2;
-        g_free(val2);
+        auto th_ver_o = f.get_string_opt("theme", "version");
+        std::string th_ver = th_ver_o ? *th_ver_o : "0.0.0";
+
+        bool is_th_uptodate = strverscmp(th_ver.c_str(), LAST_COMPAT_VER) >= 0;
+
+        ver_str = "No Engine\n";
+        ver_str += std::string("Emerald: ") + (is_th_uptodate ? "YES" : "NO") +
+                " (" + th_ver + ")\n";
     }
-    if (val) {
-        g_free(val);
-    }
-    val = g_key_file_get_string(f, "theme", "creator", NULL);
-    row[theme_columns_.creator] = val ? val : "";
-    if (val) {
-        g_free(val);
-    }
-    val = g_key_file_get_string(f, "theme", "description", NULL);
-    row[theme_columns_.description] = val ? val : "";
-    if (val) {
-        g_free(val);
-    }
-    val = g_key_file_get_string(f, "theme", "theme_version", NULL);
-    row[theme_columns_.theme_version] = val ? val : "";
-    if (val) {
-        g_free(val);
-    }
-    val = g_key_file_get_string(f, "theme", "suggested", NULL);
-    row[theme_columns_.suggested] = val ? val : "";
-    if (val) {
-        g_free(val);
-    }
-    g_free(path);
+    row[theme_columns_.engine_version] = ver_str;
+
+    std::string s_creator, s_desc, s_th_version, s_sugg;
+    auto opt = f.get_string_opt("theme", "creator");
+    s_creator = opt ? *opt : "";
+    row[theme_columns_.creator] = s_creator;
+
+    opt = f.get_string_opt("theme", "description");
+    s_desc = opt ? *opt : "";
+    row[theme_columns_.description] = s_desc;
+
+    opt = f.get_string_opt("theme", "theme_version");
+    s_th_version = opt ? *opt : "";
+    row[theme_columns_.theme_version] = s_th_version;
+
+    opt = f.get_string_opt("theme", "suggested");
+    s_sugg = opt ? *opt : "";
+    row[theme_columns_.suggested] = s_sugg;
+
     {
+        if (s_creator == "") {
+            s_creator = _("Unknown");
+        }
+        if (s_th_version == "") {
+            s_th_version = _("Unknown");
+        }
+        if (s_sugg == "") {
+            s_sugg = _("Whatever (no hint)");
+        }
+        if (s_desc == "") {
+            s_desc = _("No Description");
+        }
+
         //create the Theme column data
-        char* format =
+        const char* format =
             _("<b><big>%s</big></b>\n"
               "<i>%s</i>\n"
               "<small>"
@@ -162,60 +162,25 @@ static void theme_list_append(const char* value, const char* dir,
                   "<b>Use With</b> %s\n"
                   "</small>");
         }
-        char* creator = g_key_file_get_string(f, "theme", "creator", NULL);
-        char* tver = g_key_file_get_string(f, "theme", "theme_version", NULL);
-        char* rwid = g_key_file_get_string(f, "theme", "suggested", NULL);
-        char* desc = g_key_file_get_string(f, "theme", "description", NULL);
-        if (creator && !strlen(creator)) {
-            g_free(creator);
-            creator = NULL;
-        }
-        if (!creator) {
-            creator = g_strdup(_("Unknown"));
-        }
-        if (tver && !strlen(tver)) {
-            g_free(tver);
-            tver = NULL;
-        }
-        if (!tver) {
-            tver = g_strdup(_("Unknown"));
-        }
-        if (rwid && !strlen(rwid)) {
-            g_free(rwid);
-            rwid = NULL;
-        }
-        if (!rwid) {
-            rwid = g_strdup(_("Whatever (no hint)"));
-        }
-        if (desc && !strlen(desc)) {
-            g_free(desc);
-            desc = NULL;
-        }
-        if (!desc) {
-            desc = g_strdup(_("No Description"));
-        }
-        val = g_markup_printf_escaped(format, value, desc, tver, creator, rwid);
+
+        char* val = g_markup_printf_escaped(format, value, s_desc.c_str(),
+                                            s_th_version.c_str(), s_creator.c_str(),
+                                            s_sugg.c_str());
         row[theme_columns_.markup] = val ? val : "";
-        g_free(val);
-        g_free(tver);
-        g_free(creator);
-        g_free(rwid);
-        g_free(desc);
+        g_free(val);\
     }
-    g_key_file_free(f);
+
     auto pix = Gdk::Pixbuf::create_from_file(imgpath, -1, 100);
     if (pix) {
         row[theme_columns_.pixbuf] = pix;
     } else {
-        //p = gdk_pixbuf_new(GDK_COLORSPACE_RGB,true,8,1,1);
-        //p = gdk_pixbuf_new_from_file(,NULL);
         auto icon_theme = Gtk::IconTheme::create();
         pix = icon_theme->load_icon(GTK_STOCK_MISSING_IMAGE, Gtk::ICON_SIZE_LARGE_TOOLBAR);
         row[theme_columns_.pixbuf] = pix;
     }
 }
 
-static void theme_scan_dir(char* dir, bool writable)
+static void theme_scan_dir(const char* dir, bool writable)
 {
     GDir* d;
     d = g_dir_open(dir, 0, NULL);
@@ -297,7 +262,6 @@ static void error_dialog(const char* val)
 
 static void cb_load()
 {
-    GKeyFile* f;
     GDir* dr;
     char* fn, *xt, *gt;
     bool dist;
@@ -361,10 +325,9 @@ static void cb_load()
         g_dir_close(dr);
     }
     g_free(xt);
-    f = g_key_file_new();
-    if (!g_key_file_load_from_file(f, fn, 0, NULL)) {
+    KeyFile f;
+    if (!f.load_from_file(fn)) {
         g_free(fn);
-        g_key_file_free(f);
         error_dialog("Invalid Theme File / Name");
         return;
     }
@@ -372,22 +335,21 @@ static void cb_load()
     set_changed(true);
     set_apply(false);
     for (auto& item : get_setting_list()) {
-        item.read_setting((void*)f);
+        item.read_setting(f);
     }
     {
-        char* c;
-        c = g_key_file_get_string(f, "theme", "version", NULL);
-        if (c) {
-            version_entry_->set_text(c);
+        auto opt = f.get_string_opt("theme", "version");
+        if (opt) {
+            version_entry_->set_text(*opt);
         } else {
             version_entry_->set_text("Pre-0.8");
         }
     }
     set_apply(true);
     send_reload_signal();
-    g_key_file_free(f);
     g_free(fn);
 }
+
 static char* import_theme(char* file)
 {
     //first make sure we have our location
@@ -464,7 +426,6 @@ static void export_theme(const char* file)
 }
 static void cb_save()
 {
-    GKeyFile* f;
     char* fn, *at, *mt, *gt;
     GDir* dr;
     //first normalize the name
@@ -485,27 +446,26 @@ static void cb_save()
     g_mkdir_with_parents(fn, 00755);
     g_free(fn);
     fn = g_strdup_printf("%s/.emerald/themes/%s/theme.ini", g_get_home_dir(), at);
-    f = g_key_file_new();
-    g_key_file_load_from_file(f, fn, 0, NULL);
+
+    KeyFile f;
+    f.load_from_file(fn);
     for (auto& item : get_setting_list()) {
         item.write_setting(f);
     }
-    g_key_file_set_string(f, "theme", "version", VERSION);
+    f.set_string("theme", "version", VERSION);
     if (g_file_test(fn, G_FILE_TEST_EXISTS)) {
         if (!confirm_dialog(_("Overwrite Theme %s?"), at)) {
             return;
         }
     }
     mt = at;
-    at = g_key_file_to_data(f, NULL, NULL);
+
+    std::string dt = f.to_data();
     //little fix since we're now copying from ~/.emerald/theme/*
     g_free(fn);
     fn = g_strdup_printf("%s/.emerald/theme/theme.ini", g_get_home_dir());
-    if (at && !g_file_set_contents(fn, at, -1, NULL)) {
+    if (!g_file_set_contents(fn, dt.c_str(), -1, NULL)) {
         error_dialog(_("Couldn't Write Theme"));
-        g_free(at);
-    } else if (!at) {
-        error_dialog(_("Couldn't Form Theme"));
     } else {
         char* xt;
         xt = g_strdup_printf("%s/.emerald/themes/%s/", g_get_home_dir(), mt);
@@ -542,10 +502,10 @@ static void cb_save()
         info_dialog(_("Theme Saved"));
     }
     version_entry_->set_text(VERSION);
-    g_key_file_free(f);
     g_free(fn);
     refresh_theme_list(NULL);
 }
+
 static void cb_delete(Gtk::Widget* w)
 {
     GtkTreeIter iter;

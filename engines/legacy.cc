@@ -274,7 +274,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
 }
 
 extern "C"
-void load_engine_settings(GKeyFile* f, window_settings* ws)
+void load_engine_settings(const KeyFile& f, window_settings* ws)
 {
     private_ws* pws = ws->engine_ws;
 

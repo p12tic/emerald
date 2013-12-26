@@ -80,7 +80,7 @@ static GdkPixmap* create_pixmap(int w, int h)
 
 void engine_draw_frame(decor_t* d, cairo_t* cr);
 bool load_engine(char* engine_name, window_settings* ws);
-void load_engine_settings(GKeyFile* f, window_settings* ws);
+void load_engine_settings(const KeyFile& f, window_settings* ws);
 
 static Atom frame_window_atom;
 static Atom win_decor_atom;
@@ -5095,12 +5095,12 @@ static void load_settings(window_settings* ws)
 {
     char* path =
         g_strjoin("/", g_get_home_dir(), ".emerald/settings.ini", NULL);
-    GKeyFile* f = g_key_file_new();
+    KeyFile f;
 
     copy_from_defaults_if_needed();
 
     //settings
-    g_key_file_load_from_file(f, path, 0, NULL);
+    f.load_from_file(path);
     g_free(path);
     load_int_setting(f, &ws->double_click_action, "double_click_action",
                      "titlebars");
@@ -5158,7 +5158,7 @@ static void load_settings(window_settings* ws)
 
     //theme
     path = g_strjoin("/", g_get_home_dir(), ".emerald/theme/theme.ini", NULL);
-    g_key_file_load_from_file(f, path, 0, NULL);
+    f.load_from_file(path);
     g_free(path);
     load_string_setting(f, &engine, "engine", "engine");
     if (!load_engine(engine, ws)) {
@@ -5198,8 +5198,8 @@ static void load_settings(window_settings* ws)
     load_int_setting(f, &ws->win_extents.bottom, "bottom", "borders");
     load_int_setting(f, &ws->min_titlebar_height, "min_titlebar_height",
                      "titlebar");
-    g_key_file_free(f);
 }
+
 static void update_settings(window_settings* ws)
 {
     //assumes ws is fully allocated

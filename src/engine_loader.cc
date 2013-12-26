@@ -76,7 +76,7 @@ bool load_engine(char* engine_name, window_settings* ws)
     g_free(engine_ldname);
     return engine ? true : false;
 }
-void load_engine_settings(GKeyFile* f, window_settings* ws)
+void load_engine_settings(const KeyFile& f, window_settings* ws)
 {
     if (e_load && engine) {
         e_load(f, ws);
