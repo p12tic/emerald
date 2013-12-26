@@ -78,7 +78,7 @@ void cb_apply_setting(GtkWidget* w, void* p);
 void setup_dbus();
 #endif
 
-void update_preview(GtkFileChooser* fc, char* filename, GtkImage* img);
+void update_preview(GtkFileChooser* fc, const char* filename, GtkImage* img);
 void update_preview_cb(GtkFileChooser* file_chooser, void* data);
 
 void init_settings();
@@ -88,7 +88,7 @@ void cb_clear_file(GtkWidget* button, void* p);
 void init_key_files();
 std::list<SettingItem>& get_setting_list();
 void do_engine(const char* nam);
-GtkWidget* build_notebook_page(char* title, GtkWidget* notebook);
+GtkWidget* build_notebook_page(const char* title, GtkWidget* notebook);
 char* make_filename(const char* sect, const char* key, const char* ext);
 void layout_engine_list(GtkWidget* vbox);
 void init_engine_list();

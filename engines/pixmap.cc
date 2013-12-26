@@ -33,7 +33,7 @@
 /*
  * pixmap data structs
  */
-static char* p_types[] = {
+static const char* p_types[] = {
     "top",
     "top_left",
     "top_right",
@@ -46,7 +46,7 @@ static char* p_types[] = {
     "title_left",
     "title_right"
 };
-static char* names[] = {
+static const char* names[] = {
     "Top",
     "Top Left",
     "Top Right",

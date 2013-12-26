@@ -158,7 +158,7 @@ const char* SettingItem::get_string()
 {
     return gtk_entry_get_text(GTK_ENTRY(widget_));
 }
-void SettingItem::check_file(char* f)
+void SettingItem::check_file(const char* f)
 {
     GdkPixbuf* p;
     p = gdk_pixbuf_new_from_file(f, NULL);
@@ -188,7 +188,7 @@ const char* SettingItem::get_string_combo()
     return s;
 }
 
-void SettingItem::set_engine_combo(char* val)
+void SettingItem::set_engine_combo(const char* val)
 {
     FindEngine fe;
     fe.canname = val;
@@ -233,7 +233,7 @@ int SettingItem::get_sf_int_combo()
 {
     return gtk_combo_box_get_active(GTK_COMBO_BOX(widget_));
 }
-void SettingItem::set_img_file(char* f)
+void SettingItem::set_img_file(const char* f)
 {
     g_free(fvalue_);
     fvalue_ = g_strdup(f);
@@ -256,25 +256,25 @@ void SettingItem::set_int(int i)
 {
     set_float(i);
 }
-void SettingItem::set_float_str(char* s)
+void SettingItem::set_float_str(const char* s)
 {
     set_float(g_ascii_strtod(s, NULL));
 }
-void SettingItem::set_color(char* s)
+void SettingItem::set_color(const char* s)
 {
     GdkColor c;
     gdk_color_parse(s, &c);
     gtk_color_button_set_color(GTK_COLOR_BUTTON(widget_), &c);
 }
-void SettingItem::set_font(char* f)
+void SettingItem::set_font(const char* f)
 {
     gtk_font_button_set_font_name(GTK_FONT_BUTTON(widget_), f);
 }
-void SettingItem::set_string(char* s)
+void SettingItem::set_string(const char* s)
 {
     gtk_entry_set_text(GTK_ENTRY(widget_), s);
 }
-void SettingItem::set_string_combo(char* s)
+void SettingItem::set_string_combo(const char* s)
 {
     gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(widget_))), s);
 }
@@ -400,7 +400,7 @@ SettingItem* SettingItem::register_img_file_setting(GtkWidget* widget, const cha
                      item->preview_);
     return item;
 }
-SettingItem* SettingItem::register_setting(GtkWidget* widget, SettingType type, char* section, char* key)
+SettingItem* SettingItem::register_setting(GtkWidget* widget, SettingType type, const char* section, const char* key)
 {
     g_setting_list.push_front(SettingItem());
     SettingItem* item = &g_setting_list.front();

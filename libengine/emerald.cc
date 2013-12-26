@@ -41,7 +41,7 @@ void copy_from_defaults_if_needed()
         GDir* d;
         d = g_dir_open(DEFTHEMEDIR, 0, NULL);
         if (d) {
-            char* n;
+            const char* n;
             while ((n = g_dir_read_name(d))) {
                 char* ipath = g_strdup_printf("%s/%s", DEFTHEMEDIR, n);
                 char* npath = g_strdup_printf("%s/.emerald/theme/%s", g_get_home_dir(), n);

@@ -49,19 +49,19 @@ public:
     const char* get_color();
     const char* get_font();
     const char* get_string();
-    void check_file(char* f);
+    void check_file(const char* f);
     const char* get_file();
     const char* get_string_combo();
     int get_sf_int_combo();
-    void set_file(char* f);
+    void set_file(const char* f);
     void set_bool(bool b);
     void set_float(double f);
     void set_int(int i);
-    void set_float_str(char* s);
-    void set_color(char* s);
-    void set_font(char* f);
-    void set_string(char* s);
-    void set_string_combo(char* s);
+    void set_float_str(const char* s);
+    void set_color(const char* s);
+    void set_font(const char* f);
+    void set_string(const char* s);
+    void set_string_combo(const char* s);
     void set_sf_int_combo(int i);
     void read_setting(void** p);
     const char* get_engine_combo();
@@ -69,12 +69,12 @@ public:
     static SettingItem* register_img_file_setting(GtkWidget* widget, const char* section,
                                                   const char* key, GtkImage* image);
     static SettingItem* register_setting(GtkWidget* widget, SettingType type,
-                                         char* section, char* key);
+                                         const char* section, const char* key);
 
 private:
     const char* get_img_file();
-    void set_engine_combo(char* val);
-    void set_img_file(char* f);
+    void set_engine_combo(const char* val);
+    void set_img_file(const char* f);
 
 public:
     SettingType type_;

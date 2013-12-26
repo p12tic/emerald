@@ -90,7 +90,7 @@ static unsigned button_actions[B_T_COUNT] = {
 };
 #endif
 #ifdef NEED_BUTTON_FILE_NAMES
-static char* b_types[] = {
+static const char* b_types[] = {
     "close",
     "max",
     "restore",
@@ -108,7 +108,7 @@ static char* b_types[] = {
 };
 #endif
 #ifdef NEED_BUTTON_NAMES
-static char* b_names[] = {
+static const char* b_names[] = {
     "Close",
     "Maximize",
     "Restore",
@@ -132,7 +132,7 @@ enum {
     TITLEBAR_ACTION_COUNT
 };
 #ifdef NEED_TITLEBAR_ACTION_NAMES
-static char* titlebar_action_name[TITLEBAR_ACTION_COUNT] = {
+static const char* titlebar_action_name[TITLEBAR_ACTION_COUNT] = {
     "Shade",
     "Maximize/Restore",
     "Minimize",

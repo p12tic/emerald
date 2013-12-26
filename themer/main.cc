@@ -35,10 +35,10 @@ GtkWidget* FetchButton;
 GtkWidget* FetchButton2;
 GtkWidget* ExportButton;
 GtkWidget* QuitButton;
-char* svnpath;
+const char* svnpath;
 char* themecache;
 
-static void theme_list_append(char* value, char* dir, char* fil)
+static void theme_list_append(const char* value, const char* dir, const char* fil)
 {
     GtkTreeIter iter;
     char* path = g_strjoin("/", dir, fil, "theme.ini", NULL);
@@ -192,7 +192,7 @@ static void theme_list_append(char* value, char* dir, char* fil)
     }
     g_free(imgpath);
 }
-static void theme_scan_dir(char* dir, bool writable)
+static void theme_scan_dir(const char* dir, bool writable)
 {
     GDir* d;
     d = g_dir_open(dir, 0, NULL);
@@ -216,7 +216,7 @@ static void theme_scan_dir(char* dir, bool writable)
         g_dir_close(d);
     }
 }
-static void scroll_to_theme(char* thn)
+static void scroll_to_theme(const char* thn)
 {
     GtkTreeIter i;
     bool c;
@@ -234,7 +234,7 @@ static void scroll_to_theme(char* thn)
         c = gtk_tree_model_iter_next(GTK_TREE_MODEL(ThemeList), &i);
     }
 }
-static void refresh_theme_list(char* thn)
+static void refresh_theme_list(const char* thn)
 {
     char* path;
     gtk_list_store_clear(ThemeList);
@@ -250,7 +250,7 @@ static void cb_refresh(GtkWidget* w, void* p)
 {
     refresh_theme_list(NULL);
 }
-static bool confirm_dialog(char* val, char* val2)
+static bool confirm_dialog(const char* val, const char* val2)
 {
     GtkWidget* w;
     int ret;
@@ -264,7 +264,7 @@ static bool confirm_dialog(char* val, char* val2)
     gtk_widget_destroy(w);
     return (ret == GTK_RESPONSE_YES);
 }
-static void info_dialog(char* val)
+static void info_dialog(const char* val)
 {
     GtkWidget* w;
     w = gtk_message_dialog_new(GTK_WINDOW(mainWindow),
@@ -276,7 +276,7 @@ static void info_dialog(char* val)
     gtk_dialog_run(GTK_DIALOG(w));
     gtk_widget_destroy(w);
 }
-static void error_dialog(char* val)
+static void error_dialog(const char* val)
 {
     GtkWidget* w;
     w = gtk_message_dialog_new(GTK_WINDOW(mainWindow),
@@ -694,30 +694,30 @@ void layout_window_frame(GtkWidget* vbox, bool active)
     add_color_alpha_value(_("Button Fill"), "button", "buttons", active);
     add_color_alpha_value(_("Button Outline"), "button_halo", "buttons", active);
 }
-void add_row(GtkWidget* vbox, GtkWidget* item, char* title)
+void add_row(GtkWidget* vbox, GtkWidget* item, const char* title)
 {
     //gtk_box_pack_startC(hbox,gtk_label_new(title),false,false,0);
     //gtk_box_pack_endC(hbox,item,true,true,0);
     table_append(gtk_label_new(title), false);
     table_append(item, true);
 }
-void add_color_button_row(GtkWidget* vbox, char* title, char* key, char* sect)
+void add_color_button_row(GtkWidget* vbox, const char* title, const char* key, const char* sect)
 {
     GtkWidget* color_button;
     color_button = gtk_color_button_new();
     SettingItem::register_setting(color_button, ST_COLOR, sect, key);
     add_row(vbox, color_button, title);
 }
-void add_int_range_row(GtkWidget* vbox, char* title, char* key,
-                       int start, int end, char* sect)
+void add_int_range_row(GtkWidget* vbox, const char* title, const char* key,
+                       int start, int end, const char* sect)
 {
     GtkWidget* scaler;
     scaler = scaler_new(start, end, 1);
     SettingItem::register_setting(scaler, ST_INT, sect, key);
     add_row(vbox, scaler, title);
 }
-void add_float_range_row(GtkWidget* vbox, char* title, char* key,
-                         double start, double end, double prec, char* sect)
+void add_float_range_row(GtkWidget* vbox, const char* title, const char* key,
+                         double start, double end, double prec, const char* sect)
 {
     GtkWidget* scaler;
     scaler = scaler_new(start, end, prec);
@@ -792,7 +792,7 @@ void layout_title_frame(GtkWidget* vbox)
     gtk_box_pack_startC(vbox,junk,false,false,0);
     SettingItem::register_setting(junk,ST_BOOL,SECT,"use_active_colors");*/
 }
-void add_meta_string_value(char* title, char* key)
+void add_meta_string_value(const char* title, const char* key)
 {
     GtkWidget* entry;
     table_append(gtk_label_new(title), false);
@@ -876,7 +876,7 @@ void layout_info_frame(GtkWidget* vbox)
     gtk_widget_set_sensitive(Version, false);
     table_append(Version, true);
 }
-void add_border_slider(char* text, char* key, int value)
+void add_border_slider(const char* text, const char* key, int value)
 {
     GtkWidget* w;
     table_append(gtk_label_new(text), false);

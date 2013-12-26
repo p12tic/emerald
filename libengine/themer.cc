@@ -199,9 +199,9 @@ void send_reload_signal()
         XSync(dpy, False);
     } else {
         /* The old way */
-        char* args[] =
+        const char* args[] =
         {"killall", "-u", (char*)g_get_user_name(), "-SIGUSR1", "emerald", NULL};
-        char* ret = NULL;
+        const char* ret = NULL;
         if (!g_spawn_sync(NULL, args, NULL, G_SPAWN_STDERR_TO_DEV_NULL | G_SPAWN_SEARCH_PATH,
                           NULL, NULL, &ret, NULL, NULL, NULL) || !ret) {
             g_warning("Couldn't find running emerald, no reload signal sent.");
@@ -310,7 +310,7 @@ bool get_engine_meta_info(const char* engine, EngineMetaInfo* inf)
     }
     return fe.found;
 }
-void update_preview(GtkFileChooser* fc, char* filename, GtkImage* img)
+void update_preview(GtkFileChooser* fc, const char* filename, GtkImage* img)
 {
     GdkPixbuf* pixbuf;
     bool have_preview;
@@ -378,7 +378,7 @@ void layout_engine_list(GtkWidget* vbox)
     EngineContainer = gtk_alignment_new(0, 0, 1, 1); // really only needed for the bin-ness
     gtk_box_pack_startC(vbox, EngineContainer, true, true, 0);
 }
-static char* canonize_name(char* dlname)
+static char* canonize_name(const char* dlname)
 {
     char* end;
     char* begin = g_strrstr(dlname, "/lib");
@@ -397,7 +397,7 @@ static void engine_comp(EngineData& d, FindEngine& e)
         e.found = true;
     }
 }
-static bool engine_is_unique(char* canname)
+static bool engine_is_unique(const char* canname)
 {
     FindEngine e;
     e.canname = canname;
@@ -407,7 +407,7 @@ static bool engine_is_unique(char* canname)
     }
     return !e.found;
 }
-static void append_engine(char* dlname)
+static void append_engine(const char* dlname)
 {
     char* can;
     char* err;
@@ -468,7 +468,7 @@ static void append_engine(char* dlname)
     }
     dlclose(hand);
 }
-static void engine_scan_dir(char* dir)
+static void engine_scan_dir(const char* dir)
 {
     GDir* d;
     d = g_dir_open(dir, 0, NULL);
@@ -508,7 +508,7 @@ void init_engine_list()
 
     SettingItem::register_setting(EngineCombo, ST_ENGINE_COMBO, "engine", "engine");
 }
-GtkWidget* build_notebook_page(char* title, GtkWidget* notebook)
+GtkWidget* build_notebook_page(const char* title, GtkWidget* notebook)
 {
     GtkWidget* vbox;
     vbox = gtk_vbox_new(false, 2);
