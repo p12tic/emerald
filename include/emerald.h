@@ -106,22 +106,22 @@
 
 #define PROP_MOTIF_WM_HINT_ELEMENTS 3
 
-typedef struct {
+struct MwmHints {
     unsigned long flags;
     unsigned long functions;
     unsigned long decorations;
-} MwmHints;
+};
 
 //static double decoration_alpha = 0.5; //Decoration Alpha
 
 #define SWITCHER_SPACE     40
 #define SWITCHER_TOP_EXTRA 4
 
-typedef struct _decor_color {
+struct decor_color_t {
     double r;
     double g;
     double b;
-} decor_color_t;
+};
 
 
 #include <titlebar.h>
@@ -140,19 +140,19 @@ typedef void (*event_callback)(WnckWindow* win, XEvent* event);
     pfs->idn.color.b = (pfs->color_contrast * pfs->zc.color.b);\
     pfs->idn.alpha   = (pfs->alpha_contrast * pfs->zc.alpha);
 
-typedef struct _alpha_color {
+struct alpha_color {
     decor_color_t color;
     double alpha;
-} alpha_color;
+};
 
-typedef struct _pos_t {
+struct pos_t {
     int x, y, w, h;
     int xw, yh, ww, hh;
-} pos_t;
+};
 
-typedef struct _frame_settings frame_settings;
+struct frame_settings;
 
-typedef struct _window_settings {
+struct window_settings {
     void* engine_ws;
     int button_offset;
     int button_hoffset;
@@ -256,9 +256,9 @@ typedef struct _window_settings {
     bool stretch_sides;
     int blur_type;// = BLUR_TYPE_NONE;
 
-} window_settings;
+};
 
-struct _frame_settings {
+struct frame_settings {
     void* engine_fs;
     window_settings* ws;
     alpha_color button;
@@ -267,11 +267,11 @@ struct _frame_settings {
     alpha_color text_halo;
 };
 
-typedef struct _rectangle {
+struct rectangle_t {
     int        x1, y1, x2, y2;
-} rectangle_t;
+};
 
-typedef struct _button_fade_info {
+struct button_fade_info_t {
     void** d;  // needed by the timer function
     cairo_t* cr;
     double    y1;
@@ -282,18 +282,18 @@ typedef struct _button_fade_info {
     bool pulsating[B_T_COUNT];
     int    timer;
     bool first_draw;
-} button_fade_info_t;
+};
 
-typedef struct _button_region_t {
+struct button_region_t {
     int        base_x1, base_y1, base_x2, base_y2; // button coords with no glow
     int        glow_x1, glow_y1, glow_x2, glow_y2; // glow coordinates
 
     // holds whether this button's glow overlap with the other button's non-glow (base) area
     bool    overlap_buttons[B_T_COUNT];
     GdkPixmap* bg_pixmap;
-} button_region_t;
+};
 
-typedef struct _decor {
+struct decor_t {
     Window        event_windows[3][3];
     Window        button_windows[B_T_COUNT];
     unsigned         button_states[B_T_COUNT];
@@ -321,7 +321,7 @@ typedef struct _decor {
     XID           prop_xid;
     GtkWidget*         force_quit_dialog;
     frame_settings* fs;
-    void (*draw)(struct _decor* d);
+    void (*draw)(decor_t* d);
     button_region_t   button_region[B_T_COUNT];
     rectangle_t       min_drawn_buttons_region; // minimal rectangle enclosing all drawn regions
     bool          draw_only_buttons_region;
@@ -331,7 +331,7 @@ typedef struct _decor {
     GdkPixmap* p_inactive, * p_inactive_buffer;
     button_region_t   button_region_inact[B_T_COUNT];
     bool only_change_active;
-} decor_t;
+};
 
 #define LFACSS(zc,sec) \
     load_color_setting(f,&ws->fs_act->zc.color,"active_" #zc , #sec);\

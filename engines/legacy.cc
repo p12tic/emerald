@@ -31,7 +31,7 @@
 /*
  * settings structs
  */
-typedef struct _private_fs {
+struct private_fs {
     alpha_color inner;
     alpha_color outer;
     alpha_color title_inner;
@@ -43,15 +43,15 @@ typedef struct _private_fs {
     alpha_color contents_highlight;
     alpha_color contents_shadow;
     alpha_color contents_halo;
-} private_fs;
+};
 
-typedef struct _private_ws {
+struct private_ws {
     bool round_top_left;
     bool round_top_right;
     bool round_bottom_left;
     bool round_bottom_right;
     double  corner_radius;
-} private_ws;
+};
 
 extern "C"
 void get_meta_info(EngineMetaInfo* emi)

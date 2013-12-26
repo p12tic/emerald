@@ -32,8 +32,7 @@
 
 #define DIP_ROUND_TRI  (1 << 4)
 
-
-typedef struct _pixmaps {
+struct pixmaps {
     cairo_surface_t* titlebar_surface;
     cairo_surface_t* titlebar_surface_large;
     cairo_surface_t* titlebar_surface_buttons;
@@ -43,10 +42,9 @@ typedef struct _pixmaps {
     bool    titlebarpart_enabled;
     bool    titlebar_enabled;
     bool    titlebar_repeat_enabled;
+};
 
-} pixmaps;
-
-typedef struct _private_fs {
+struct private_fs {
     alpha_color inner;
     alpha_color outer;
     alpha_color title_inner;
@@ -63,9 +61,9 @@ typedef struct _private_fs {
     alpha_color contents_shadow;
     alpha_color contents_halo;
     double  gradient_repeat_height;
-} private_fs;
+};
 
-typedef struct _private_ws {
+struct private_ws {
     bool done_indent;
     bool round_top_left;
     bool enable_maximised_colors;
@@ -95,7 +93,7 @@ typedef struct _private_ws {
     int     left_bar_dip_radius;
     pixmaps     pixmaps;
 
-} private_ws;
+};
 
 extern "C"
 void get_meta_info(EngineMetaInfo* emi)

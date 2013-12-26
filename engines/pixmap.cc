@@ -72,27 +72,28 @@ enum {
     TITLE_LEFT,
     TITLE_RIGHT
 };
-typedef struct _pixmap_data {
+
+struct pixmap_data {
     cairo_surface_t* surface;
     bool use_scaled;
     bool use_width;
     bool use_height;
     double width;
     double height;
-} pixmap_data;
+};
 
 /*
  * settings structs
  */
-typedef struct _private_fs {
+struct private_fs {
     alpha_color inner;
     alpha_color outer;
     alpha_color title_inner;
     alpha_color title_outer;
     pixmap_data pixmaps[11];
-} private_fs;
+};
 
-typedef struct _private_ws {
+struct private_ws {
     bool round_top_left;
     bool round_top_right;
     bool round_bottom_left;
@@ -100,7 +101,7 @@ typedef struct _private_ws {
     bool inactive_use_active_pixmaps;
     double  top_corner_radius;
     double  bottom_corner_radius;
-} private_ws;
+};
 
 extern "C"
 void get_meta_info(EngineMetaInfo* emi)

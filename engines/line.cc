@@ -34,16 +34,16 @@
 /*
  * color privates
  */
-typedef struct _private_fs {
+struct private_fs {
     alpha_color border;
     alpha_color title_bar;
-} private_fs;
+};
 
 /*
  * settings privates
  */
-typedef struct _private_ws {
-} private_ws;
+struct private_ws {
+};
 
 void get_meta_info(EngineMetaInfo* emi)
 {
