@@ -106,6 +106,7 @@ typedef struct _private_ws
     double	bottom_corner_radius;
 } private_ws;
 
+extern "C"
 void get_meta_info (EngineMetaInfo * emi)
 {
     emi->version = g_strdup("0.2");
@@ -187,6 +188,8 @@ static gint get_real_pos(window_settings * ws, gint tobj, decor_t * d)
     }
     return base + d->tobj_item_pos[tobj];
 }
+
+extern "C"
 void engine_draw_frame (decor_t * d, cairo_t * cr)
 {
     double        x1, y1, x2, y2, h;
@@ -407,6 +410,8 @@ void engine_draw_frame (decor_t * d, cairo_t * cr)
 
     cairo_stroke (cr);
 }
+
+extern "C"
 void load_engine_settings(GKeyFile * f, window_settings * ws)
 {
     private_ws * pws = ws->engine_ws;
@@ -463,6 +468,7 @@ void load_engine_settings(GKeyFile * f, window_settings * ws)
     }
 }
 
+extern "C"
 void init_engine(window_settings * ws)
 {
     private_fs * pfs;
@@ -498,11 +504,13 @@ void init_engine(window_settings * ws)
     ACOLOR(title_outer, 0.8, 0.8, 0.8, 0.6);
 }
 
+extern "C"
 void fini_engine(window_settings * ws)
 {
     free(ws->fs_act->engine_fs);
     free(ws->fs_inact->engine_fs);
 }
+
 void layout_corners_frame(GtkWidget * vbox)
 {
     GtkWidget * hbox;
@@ -694,6 +702,8 @@ void layout_engine_pixmaps(GtkWidget * vbox, gboolean active)
         layout_pixmap_box(vbox, i, active);
     }
 }
+
+extern "C"
 void layout_engine_settings(GtkWidget * vbox)
 {
     GtkWidget * note;

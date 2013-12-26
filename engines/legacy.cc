@@ -1,10 +1,9 @@
 /*
- * oxygen theme engine
+ * Legacy theme engine
  *
- * oxygen.c
+ * legacy.c
  *
- * Copyright (C) 2006 Quinn Storm <livinglatexkali@gmail.com> (original legacy theme engine)
- * Copyright (C) 2006 Alain <big_al326@hotmail.com>
+ * Copyright (C) 2006 Quinn Storm <livinglatexkali@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -19,20 +18,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *
  */
 
 //legacy engine
 #include <emerald.h>
 #include <engine.h>
-#include <oxygen_icon.h>
+#include <legacy_icon.h>
 
-#define SECT "oxygen_settings"
+#define SECT "legacy_settings"
 
+/*
+ * settings structs
+ */
 typedef struct _private_fs
 {
-    alpha_color sides;
-    alpha_color base;
-    alpha_color glow;
+    alpha_color inner;
+    alpha_color outer;
+    alpha_color title_inner;
+    alpha_color title_outer;
     alpha_color window_halo;
     alpha_color window_highlight;
     alpha_color window_shadow;
@@ -51,18 +55,20 @@ typedef struct _private_ws
     double	corner_radius;
 } private_ws;
 
+extern "C"
 void get_meta_info (EngineMetaInfo * emi)
 {
     emi->version = g_strdup("0.1");
-    emi->description = g_strdup(_("Designed to be vista-ish in nature"));
-    emi->last_compat = g_strdup("0.0"); // old themes marked still compatible for testing-NeOS
-    emi->icon = gdk_pixbuf_new_from_inline(-1,my_pixbuf,TRUE,NULL);
+    emi->description = g_strdup(_("Based on original gnome-window-decorator"));
+    emi->last_compat = g_strdup("0.0"); // old themes still compatible
+    emi->icon = gdk_pixbuf_new_from_inline(-1, my_pixbuf, TRUE, NULL);
 }
 
+extern "C"
 void engine_draw_frame (decor_t * d, cairo_t * cr)
 {
-    double x1, y1, x2, y2, h;
-    int	top;
+    double        x1, y1, x2, y2, h;
+    int		  top;
     frame_settings * fs = d->fs;
     private_fs * pfs = fs->engine_fs;
     window_settings * ws = fs->ws;
@@ -85,156 +91,81 @@ void engine_draw_frame (decor_t * d, cairo_t * cr)
     h = d->height - ws->top_space - ws->titlebar_height - ws->bottom_space;
 
     int corners = 
-        ((pws->round_top_left)?CORNER_TOPLEFT:0) |
-        ((pws->round_top_right)?CORNER_TOPRIGHT:0) |
-        ((pws->round_bottom_left)?CORNER_BOTTOMLEFT:0) |
-        ((pws->round_bottom_right)?CORNER_BOTTOMRIGHT:0);
+        ((pws->round_top_left)     ? CORNER_TOPLEFT     : 0) |
+        ((pws->round_top_right)    ? CORNER_TOPRIGHT    : 0) |
+        ((pws->round_bottom_left)  ? CORNER_BOTTOMLEFT  : 0) |
+        ((pws->round_bottom_right) ? CORNER_BOTTOMRIGHT : 0);
     
 	// maximize work-a-round
 	if (d->state & (WNCK_WINDOW_STATE_MAXIMIZED_HORIZONTALLY |
                 WNCK_WINDOW_STATE_MAXIMIZED_VERTICALLY))
         corners = 0;
-
-    cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
+   
+	cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
     cairo_set_line_width (cr, 1.0);
 
-    //Center
-    fill_rounded_rectangle (cr,
-            x1 + ws->win_extents.left,
-            y1 + 0.5,
-            x2 - x1 - ws->win_extents.left -
-            ws->win_extents.right,
-            top - 0.5,
-            0,
-            &pfs->base, &pfs->base,
-            SHADE_TOP, ws,
-            pws->corner_radius);
-
-    //Top Left Gradient
-    fill_rounded_rectangle (cr,
-            x1 + ws->win_extents.left,
-            y1 + 0.5,
-            (x2 - x1 - ws->win_extents.left -
-            ws->win_extents.right) / 3,
-            top - 0.5,
-            0,
-            &pfs->glow, &pfs->base,
-            SHADE_RIGHT, ws,
-            pws->corner_radius);
-
-    //Top Right Gradient
-    fill_rounded_rectangle (cr,
-            x1 + ws->win_extents.left + 2 * (x2 - x1 - ws->win_extents.left -
-            ws->win_extents.right) / 3,
-            y1 + 0.5,
-            (x2 - x1 - ws->win_extents.left -
-            ws->win_extents.right) / 3,
-            top - 0.5,
-            0,
-            &pfs->base, &pfs->glow,
-            SHADE_RIGHT, ws,
-            pws->corner_radius);
-
-    //Top Right
-    fill_rounded_rectangle (cr,
-            x2 - ws->win_extents.right,
-            y1 + 0.5,
-            ws->win_extents.right - 0.5,
-            top - 0.5,
-            CORNER_TOPRIGHT & corners,
-            &pfs->glow, &pfs->glow,
-            SHADE_TOP | SHADE_RIGHT, ws,
-            pws->corner_radius);
-
-    //Top Left
     fill_rounded_rectangle (cr,
             x1 + 0.5,
             y1 + 0.5,
             ws->win_extents.left - 0.5,
             top - 0.5,
             CORNER_TOPLEFT & corners,
-            &pfs->glow, &pfs->glow,
+            &pfs->title_inner, &pfs->title_outer,
             SHADE_TOP | SHADE_LEFT, ws,
             pws->corner_radius);
 
-    //Left Top
+    fill_rounded_rectangle (cr,
+            x1 + ws->win_extents.left,
+            y1 + 0.5,
+            x2 - x1 - ws->win_extents.left -
+            ws->win_extents.right,
+            top - 0.5,
+            0,
+            &pfs->title_inner, &pfs->title_outer,
+            SHADE_TOP, ws,
+            pws->corner_radius);
+
+    fill_rounded_rectangle (cr,
+            x2 - ws->win_extents.right,
+            y1 + 0.5,
+            ws->win_extents.right - 0.5,
+            top - 0.5,
+            CORNER_TOPRIGHT & corners,
+            &pfs->title_inner, &pfs->title_outer,
+            SHADE_TOP | SHADE_RIGHT, ws,
+            pws->corner_radius);
+
     fill_rounded_rectangle (cr,
             x1 + 0.5,
             y1 + top,
             ws->win_extents.left - 0.5,
-            h / 4,
+            h,
             0,
-            &pfs->glow, &pfs->sides,
-            SHADE_BOTTOM, ws,
+            &pfs->inner, &pfs->outer,
+            SHADE_LEFT, ws,
             pws->corner_radius);
 
-    //Left Bottom
-    fill_rounded_rectangle (cr,
-            x1 + 0.5,
-            y1 + top + h / 4 + 2,
-            ws->win_extents.left - 0.5,
-            h - (h / 4 + 2),
-            0,
-            &pfs->base, &pfs->base,
-            SHADE_BOTTOM, ws,
-            pws->corner_radius);
-
-    //Left Middle
-    fill_rounded_rectangle (cr,
-            x1 + 0.5,
-            y1 + top + h / 4 - 0.5,
-            ws->win_extents.left - 0.5,
-            3,
-            0,
-            &pfs->sides, &pfs->base,
-            SHADE_BOTTOM, ws,
-            pws->corner_radius);
-
-    //Right Top
     fill_rounded_rectangle (cr,
             x2 - ws->win_extents.right,
             y1 + top,
             ws->win_extents.right - 0.5,
-            h / 4,
+            h,
             0,
-            &pfs->glow, &pfs->sides,
-            SHADE_BOTTOM, ws,
+            &pfs->inner, &pfs->outer,
+            SHADE_RIGHT, ws,
             pws->corner_radius);
 
-    //Right Bottom
-    fill_rounded_rectangle (cr,
-            x2 - ws->win_extents.right,
-            y1 + top + h / 4 + 2,
-            ws->win_extents.left - 0.5,
-            h - (h / 4 + 2),
-            0,
-            &pfs->base, &pfs->base,
-            SHADE_BOTTOM, ws,
-            pws->corner_radius);
 
-    //Right Middle
-    fill_rounded_rectangle (cr,
-            x2 - ws->win_extents.right,
-            y1 + top + h / 4 - 0.5,
-            ws->win_extents.right - 0.5,
-            3,
-            0,
-            &pfs->sides, &pfs->base,
-            SHADE_BOTTOM, ws,
-            pws->corner_radius);
-
-    //Bottom Left
     fill_rounded_rectangle (cr,
             x1 + 0.5,
             y2 - ws->win_extents.bottom,
             ws->win_extents.left - 0.5,
             ws->win_extents.bottom - 0.5,
             CORNER_BOTTOMLEFT & corners,
-            &pfs->base, &pfs->base,
+            &pfs->inner, &pfs->outer,
             SHADE_BOTTOM | SHADE_LEFT, ws,
             pws->corner_radius);
 
-    //Bottom
     fill_rounded_rectangle (cr,
             x1 + ws->win_extents.left,
             y2 - ws->win_extents.bottom,
@@ -242,18 +173,17 @@ void engine_draw_frame (decor_t * d, cairo_t * cr)
             ws->win_extents.right,
             ws->win_extents.bottom - 0.5,
             0,
-            &pfs->base, &pfs->base,
+            &pfs->inner, &pfs->outer,
             SHADE_BOTTOM, ws,
             pws->corner_radius);
 
-    //Bottom Right
     fill_rounded_rectangle (cr,
             x2 - ws->win_extents.right,
             y2 - ws->win_extents.bottom,
             ws->win_extents.right - 0.5,
             ws->win_extents.bottom - 0.5,
             CORNER_BOTTOMRIGHT & corners,
-            &pfs->base, &pfs->base,
+            &pfs->inner, &pfs->outer,
             SHADE_BOTTOM | SHADE_RIGHT, ws,
             pws->corner_radius);
 
@@ -343,14 +273,17 @@ void engine_draw_frame (decor_t * d, cairo_t * cr)
     cairo_set_source_alpha_color (cr, &pfs->contents_halo);
     cairo_stroke(cr);
 }
+
+extern "C"
 void load_engine_settings(GKeyFile * f, window_settings * ws)
 {
     private_ws * pws = ws->engine_ws;
 
 	// parse color settings
-    PFACS(base);
-    PFACS(glow);
-    PFACS(sides);
+    PFACS(outer);
+    PFACS(inner);
+    PFACS(title_outer);
+    PFACS(title_inner);
     PFACS(window_halo);
     PFACS(window_highlight);
     PFACS(window_shadow);
@@ -364,16 +297,17 @@ void load_engine_settings(GKeyFile * f, window_settings * ws)
     load_bool_setting(f, &pws->round_top_right, "round_top_right", SECT);
     load_bool_setting(f, &pws->round_bottom_left, "round_bottom_left", SECT);
     load_bool_setting(f, &pws->round_bottom_right, "round_bottom_right", SECT);
-    load_float_setting(f, &pws->corner_radius, "radius",SECT);
+    load_float_setting(f, &pws->corner_radius, "radius", SECT);
 
 }
 
+extern "C"
 void init_engine(window_settings * ws)
 {
     private_fs * pfs;
     private_ws * pws;
 
-    // private window settings
+	// private window settings
     pws = malloc(sizeof(private_ws));
     ws->engine_ws = pws;
     bzero(pws,sizeof(private_ws));
@@ -386,10 +320,11 @@ void init_engine(window_settings * ws)
 	// private frame settings for active frames
     pfs = malloc(sizeof(private_fs));
     ws->fs_act->engine_fs = pfs;
-    bzero(pfs, sizeof(private_fs));
-    ACOLOR(base, 0.8, 0.8, 0.8, 0.5);
-    ACOLOR(glow, 0.8, 0.8, 0.8, 0.5);
-    ACOLOR(sides, 0.8, 0.8, 0.8, 0.5);
+    bzero(pfs,sizeof(private_fs));
+    ACOLOR(inner, 0.8, 0.8, 0.8, 0.5);
+    ACOLOR(outer, 0.8, 0.8, 0.8, 0.5);
+    ACOLOR(title_inner, 0.8, 0.8, 0.8, 0.8);
+    ACOLOR(title_outer, 0.8, 0.8, 0.8, 0.8);
     ACOLOR(window_highlight, 1.0, 1.0, 1.0, 0.8);
     ACOLOR(window_shadow, 0.6, 0.6, 0.6, 0.8);
     ACOLOR(window_halo, 0.8, 0.8, 0.8, 0.8);
@@ -402,9 +337,10 @@ void init_engine(window_settings * ws)
     pfs = malloc(sizeof(private_fs));
     bzero(pfs, sizeof(private_fs));
     ws->fs_inact->engine_fs = pfs;
-    ACOLOR(base, 0.8, 0.8, 0.8, 0.3);
-    ACOLOR(glow, 0.8, 0.8, 0.8, 0.3);
-    ACOLOR(sides, 0.8, 0.8, 0.8, 0.3);
+    ACOLOR(inner, 0.8, 0.8, 0.8, 0.3);
+    ACOLOR(outer, 0.8, 0.8, 0.8, 0.3);
+    ACOLOR(title_inner, 0.8, 0.8, 0.8, 0.6);
+    ACOLOR(title_outer, 0.8, 0.8, 0.8, 0.6);
     ACOLOR(window_highlight, 1.0, 1.0, 1.0, 0.7);
     ACOLOR(window_shadow, 0.6, 0.6, 0.6, 0.7);
     ACOLOR(window_halo, 0.8, 0.8, 0.8, 0.7);
@@ -414,6 +350,7 @@ void init_engine(window_settings * ws)
     ACOLOR(contents_halo, 0.8, 0.8, 0.8, 0.8);
 }
 
+extern "C"
 void fini_engine(window_settings * ws)
 {
     free(ws->fs_act->engine_fs);
@@ -460,7 +397,7 @@ void my_engine_settings(GtkWidget * hbox, gboolean active)
     gtk_box_pack_startC(vbox, gtk_label_new(active?"Active Window":"Inactive Window"), FALSE, FALSE, 0);
     gtk_box_pack_startC(vbox, gtk_hseparator_new(), FALSE, FALSE, 0);
     scroller = gtk_scrolled_window_new(NULL, NULL);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller), 
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller),
             GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
     gtk_box_pack_startC(vbox, scroller, TRUE, TRUE, 0);
     
@@ -470,9 +407,11 @@ void my_engine_settings(GtkWidget * hbox, gboolean active)
     
     make_labels(_("Colors"));
     table_append_separator();
-    ACAV(_("Base"), "base", SECT);
-    ACAV(_("Glow"), "glow", SECT);
-    ACAV(_("Sides"), "sides", SECT);
+    ACAV(_("Outer Frame Blend"), "outer", SECT);
+    ACAV(_("Inner Frame Blend"), "inner", SECT);
+    table_append_separator();
+    ACAV(_("Outer Titlebar Blend"), "title_outer", SECT);
+    ACAV(_("Inner Titlebar Blend"), "title_inner", SECT);
     table_append_separator();
     ACAV(_("Titlebar Separator"), "separator_line", SECT);
     table_append_separator();
@@ -495,6 +434,7 @@ void layout_engine_colors(GtkWidget * vbox)
     my_engine_settings(hbox, FALSE);
 }
 
+extern "C"
 void layout_engine_settings(GtkWidget * vbox)
 {
     GtkWidget * note;

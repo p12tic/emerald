@@ -99,6 +99,7 @@ typedef struct _private_ws
     
 } private_ws;
 
+extern "C"
 void get_meta_info (EngineMetaInfo * emi)
 {
     emi->version = g_strdup("0.1");
@@ -627,6 +628,7 @@ gboolean pattern_vert = TRUE;
     cairo_pattern_destroy (pattern);
 }
 
+extern "C"
 void engine_draw_frame (decor_t * d, cairo_t * cr)
 {
     double        x1, y1, x2, y2, h;
@@ -1093,6 +1095,8 @@ if (pfs->window_frame_halo.alpha != 0) {
     cairo_stroke(cr);
   }
 }
+
+extern "C"
 void load_engine_settings(GKeyFile * f, window_settings * ws)
 {
     private_ws * pws = ws->engine_ws;
@@ -1163,6 +1167,8 @@ void load_engine_settings(GKeyFile * f, window_settings * ws)
 
 
 }
+
+extern "C"
 void init_engine(window_settings * ws)
 {
     private_fs * pfs;
@@ -1241,6 +1247,8 @@ void init_engine(window_settings * ws)
     ACOLOR(contents_shadow,0.6,0.6,0.6,0.8);
     ACOLOR(contents_halo,0.8,0.8,0.8,0.8);
 }
+
+extern "C"
 void fini_engine(window_settings * ws)
 {
     free(ws->fs_act->engine_fs);
@@ -1419,9 +1427,6 @@ void layout_maximised_colors(GtkWidget * vbox)
     w = scaler_new(0.0,1.0,0.01);
     table_append(w,TRUE);
     register_setting(w,ST_FLOAT,SECT,"inner_maximised_alpha");
-
-
-
 }
 
 void layout_corners_frame(GtkWidget * vbox)
@@ -1556,6 +1561,7 @@ void my_engine_settings(GtkWidget * hbox, gboolean active)
     ACAV(_("Contents Highlight"),"contents_highlight",SECT);
     ACAV(_("Contents Shadow"),"contents_shadow",SECT);
 }
+
 void layout_engine_colors(GtkWidget * vbox)
 {
     GtkWidget * hbox;
@@ -1667,6 +1673,8 @@ void layout_pixmaps(GtkWidget * vbox) {
 ///////////////////////////////////////
     
 }
+
+extern "C"
 void layout_engine_settings(GtkWidget * vbox)
 {
     GtkWidget * note;

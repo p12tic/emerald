@@ -1,11 +1,11 @@
-src/main.c
-themer/main.c
-libengine/themer.c
-engines/legacy.c
-engines/line.c
-engines/oxygen.c
-engines/pixmap.c
-engines/truglass.c
-engines/vrunner.c
-engines/zootreeves.c
+src/main.cc
+themer/main.cc
+libengine/themer.cc
+engines/legacy.cc
+engines/line.cc
+engines/oxygen.cc
+engines/pixmap.cc
+engines/truglass.cc
+engines/vrunner.cc
+engines/zootreeves.cc
 

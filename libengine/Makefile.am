@@ -3,8 +3,9 @@ AM_CPPFLAGS = @EMERALD_CFLAGS@ -I$(top_srcdir)/include\
 		   -DENGINE_DIR=\"$(enginesdir)\" \
 		   -DDEFTHEMEDIR='"@datadir@/emerald/theme/"' \
 		   -DDEFSETTINGSFILE='"@datadir@/emerald/settings.ini"'
+AM_CXXFLAGS = -fpermissive -std=c++11
 libemeraldengine_la_LIBADD = @EMERALD_LIBS@
-libemeraldengine_la_SOURCES = emerald.c themer.c
+libemeraldengine_la_SOURCES = emerald.cc themer.cc
 lib_LTLIBRARIES = libemeraldengine.la
 
 pkgconfigdir = $(libdir)/pkgconfig

@@ -59,6 +59,7 @@ typedef struct _private_ws
     double	glow_height;
 } private_ws;
 
+extern "C"
 void get_meta_info (EngineMetaInfo * emi)
 {
     emi->version = g_strdup("0.5");
@@ -67,6 +68,7 @@ void get_meta_info (EngineMetaInfo * emi)
     emi->icon = gdk_pixbuf_new_from_inline(-1, my_pixbuf, TRUE, NULL);
 }
 
+extern "C"
 void engine_draw_frame (decor_t * d, cairo_t * cr)
 {
     double        x1, y1, x2, y2, h;
@@ -407,6 +409,7 @@ void engine_draw_frame (decor_t * d, cairo_t * cr)
     cairo_stroke(cr);
 }
 
+extern "C"
 void load_engine_settings(GKeyFile * f, window_settings * ws)
 {
     private_ws * pws = ws->engine_ws;
@@ -437,6 +440,7 @@ void load_engine_settings(GKeyFile * f, window_settings * ws)
     load_float_setting(f, &pws->glow_height, "glow_height", SECT);
 }
 
+extern "C"
 void init_engine(window_settings * ws)
 {
     private_fs * pfs;
@@ -490,6 +494,7 @@ void init_engine(window_settings * ws)
     ACOLOR(contents_halo, 0.8, 0.8, 0.8, 0.8);
 }
 
+extern "C"
 void fini_engine(window_settings * ws)
 {
     free(ws->fs_act->engine_fs);
@@ -585,6 +590,7 @@ void layout_engine_colors(GtkWidget * vbox)
     my_engine_settings(hbox, FALSE);
 }
 
+extern "C"
 void layout_engine_settings(GtkWidget * vbox)
 {
     GtkWidget * note;

@@ -125,6 +125,7 @@ static void draw_shadow_background(decor_t * d, cairo_t * cr)
 }
 #endif
 
+extern "C"
 void engine_draw_frame (decor_t * d, cairo_t * cr)
 {
     frame_settings *fs = d->fs;
@@ -188,12 +189,14 @@ void engine_draw_frame (decor_t * d, cairo_t * cr)
 	}
 }
 
+extern "C"
 void load_engine_settings(GKeyFile * f, window_settings * ws)
 {
     PFACS(border);
 	PFACS(title_bar);
 }
 
+extern "C"
 void init_engine(window_settings * ws)
 {
     private_fs * pfs;
@@ -216,6 +219,7 @@ void init_engine(window_settings * ws)
 	ACOLOR(title_bar, 0.0, 0.0, 0.0, 0.0);
 }
 
+extern "C"
 void fini_engine(window_settings * ws)
 {
     free(ws->fs_act->engine_fs);
@@ -254,6 +258,7 @@ void layout_engine_colors(GtkWidget * vbox)
     my_engine_settings(hbox, FALSE);
 }
 
+extern "C"
 void layout_engine_settings(GtkWidget * vbox)
 {
     GtkWidget * note;
