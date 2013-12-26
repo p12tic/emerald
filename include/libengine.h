@@ -79,7 +79,6 @@ typedef struct _SettingItem {
 #define gtk_container_addC(a,b) gtk_container_add(GTK_CONTAINER(a),b)
 #define gtk_container_set_border_widthC(a,b) gtk_container_set_border_width(GTK_CONTAINER(a),b)
 
-#define ACAV(caption,basekey,sect) add_color_alpha_value(caption,basekey,sect,active)
 
 gboolean get_engine_meta_info(const gchar* engine, EngineMetaInfo* inf);   // returns FALSE if couldn't find engine
 

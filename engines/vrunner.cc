@@ -614,9 +614,9 @@ void my_engine_settings(GtkWidget* hbox,  gboolean active)
 
     make_labels(_("Colors"));
     table_append_separator();
-    ACAV(_("Left Blend"), "title_left", SECT);
-    ACAV(_("Middle Blend"), "title_middle", SECT);
-    ACAV(_("Right Blend"), "title_right", SECT);
+    add_color_alpha_value(_("Left Blend"), "title_left", SECT, active);
+    add_color_alpha_value(_("Middle Blend"), "title_middle", SECT, active);
+    add_color_alpha_value(_("Right Blend"), "title_right", SECT, active);
 
     table_append_separator();
     junk = gtk_label_new(_("Contrast"));
@@ -680,7 +680,7 @@ void my_engine_settings(GtkWidget* hbox,  gboolean active)
         register_setting(junk, ST_BOOL, SECT, "inactive_use_glow");
     }
 
-    ACAV(_("Title Glow"), "glow_inner", SECT);
+    add_color_alpha_value(_("Title Glow"), "glow_inner", SECT, active);
     junk = gtk_label_new("Glow");
     table_append(junk, FALSE);
     junk = gtk_label_new(_("Radius"));
@@ -695,17 +695,17 @@ void my_engine_settings(GtkWidget* hbox,  gboolean active)
     }
 
     table_append_separator();
-    ACAV(_("Titlebar Separator"), "separator_line", SECT);
+    add_color_alpha_value(_("Titlebar Separator"), "separator_line", SECT, active);
 
     table_append_separator();
-    ACAV(_("Frame Outline"), "window_halo", SECT);
-    ACAV(_("Frame Highlight"), "window_highlight", SECT);
-    ACAV("Frame Shadow", "window_shadow", SECT);
+    add_color_alpha_value(_("Frame Outline"), "window_halo", SECT, active);
+    add_color_alpha_value(_("Frame Highlight"), "window_highlight", SECT, active);
+    add_color_alpha_value("Frame Shadow", "window_shadow", SECT, active);
 
     table_append_separator();
-    ACAV(_("Contents Outline"), "contents_halo", SECT);
-    ACAV(_("Contents Highlight"), "contents_highlight", SECT);
-    ACAV("Contents Shadow", "contents_shadow", SECT);
+    add_color_alpha_value(_("Contents Outline"), "contents_halo", SECT, active);
+    add_color_alpha_value(_("Contents Highlight"), "contents_highlight", SECT, active);
+    add_color_alpha_value("Contents Shadow", "contents_shadow", SECT, active);
 }
 
 void layout_engine_colors(GtkWidget* vbox)

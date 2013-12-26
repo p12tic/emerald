@@ -591,13 +591,13 @@ void my_engine_settings(GtkWidget* hbox,  gboolean active)
 
     make_labels("Colors");
     table_append_separator();
-    ACAV(_("Outer Frame Blend"), "outer", SECT);
-    ACAV(_("Inner Frame Blend"), "inner", SECT);
+    add_color_alpha_value(_("Outer Frame Blend"), "outer", SECT, active);
+    add_color_alpha_value(_("Inner Frame Blend"), "inner", SECT, active);
     table_append_separator();
-    ACAV(_("Outer Titlebar Blend"), "title_outer", SECT);
-    ACAV(_("Inner Titlebar Blend"), "title_inner", SECT);
+    add_color_alpha_value(_("Outer Titlebar Blend"), "title_outer", SECT, active);
+    add_color_alpha_value(_("Inner Titlebar Blend"), "title_inner", SECT, active);
     table_append_separator();
-    ACAV(_("Titlebar Separator"), "separator_line", SECT);
+    add_color_alpha_value(_("Titlebar Separator"), "separator_line", SECT, active);
 }
 void layout_engine_colors(GtkWidget* vbox)
 {

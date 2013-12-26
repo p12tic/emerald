@@ -1512,11 +1512,11 @@ void my_engine_settings(GtkWidget* hbox, gboolean active)
 
     make_labels(_("Colors"));
     table_append_separator();
-    ACAV(_("Outer Frame Blend"), "outer", SECT);
-    ACAV(_("Inner Frame Blend"), "inner", SECT);
+    add_color_alpha_value(_("Outer Frame Blend"), "outer", SECT, active);
+    add_color_alpha_value(_("Inner Frame Blend"), "inner", SECT, active);
     table_append_separator();
-    ACAV(_("Outer Titlebar Blend"), "title_outer", SECT);
-    ACAV(_("Inner Titlebar Blend"), "title_inner", SECT);
+    add_color_alpha_value(_("Outer Titlebar Blend"), "title_outer", SECT, active);
+    add_color_alpha_value(_("Inner Titlebar Blend"), "title_inner", SECT, active);
 
     table_append_separator();
 
@@ -1561,15 +1561,15 @@ void my_engine_settings(GtkWidget* hbox, gboolean active)
 
 
 
-    ACAV(_("Titlebar Separator"), "separator_line", SECT);
+    add_color_alpha_value(_("Titlebar Separator"), "separator_line", SECT, active);
     table_append_separator();
-    ACAV(_("Frame Outline"), "window_frame_halo", SECT);
-    ACAV(_("Frame Highlight"), "window_highlight", SECT);
-    ACAV(_("Frame Shadow"), "window_shadow", SECT);
+    add_color_alpha_value(_("Frame Outline"), "window_frame_halo", SECT, active);
+    add_color_alpha_value(_("Frame Highlight"), "window_highlight", SECT, active);
+    add_color_alpha_value(_("Frame Shadow"), "window_shadow", SECT, active);
     table_append_separator();
-    ACAV(_("Contents Outline"), "contents_halo", SECT);
-    ACAV(_("Contents Highlight"), "contents_highlight", SECT);
-    ACAV(_("Contents Shadow"), "contents_shadow", SECT);
+    add_color_alpha_value(_("Contents Outline"), "contents_halo", SECT, active);
+    add_color_alpha_value(_("Contents Highlight"), "contents_highlight", SECT, active);
+    add_color_alpha_value(_("Contents Shadow"), "contents_shadow", SECT, active);
 }
 
 void layout_engine_colors(GtkWidget* vbox)

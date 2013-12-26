@@ -238,8 +238,8 @@ void my_engine_settings(GtkWidget* hbox, gboolean active)
 
     make_labels(_("Colors"));
     table_append_separator();
-    ACAV(_("Outer Frame Blend"), "border", SECT);
-    ACAV(_("Title Bar"), "title_bar", SECT);
+    add_color_alpha_value(_("Outer Frame Blend"), "border", SECT, active);
+    add_color_alpha_value(_("Title Bar"), "title_bar", SECT, active);
 }
 
 void layout_engine_colors(GtkWidget* vbox)
