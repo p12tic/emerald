@@ -1083,26 +1083,8 @@ void layout_settings_pane(Gtk::Box& vbox)
     combo->set_active(BLUR_TYPE_NONE);
     table_append(*combo, true);
     SettingItem::create_global(*combo, "decorations", "blur_type");
-
-    /*table_append(*Gtk::manage(new Gtk::Label("Icon Click Action")),false);
-    combo = gtk_combo_box_new_text();
-    combo->append_text("None");
-    combo->append_text("Window Menu");
-    combo->set_active(0);
-    table_append(combo,false);
-    SettingItem::create(combo,ST_SFILE_INT_COMBO,"window_icon",
-            "click_action");
-
-    table_append(*Gtk::manage(new Gtk::Label("Icon Double-Click Action")),false);
-    combo = gtk_combo_box_new_text();
-    combo->append_text("None");
-    combo->append_text("Close Window");
-    combo->set_active(0);
-    table_append(combo,false);
-    SettingItem::create(combo,ST_SFILE_INT_COMBO,"window_icon",
-            "double_click_action");*/
-    //TODO - implement the emerald side of these, so for now they won't be here.
 }
+
 void layout_engine_pane(Gtk::Box& vbox)
 {
     auto& nvbox = *Gtk::manage(new Gtk::VBox(false, 2));
@@ -1117,8 +1099,6 @@ void layout_engine_pane(Gtk::Box& vbox)
 
 void layout_lower_pane(Gtk::Box& vbox)
 {
-    //layout_mid_pane(vbox);
-
     auto& notebook = *Gtk::manage(new Gtk::Notebook());
     vbox.pack_start(notebook, true, true);
 
@@ -1247,12 +1227,6 @@ Gtk::Widget* build_tree_view()
 
     vbox.pack_start(*Gtk::manage(new Gtk::HSeparator()), false, false);
 
-    /*auto filt = Gtk::TreeModelFilter::create(theme_model_);
-    filt->set_visible_func(sigc::bind(&is_visible, std::ref(searchbox)));
-
-    auto sort = Gtk::TreeModelSort::create(filt);
-    searchbox.signal_changed().connect(sigc::bind(&cb_refilter, filt));
-*/
     theme_selector_ = Gtk::manage(new Gtk::TreeView(theme_model_));
     theme_selector_->set_headers_clickable();
     theme_selector_->set_reorderable();
@@ -1276,18 +1250,7 @@ Gtk::Widget* build_tree_view()
     column.set_max_width(400);
     column.set_resizable();
     column.set_reorderable();
-    }
-
-    /*MetaRenderer = gtk_cell_renderer_text_new();
-    g_object_set(MetaRenderer,"wrap-mode",PANGO_WRAP_WORD,"wrap-width",30,NULL);
-    MetaColumn = gtk_tree_view_column_new_with_attributes
-        ("Version",MetaRenderer,"text",4,NULL);
-    gtk_tree_view_column_set_sort_column_id(MetaColumn,4);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(ThemeSelector),MetaColumn);
-    gtk_tree_view_column_set_resizable(MetaColumn,false);
-    gtk_tree_view_column_set_reorderable(MetaColumn,true);*/
-
-    {
+    } {
     auto &renderer = *Gtk::manage(new Gtk::CellRendererText());
     int id = theme_selector_->append_column("Up-to-Date", renderer);
     auto &column = *(theme_selector_->get_column(id-1));
@@ -1304,32 +1267,6 @@ Gtk::Widget* build_tree_view()
     column.set_resizable();
     column.set_reorderable();
     }
-
-    /*MetaRenderer = gtk_cell_renderer_text_new();
-    g_object_set(MetaRenderer,"wrap-mode",PANGO_WRAP_WORD,"wrap-width",80,NULL);
-    MetaColumn = gtk_tree_view_column_new_with_attributes
-        ("Suggested Widget Theme",MetaRenderer,"text",5,NULL);
-    gtk_tree_view_column_set_sort_column_id(MetaColumn,5);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(ThemeSelector),MetaColumn);
-    gtk_tree_view_column_set_resizable(MetaColumn,true);
-    gtk_tree_view_column_set_reorderable(MetaColumn,true);
-
-    MetaRenderer = gtk_cell_renderer_text_new();
-    g_object_set(MetaRenderer,"wrap-mode",PANGO_WRAP_WORD,"wrap-width",80,NULL);
-    MetaColumn = gtk_tree_view_column_new_with_attributes
-        ("Creator",MetaRenderer,"text",2,NULL);
-    gtk_tree_view_column_set_sort_column_id(MetaColumn,2);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(ThemeSelector),MetaColumn);
-    gtk_tree_view_column_set_resizable(MetaColumn,true);
-    gtk_tree_view_column_set_reorderable(MetaColumn,true);*/
-
-    /*MetaRenderer = gtk_cell_renderer_text_new();
-    g_object_set(MetaRenderer,"wrap-mode",PANGO_WRAP_WORD,"wrap-width",100,NULL);
-    MetaColumn = gtk_tree_view_column_new_with_attributes
-        ("Description",MetaRenderer,"text",3,NULL);
-    gtk_tree_view_column_set_sort_column_id(MetaColumn,3);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(ThemeSelector),MetaColumn);
-    gtk_tree_view_column_set_resizable(MetaColumn,true);*/
 
     theme_select_ = theme_selector_->get_selection();
     theme_select_->set_mode(Gtk::SELECTION_SINGLE);

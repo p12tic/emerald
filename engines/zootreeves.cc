@@ -584,22 +584,6 @@ fill_rounded_square(cairo_t*       cr,
         common_gradient_starting_point_y = h = 0;
     }
 
-    /*  if (w && h)
-      {
-          cairo_matrix_t matrix;
-
-          pattern = cairo_pattern_create_radial (0.0, 0.0, 0.0, 0.0, 0.0, w);
-
-          cairo_matrix_init_scale (&matrix, 1.0, w / h);
-          cairo_matrix_translate (&matrix, -(x + w), -(y + h));
-
-          cairo_pattern_set_matrix (pattern, &matrix);
-      }
-      else
-      { */
-
-
-
     if (enable_pixmaps == false) {
         if (gradient_repeat_direction == 1 && pattern_vert == true) {
             pattern = cairo_pattern_create_linear(common_gradient_starting_point_x, common_gradient_starting_point_y, common_gradient_starting_point_x + pattern_size, common_gradient_starting_point_y);
@@ -737,18 +721,8 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                 ws->tobj_layout = layout;
                 pws->done_indent = true;
             }
-
-            //sprintf(ws->tobj_layout, "(-%i)%s", left_bar_dip_offset, layout); 89
-            //pango_layout_set_indent(d->layout, 20000);
-            //pws->round_bottom_left = false;
         }
     }
-
-
-
-//   pfs->title_outer.alpha = 0.0;
-
-
 
 ////////////DRAW FRAME///////////////////////////////////////////
     // always_allow 1 = radius_top_left
@@ -763,16 +737,10 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
     double title_bar_dip_dip_width = width - (pws->title_bar_dip_title_width + pws->title_bar_dip_button_width);
     bool enable_dip;
 
-    //printf("Frame width: %f - Pane Width: %f\n", width, pane_1_width);
-    //fflush(stdout);
-
     enable_dip = false;
     bool do_button_part = true;
     double title_bar_dip_radius = 0;
     double title_bar_dip_radius_offset = 0;
-
-//    printf("%s\n", d->tobj_item_state[TBT_TITLE]);
-//        if ((owidth=get_title_object_width(ws->tobj_layout[i],ws,d))==-1)
 
 //TIDY ALL THIS UP! -lazy
 //Maximised causes problems

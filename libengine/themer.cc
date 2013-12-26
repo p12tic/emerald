@@ -28,8 +28,6 @@ std::list<EngineData> g_engine_list;
 Gtk::ComboBox* engine_combo_;
 Glib::RefPtr<Gtk::ListStore> engine_model_;
 Gtk::Alignment* engine_container_;
-//GtkWidget * PreviewImage[BX_COUNT];
-//GtkWidget * ButtonImage[BX_COUNT];
 bool apply = false;
 bool changed = false;
 GKeyFile* global_theme_file;
