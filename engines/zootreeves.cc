@@ -1277,26 +1277,26 @@ void layout_layout_frame(GtkWidget* vbox)
     gtk_box_pack_startC(hbox, gtk_label_new(_("Border Gap")), FALSE, FALSE, 0);
     junk = scaler_new(0, 20, 0.5);
     gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
-    register_setting(junk, ST_FLOAT, SECT, "window_gap");
+    SettingItem::register_setting(junk, ST_FLOAT, SECT, "window_gap");
 
     hbox = gtk_hbox_new(FALSE, 2);
     gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
     junk = gtk_check_button_new_with_label(_("Show Border when maximised?"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "show_border_maximised");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "show_border_maximised");
 
     hbox = gtk_hbox_new(FALSE, 2);
     gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
     junk = gtk_check_button_new_with_label(_("Show when minimised?"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "show_border_minimised");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "show_border_minimised");
 
     hbox = gtk_hbox_new(FALSE, 2);
     gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
     gtk_box_pack_startC(hbox, gtk_label_new(_("Minimised Border Size")), FALSE, FALSE, 0);
     junk = scaler_new(0, 30, 1);
     gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
-    register_setting(junk, ST_FLOAT, SECT, "minimised_border");
+    SettingItem::register_setting(junk, ST_FLOAT, SECT, "minimised_border");
 
 
 
@@ -1312,27 +1312,27 @@ void layout_left_bar_frame(GtkWidget* vbox)
     gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
     junk = gtk_check_button_new_with_label(_("Enable Left Bar Dip?"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "enable_left_bar_dip");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "enable_left_bar_dip");
 
     hbox = gtk_hbox_new(FALSE, 2);
     gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
     gtk_box_pack_startC(hbox, gtk_label_new(_("Left Bar Radius")), FALSE, FALSE, 0);
     junk = scaler_new(0, 20, 1);
     gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
-    register_setting(junk, ST_INT, SECT, "left_bar_dip_radius");
+    SettingItem::register_setting(junk, ST_INT, SECT, "left_bar_dip_radius");
 
     hbox = gtk_hbox_new(FALSE, 2);
     gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
     junk = gtk_check_button_new_with_label(_("Enable Lower Bulge? (Useless at the moment, but will be used soon)"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "enable_left_bar_dip_lower_part");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "enable_left_bar_dip_lower_part");
 
     hbox = gtk_hbox_new(FALSE, 2);
     gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
     gtk_box_pack_startC(hbox, gtk_label_new(_("Top Corner Offset (%)")), FALSE, FALSE, 0);
     junk = scaler_new(0, 90, 1);
     gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
-    register_setting(junk, ST_INT, SECT, "left_bar_dip_offset");
+    SettingItem::register_setting(junk, ST_INT, SECT, "left_bar_dip_offset");
 
 
 
@@ -1352,40 +1352,40 @@ void layout_title_bar_frame(GtkWidget* vbox)
     gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
     junk = gtk_check_button_new_with_label(_("Enable Title Bar Dip?"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "enable_title_bar_dip");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "enable_title_bar_dip");
 
     hbox = gtk_hbox_new(FALSE, 2);
     gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
     junk = gtk_check_button_new_with_label(_("Enable Button Part?"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "enable_bar_dip_button_part");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "enable_bar_dip_button_part");
 
     hbox = gtk_hbox_new(FALSE, 2);
     gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
     gtk_box_pack_startC(hbox, gtk_label_new(_("Title Part Width")), FALSE, FALSE, 0);
     junk = scaler_new(80, 800, 1);
     gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
-    register_setting(junk, ST_INT, SECT, "title_bar_dip_title_width");
+    SettingItem::register_setting(junk, ST_INT, SECT, "title_bar_dip_title_width");
 
     hbox = gtk_hbox_new(FALSE, 2);
     gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
     gtk_box_pack_startC(hbox, gtk_label_new(_("Button Part Width)")), FALSE, FALSE, 0);
     junk = scaler_new(10, 800, 1);
     gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
-    register_setting(junk, ST_INT, SECT, "title_bar_dip_button_width");
+    SettingItem::register_setting(junk, ST_INT, SECT, "title_bar_dip_button_width");
 
     hbox = gtk_hbox_new(FALSE, 2);
     gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
     gtk_box_pack_startC(hbox, gtk_label_new(_("Dip Corners Radius)")), FALSE, FALSE, 0);
     junk = scaler_new(1, 20, 1);
     gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
-    register_setting(junk, ST_INT, SECT, "title_bar_dip_radius");
+    SettingItem::register_setting(junk, ST_INT, SECT, "title_bar_dip_radius");
 
     hbox = gtk_hbox_new(FALSE, 2);
     gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
     junk = gtk_check_button_new_with_label(_("Round Inside Corners As well?"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "round_tri");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "round_tri");
 
 
 }
@@ -1402,11 +1402,11 @@ void layout_maximised_colors(GtkWidget* vbox)
 
     junk = gtk_check_button_new_with_label(_("Enable Different Maximised Colors?"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "enable_maximised_colors");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "enable_maximised_colors");
 
     junk = gtk_check_button_new_with_label(_("Turn Off repeating gradients when maximised?"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "gradient_repeat_disabled_maximised");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "gradient_repeat_disabled_maximised");
 
     scroller = gtk_scrolled_window_new(NULL, NULL);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller),
@@ -1424,19 +1424,19 @@ void layout_maximised_colors(GtkWidget* vbox)
     table_append(w, FALSE);
     w = gtk_color_button_new();
     table_append(w, FALSE);
-    register_setting(w, ST_COLOR, SECT, "outer_maximised_color");
+    SettingItem::register_setting(w, ST_COLOR, SECT, "outer_maximised_color");
     w = scaler_new(0.0, 1.0, 0.01);
     table_append(w, TRUE);
-    register_setting(w, ST_FLOAT, SECT, "outer_maximised_alpha");
+    SettingItem::register_setting(w, ST_FLOAT, SECT, "outer_maximised_alpha");
 
     w = gtk_label_new(_("Inner Frame Blend"));
     table_append(w, FALSE);
     w = gtk_color_button_new();
     table_append(w, FALSE);
-    register_setting(w, ST_COLOR, SECT, "inner_maximised_color");
+    SettingItem::register_setting(w, ST_COLOR, SECT, "inner_maximised_color");
     w = scaler_new(0.0, 1.0, 0.01);
     table_append(w, TRUE);
-    register_setting(w, ST_FLOAT, SECT, "inner_maximised_alpha");
+    SettingItem::register_setting(w, ST_FLOAT, SECT, "inner_maximised_alpha");
 }
 
 void layout_corners_frame(GtkWidget* vbox)
@@ -1446,26 +1446,26 @@ void layout_corners_frame(GtkWidget* vbox)
 
     junk = gtk_check_button_new_with_label(_("Round Top Left Corner?"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "round_top_left");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "round_top_left");
 
     junk = gtk_check_button_new_with_label(_("Round Top Right Corner"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "round_top_right");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "round_top_right");
 
     junk = gtk_check_button_new_with_label(_("Round Bottom Left Corner"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "round_bottom_left");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "round_bottom_left");
 
     junk = gtk_check_button_new_with_label(_("Round Bottom Right Corner"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "round_bottom_right");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "round_bottom_right");
 
     hbox = gtk_hbox_new(FALSE, 2);
     gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
     gtk_box_pack_startC(hbox, gtk_label_new(_("Frame Rounding Radius")), FALSE, FALSE, 0);
     junk = scaler_new(0, 20, 0.5);
     gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
-    register_setting(junk, ST_FLOAT, SECT, "frame_radius");
+    SettingItem::register_setting(junk, ST_FLOAT, SECT, "frame_radius");
 
     hbox = gtk_hbox_new(FALSE, 2);
     gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
@@ -1473,7 +1473,7 @@ void layout_corners_frame(GtkWidget* vbox)
 
     junk = scaler_new(0, 20, 0.5);
     gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
-    register_setting(junk, ST_FLOAT, SECT, "titlebar_radius");
+    SettingItem::register_setting(junk, ST_FLOAT, SECT, "titlebar_radius");
 
 }
 
@@ -1485,7 +1485,7 @@ void add_border_slider(char* text, char* key, int value)
     w = scaler_new(0, 20, 1);
     table_append(w, TRUE);
     gtk_range_set_value(GTK_RANGE(w), value);
-    register_setting(w, ST_INT, "borders", key);
+    SettingItem::register_setting(w, ST_INT, "borders", key);
 }
 
 
@@ -1528,7 +1528,7 @@ void my_engine_settings(GtkWidget* hbox, bool active)
     table_append(junk, TRUE);
     char* key_line;
     key_line = g_strdup_printf(active ? "active_%s" : "inactive_%s", "gradient_repeat_enabled");
-    register_setting(junk, ST_BOOL, SECT, key_line);
+    SettingItem::register_setting(junk, ST_BOOL, SECT, key_line);
 
     junk = gtk_label_new(_("Vertical Repeat?"));
     table_append(junk, FALSE);
@@ -1537,7 +1537,7 @@ void my_engine_settings(GtkWidget* hbox, bool active)
     junk = gtk_check_button_new();
     table_append(junk, TRUE);
     key_line = g_strdup_printf(active ? "active_%s" : "inactive_%s", "gradient_repeat_direction_vertical");
-    register_setting(junk, ST_BOOL, SECT, key_line);
+    SettingItem::register_setting(junk, ST_BOOL, SECT, key_line);
 
     junk = gtk_label_new(_("Diagonal Repeat?"));
     table_append(junk, FALSE);
@@ -1546,7 +1546,7 @@ void my_engine_settings(GtkWidget* hbox, bool active)
     junk = gtk_check_button_new();
     table_append(junk, TRUE);
     key_line = g_strdup_printf(active ? "active_%s" : "inactive_%s", "gradient_repeat_direction_diagonal");
-    register_setting(junk, ST_BOOL, SECT, key_line);
+    SettingItem::register_setting(junk, ST_BOOL, SECT, key_line);
 
 
     junk = gtk_label_new(_("Repeat Frequency"));
@@ -1556,7 +1556,7 @@ void my_engine_settings(GtkWidget* hbox, bool active)
     junk = scaler_new(0, 20, 0.5);
     table_append(junk, TRUE);
     key_line = g_strdup_printf(active ? "active_%s" : "inactive_%s", "gradient_repeat_height");
-    register_setting(junk, ST_FLOAT, SECT, key_line);
+    SettingItem::register_setting(junk, ST_FLOAT, SECT, key_line);
     table_append_separator();
 
 
@@ -1595,11 +1595,11 @@ void layout_pixmaps(GtkWidget* vbox)
 
     junk = gtk_check_button_new_with_label(_("Enable Title Part Pixmap?"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "pixmaps_titlebarpart_enabled");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "pixmaps_titlebarpart_enabled");
 
     junk = gtk_check_button_new_with_label(_("Repeat Title Part Pixmap?"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "pixmaps_titlebarpart_repeat_enabled");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "pixmaps_titlebarpart_repeat_enabled");
 
     hbox = gtk_hbox_new(FALSE, 2);
     gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
@@ -1618,18 +1618,18 @@ void layout_pixmaps(GtkWidget* vbox)
 
     title_bar_image = gtk_image_new();
 
-    /* set =*/ register_img_file_setting(file_selector, "pixmaps", "titlebarpart", GTK_IMAGE(title_bar_image));
+    /* set =*/ SettingItem::register_img_file_setting(file_selector, "pixmaps", "titlebarpart", GTK_IMAGE(title_bar_image));
 ///////////////////////////
     gtk_box_pack_startC(hbox, gtk_vseparator_new(), FALSE, FALSE, 0);
 ///////////////////////////
 
     junk = gtk_check_button_new_with_label(_("Enable Button Part Pixmap?"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "pixmaps_buttonpart_enabled");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "pixmaps_buttonpart_enabled");
 
     junk = gtk_check_button_new_with_label(_("Repeat Button Part Pixmap?"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "pixmaps_buttonpart_repeat_enabled");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "pixmaps_buttonpart_repeat_enabled");
 
 
     hbox = gtk_hbox_new(FALSE, 2);
@@ -1649,18 +1649,18 @@ void layout_pixmaps(GtkWidget* vbox)
 
     title_bar_image = gtk_image_new();
 
-    /*set =*/ register_img_file_setting(file_selector, "pixmaps", "buttonpart", GTK_IMAGE(title_bar_image));
+    /*set =*/ SettingItem::register_img_file_setting(file_selector, "pixmaps", "buttonpart", GTK_IMAGE(title_bar_image));
 ///////////////////////////////////////
     gtk_box_pack_startC(hbox, gtk_vseparator_new(), FALSE, FALSE, 0);
 ///////////////////////////
 
     junk = gtk_check_button_new_with_label(_("Enable Titlebar Pixmap?"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "pixmaps_titlebar_enabled");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "pixmaps_titlebar_enabled");
 
     junk = gtk_check_button_new_with_label(_("Repeat Titlebar Pixmap?"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "pixmaps_titlebar_repeat_enabled");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "pixmaps_titlebar_repeat_enabled");
 
 
     hbox = gtk_hbox_new(FALSE, 2);
@@ -1680,7 +1680,7 @@ void layout_pixmaps(GtkWidget* vbox)
 
     title_bar_image = gtk_image_new();
 
-    /* set =*/ register_img_file_setting(file_selector, "pixmaps", "titlebar", GTK_IMAGE(title_bar_image));
+    /* set =*/ SettingItem::register_img_file_setting(file_selector, "pixmaps", "titlebar", GTK_IMAGE(title_bar_image));
 ///////////////////////////////////////
 
 }

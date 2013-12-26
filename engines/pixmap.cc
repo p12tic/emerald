@@ -544,33 +544,33 @@ void layout_corners_frame(GtkWidget* vbox)
 
     junk = gtk_check_button_new_with_label(_("Round Top Left Corner"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "round_top_left");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "round_top_left");
 
     junk = gtk_check_button_new_with_label(_("Round Top Right Corner"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "round_top_right");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "round_top_right");
 
     junk = gtk_check_button_new_with_label(_("Round Bottom Left Corner"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "round_bottom_left");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "round_bottom_left");
 
     junk = gtk_check_button_new_with_label(_("Round Bottom Right Corner"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "round_bottom_right");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "round_bottom_right");
 
     hbox = gtk_hbox_new(FALSE, 2);
     gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
     gtk_box_pack_startC(hbox, gtk_label_new(_("Top Rounding Radius")), FALSE, FALSE, 0);
     junk = scaler_new(0, 20, 0.5);
     gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
-    register_setting(junk, ST_FLOAT, SECT, "top_radius");
+    SettingItem::register_setting(junk, ST_FLOAT, SECT, "top_radius");
 
     hbox = gtk_hbox_new(FALSE, 2);
     gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
     gtk_box_pack_startC(hbox, gtk_label_new(_("Bottom Rounding Radius")), FALSE, FALSE, 0);
     junk = scaler_new(0, 20, 0.5);
     gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
-    register_setting(junk, ST_FLOAT, SECT, "bottom_radius");
+    SettingItem::register_setting(junk, ST_FLOAT, SECT, "bottom_radius");
 }
 void my_engine_settings(GtkWidget* hbox,  bool active)
 {
@@ -644,7 +644,7 @@ static void layout_pixmap_box(GtkWidget* vbox, int b_t, bool active)
     gtk_widget_set_size_request(scroller,  150, 50);
 
     image = gtk_image_new();
-    item = register_img_file_setting(filesel, "pixmaps",  g_strdup_printf("%s_%s", pre, p_types[b_t]), (GtkImage*)image);
+    item = SettingItem::register_img_file_setting(filesel, "pixmaps",  g_strdup_printf("%s_%s", pre, p_types[b_t]), (GtkImage*)image);
     gtk_scrolled_window_add_with_viewport(
         GTK_SCROLLED_WINDOW(scroller), GTK_WIDGET(image));
     table_append(scroller, TRUE);
@@ -655,7 +655,7 @@ static void layout_pixmap_box(GtkWidget* vbox, int b_t, bool active)
 
     // Style : Use Tiled or Scaled pixmaps
     use_scaled = gtk_check_button_new_with_label(_("Scaled"));
-    register_setting(use_scaled,  ST_BOOL,  SECT,  g_strdup_printf("%s_%s_use_scaled", pre, p_types[b_t]));
+    SettingItem::register_setting(use_scaled,  ST_BOOL,  SECT,  g_strdup_printf("%s_%s_use_scaled", pre, p_types[b_t]));
     table_append(use_scaled, FALSE);
 
     // Width : Checkbox (Use my width) + Number (0-500)
@@ -663,11 +663,11 @@ static void layout_pixmap_box(GtkWidget* vbox, int b_t, bool active)
         table_append(gtk_label_new(_("Not adjustable")), FALSE);
     } else {
         width = gtk_spin_button_new_with_range(0, 500, 1);
-        register_setting(width,
+        SettingItem::register_setting(width,
                          ST_INT, SECT, g_strdup_printf("%s_%s_width", pre, p_types[b_t]));
 
         use_my_width = gtk_check_button_new_with_label("");
-        register_setting(use_my_width, ST_BOOL, SECT, g_strdup_printf("%s_%s_use_width", pre, p_types[b_t]));
+        SettingItem::register_setting(use_my_width, ST_BOOL, SECT, g_strdup_printf("%s_%s_use_width", pre, p_types[b_t]));
 
         tbox = gtk_hbox_new(FALSE, 2);
         gtk_box_pack_startC(tbox, width, FALSE, FALSE, 0);
@@ -678,10 +678,10 @@ static void layout_pixmap_box(GtkWidget* vbox, int b_t, bool active)
     // Height : Checkbox (Use my width) + Number (0-500)
     if (b_t == 1 || b_t == 2 || b_t == 6 || b_t == 7) {
         height = gtk_spin_button_new_with_range(0, 500, 1);
-        register_setting(height, ST_INT, SECT, g_strdup_printf("%s_%s_height", pre, p_types[b_t]));
+        SettingItem::register_setting(height, ST_INT, SECT, g_strdup_printf("%s_%s_height", pre, p_types[b_t]));
 
         use_my_height = gtk_check_button_new_with_label("");
-        register_setting(use_my_height, ST_BOOL, SECT, g_strdup_printf("%s_%s_use_height", pre, p_types[b_t]));
+        SettingItem::register_setting(use_my_height, ST_BOOL, SECT, g_strdup_printf("%s_%s_use_height", pre, p_types[b_t]));
 
         ttbox = gtk_hbox_new(FALSE, 2);
         gtk_box_pack_startC(ttbox, height, FALSE, FALSE, 0);
@@ -705,7 +705,7 @@ void layout_engine_pixmaps(GtkWidget* vbox, bool active)
     if (!active) {
         junk = gtk_check_button_new_with_label(_("Same as Active"));
         gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
-        register_setting(junk, ST_BOOL, SECT, "inactive_use_active_pixmaps");
+        SettingItem::register_setting(junk, ST_BOOL, SECT, "inactive_use_active_pixmaps");
     }
 
     scroller = gtk_scrolled_window_new(NULL, NULL);

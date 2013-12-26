@@ -63,9 +63,7 @@ void add_color_alpha_value(const char* caption, const char* basekey,
 
 void make_labels(const char* header);
 GtkWidget* build_frame(GtkWidget* vbox, const char* title, bool is_hbox);
-SettingItem* register_setting(GtkWidget* widget, SettingType type, char* section, char* key);
-SettingItem* register_img_file_setting(GtkWidget* widget, const char* section,
-                                       const char* key, GtkImage* image);
+
 void table_new(int width, bool same, bool labels);
 void table_append(GtkWidget* child, bool stretch);
 void table_append_separator();

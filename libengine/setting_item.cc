@@ -29,36 +29,36 @@ extern GtkListStore* EngineModel;
 char* globalStr = NULL;
 char globalFloatStr[G_ASCII_DTOSTR_BUF_SIZE + 1];
 
-void write_setting(SettingItem* item, void* p)
+void SettingItem::write_setting(void* p)
 {
     GKeyFile* f = (GKeyFile*) p;
-    switch (item->type) {
+    switch (type_) {
     case ST_BOOL:
-        g_key_file_set_boolean(f, item->section, item->key, get_bool(item));
+        g_key_file_set_boolean(f, section_, key_, get_bool());
         break;
     case ST_INT:
-        g_key_file_set_integer(f, item->section, item->key, get_int(item));
+        g_key_file_set_integer(f, section_, key_, get_int());
         break;
     case ST_FLOAT:
-        g_key_file_set_string(f, item->section, item->key, get_float_str(item));
+        g_key_file_set_string(f, section_, key_, get_float_str());
         break;
     case ST_COLOR:
-        g_key_file_set_string(f, item->section, item->key, get_color(item));
+        g_key_file_set_string(f, section_, key_, get_color());
         break;
     case ST_FONT:
-        g_key_file_set_string(f, item->section, item->key, get_font(item));
+        g_key_file_set_string(f, section_, key_, get_font());
         break;
     case ST_META_STRING:
-        g_key_file_set_string(f, item->section, item->key, get_string(item));
+        g_key_file_set_string(f, section_, key_, get_string());
         break;
     case ST_STRING_COMBO:
-        g_key_file_set_string(f, item->section, item->key, get_string_combo(item));
+        g_key_file_set_string(f, section_, key_, get_string_combo());
         break;
     case ST_IMG_FILE:
-        //g_key_file_set_string(f,item->section,item->key,get_img_file(item));
+        //g_key_file_set_string(f,section_,key_,get_img_file(item));
     {
-        char* s = g_strdup_printf("%s/.emerald/theme/%s.%s.png", g_get_home_dir(), item->section, item->key);
-        GdkPixbuf* pbuf = gtk_image_get_pixbuf(item->image);
+        char* s = g_strdup_printf("%s/.emerald/theme/%s.%s.png", g_get_home_dir(), section_, key_);
+        GdkPixbuf* pbuf = gtk_image_get_pixbuf(image_);
         if (pbuf) {
             gdk_pixbuf_savev(pbuf, s, "png", NULL, NULL, NULL);
         } else {
@@ -69,32 +69,32 @@ void write_setting(SettingItem* item, void* p)
     break;
     case ST_ENGINE_COMBO: {
         EngineMetaInfo emi;
-        const char* active_engine = get_engine_combo(item);
+        const char* active_engine = get_engine_combo();
         if (get_engine_meta_info(active_engine, &emi)) {
             g_key_file_set_string(f, "engine_version", active_engine, emi.version);
         }
-        g_key_file_set_string(f, item->section, item->key, active_engine);
+        g_key_file_set_string(f, section_, key_, active_engine);
         do_engine(active_engine);
     }
     break;
     case ST_SFILE_INT:
         if (f == global_theme_file) {
-            g_key_file_set_integer(global_settings_file, item->section,
-                                   item->key, get_int(item));
+            g_key_file_set_integer(global_settings_file, section_,
+                                   key_, get_int());
             write_setting_file();
         }
         break;
     case ST_SFILE_BOOL:
         if (f == global_theme_file) {
-            g_key_file_set_boolean(global_settings_file, item->section,
-                                   item->key, get_bool(item));
+            g_key_file_set_boolean(global_settings_file, section_,
+                                   key_, get_bool());
             write_setting_file();
         }
         break;
     case ST_SFILE_INT_COMBO:
         if (f == global_theme_file) {
-            g_key_file_set_integer(global_settings_file, item->section,
-                                   item->key, get_sf_int_combo(item));
+            g_key_file_set_integer(global_settings_file, section_,
+                                   key_, get_sf_int_combo());
             write_setting_file();
         }
         break;
@@ -103,7 +103,7 @@ void write_setting(SettingItem* item, void* p)
         //unhandled types
     }
 }
-void write_setting_file()
+void SettingItem::write_setting_file()
 {
     char* file = g_strjoin("/", g_get_home_dir(), ".emerald/settings.ini", NULL);
     char* path = g_strjoin("/", g_get_home_dir(), ".emerald/", NULL);
@@ -117,69 +117,69 @@ void write_setting_file()
     g_free(file);
     g_free(path);
 }
-bool get_bool(SettingItem* item)
+bool SettingItem::get_bool()
 {
-    return gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(item->widget));
+    return gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget_));
 }
-double get_float(SettingItem* item)
+double SettingItem::get_float()
 {
-    if (!strcmp(G_OBJECT_TYPE_NAME(item->widget), "GtkSpinButton")) {
-        return gtk_spin_button_get_value((GtkSpinButton*)item->widget);
+    if (!strcmp(G_OBJECT_TYPE_NAME(widget_), "GtkSpinButton")) {
+        return gtk_spin_button_get_value((GtkSpinButton*)widget_);
     } else {
-        return gtk_range_get_value(GTK_RANGE(item->widget));
+        return gtk_range_get_value(GTK_RANGE(widget_));
     }
 }
-int get_int(SettingItem* item)
+int SettingItem::get_int()
 {
-    return get_float(item);
+    return get_float();
 }
-const char* get_float_str(SettingItem* item)
+const char* SettingItem::get_float_str()
 {
     g_ascii_dtostr(globalFloatStr, G_ASCII_DTOSTR_BUF_SIZE,
-                   get_float(item));
+                   get_float());
     return globalFloatStr;
 }
-const char* get_color(SettingItem* item)
+const char* SettingItem::get_color()
 {
     GdkColor c;
     if (globalStr) {
         g_free(globalStr);
     }
-    gtk_color_button_get_color(GTK_COLOR_BUTTON(item->widget), &c);
+    gtk_color_button_get_color(GTK_COLOR_BUTTON(widget_), &c);
     globalStr = g_strdup_printf("#%02x%02x%02x", c.red >> 8, c.green >> 8, c.blue >> 8);
     return globalStr;
 }
-const char* get_font(SettingItem* item)
+const char* SettingItem::get_font()
 {
-    return gtk_font_button_get_font_name(GTK_FONT_BUTTON(item->widget));
+    return gtk_font_button_get_font_name(GTK_FONT_BUTTON(widget_));
 }
-const char* get_string(SettingItem* item)
+const char* SettingItem::get_string()
 {
-    return gtk_entry_get_text(GTK_ENTRY(item->widget));
+    return gtk_entry_get_text(GTK_ENTRY(widget_));
 }
-void check_file(SettingItem* item, char* f)
+void SettingItem::check_file(char* f)
 {
     GdkPixbuf* p;
     p = gdk_pixbuf_new_from_file(f, NULL);
     if (p) {
-        gtk_image_set_from_pixbuf(item->image, p);
-        gtk_image_set_from_pixbuf(item->preview, p);
+        gtk_image_set_from_pixbuf(image_, p);
+        gtk_image_set_from_pixbuf(preview_, p);
     } else {
-        gtk_image_clear(item->image);
-        gtk_image_clear(item->preview);
+        gtk_image_clear(image_);
+        gtk_image_clear(preview_);
     }
     if (p) {
         g_object_unref(p);
     }
 }
-const char* get_img_file(SettingItem* item)
+const char* SettingItem::get_img_file()
 {
-    return item->fvalue;
+    return fvalue_;
 }
-const char* get_string_combo(SettingItem* item)
+const char* SettingItem::get_string_combo()
 {
     const char* s;
-    s = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(item->widget))));
+    s = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(widget_))));
     if (strlen(s)) {
         return s;
     }
@@ -187,7 +187,7 @@ const char* get_string_combo(SettingItem* item)
     return s;
 }
 
-void set_engine_combo(SettingItem* item, char* val)
+void SettingItem::set_engine_combo(char* val)
 {
     FindEngine fe;
     fe.canname = val;
@@ -195,27 +195,27 @@ void set_engine_combo(SettingItem* item, char* val)
     fe.i = 0;
     g_slist_foreach(EngineList, (GFunc) search_engine, &fe);
     if (fe.found) {
-        gtk_combo_box_set_active(GTK_COMBO_BOX(item->widget), fe.i);
+        gtk_combo_box_set_active(GTK_COMBO_BOX(widget_), fe.i);
     } else {
         fe.canname = "legacy";
         fe.found = FALSE;
         fe.i = 0;
         g_slist_foreach(EngineList, (GFunc) search_engine, &fe);
         if (fe.found) {
-            gtk_combo_box_set_active(GTK_COMBO_BOX(item->widget), fe.i);
+            gtk_combo_box_set_active(GTK_COMBO_BOX(widget_), fe.i);
         }
     }
     do_engine(fe.canname);
 }
-const char* get_engine_combo(SettingItem* item)
+const char* SettingItem::get_engine_combo()
 {
     static char* s = NULL;
     GtkTreeIter i;
     if (s) {
         g_free(s);
     }
-    //s = gtk_combo_box_get_active_text(GTK_COMBO_BOX(item->widget));
-    if (gtk_combo_box_get_active_iter(GTK_COMBO_BOX(item->widget), &i)) {
+    //s = gtk_combo_box_get_active_text(GTK_COMBO_BOX(widget_));
+    if (gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget_), &i)) {
         gtk_tree_model_get(GTK_TREE_MODEL(EngineModel), &i, ENGINE_COL_NAME, &s, -1);
         if (!strlen(s)) {
             g_free(s);
@@ -224,156 +224,156 @@ const char* get_engine_combo(SettingItem* item)
     }
     return s;
 }
-int get_sf_int_combo(SettingItem* item)
+int SettingItem::get_sf_int_combo()
 {
-    return gtk_combo_box_get_active(GTK_COMBO_BOX(item->widget));
+    return gtk_combo_box_get_active(GTK_COMBO_BOX(widget_));
 }
-void set_img_file(SettingItem* item, char* f)
+void SettingItem::set_img_file(char* f)
 {
-    g_free(item->fvalue);
-    item->fvalue = g_strdup(f);
-    gtk_file_chooser_select_filename(GTK_FILE_CHOOSER(item->widget), f);
-    check_file(item, f);
+    g_free(fvalue_);
+    fvalue_ = g_strdup(f);
+    gtk_file_chooser_select_filename(GTK_FILE_CHOOSER(widget_), f);
+    check_file(f);
 }
-void set_bool(SettingItem* item, bool b)
+void SettingItem::set_bool(bool b)
 {
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(item->widget), b);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget_), b);
 }
-void set_float(SettingItem* item, double f)
+void SettingItem::set_float(double f)
 {
-    if (!strcmp(G_OBJECT_TYPE_NAME(item->widget), "GtkSpinButton")) {
-        gtk_spin_button_set_value((GtkSpinButton*)item->widget, f);
+    if (!strcmp(G_OBJECT_TYPE_NAME(widget_), "GtkSpinButton")) {
+        gtk_spin_button_set_value((GtkSpinButton*)widget_, f);
     } else {
-        gtk_range_set_value(GTK_RANGE(item->widget), f);
+        gtk_range_set_value(GTK_RANGE(widget_), f);
     }
 }
-void set_int(SettingItem* item, int i)
+void SettingItem::set_int(int i)
 {
-    set_float(item, i);
+    set_float(i);
 }
-void set_float_str(SettingItem* item, char* s)
+void SettingItem::set_float_str(char* s)
 {
-    set_float(item, g_ascii_strtod(s, NULL));
+    set_float(g_ascii_strtod(s, NULL));
 }
-void set_color(SettingItem* item, char* s)
+void SettingItem::set_color(char* s)
 {
     GdkColor c;
     gdk_color_parse(s, &c);
-    gtk_color_button_set_color(GTK_COLOR_BUTTON(item->widget), &c);
+    gtk_color_button_set_color(GTK_COLOR_BUTTON(widget_), &c);
 }
-void set_font(SettingItem* item, char* f)
+void SettingItem::set_font(char* f)
 {
-    gtk_font_button_set_font_name(GTK_FONT_BUTTON(item->widget), f);
+    gtk_font_button_set_font_name(GTK_FONT_BUTTON(widget_), f);
 }
-void set_string(SettingItem* item, char* s)
+void SettingItem::set_string(char* s)
 {
-    gtk_entry_set_text(GTK_ENTRY(item->widget), s);
+    gtk_entry_set_text(GTK_ENTRY(widget_), s);
 }
-void set_string_combo(SettingItem* item, char* s)
+void SettingItem::set_string_combo(char* s)
 {
-    gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(item->widget))), s);
+    gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(widget_))), s);
 }
-void set_sf_int_combo(SettingItem* item, int i)
+void SettingItem::set_sf_int_combo(int i)
 {
-    gtk_combo_box_set_active(GTK_COMBO_BOX(item->widget), i);
+    gtk_combo_box_set_active(GTK_COMBO_BOX(widget_), i);
 }
-void read_setting(SettingItem* item, void** p)
+void SettingItem::read_setting(void** p)
 {
     GKeyFile* f = (GKeyFile*) p;
     GError* e = NULL;
     bool b;
     int i;
     char* s;
-    switch (item->type) {
+    switch (type_) {
     case ST_BOOL:
-        b = g_key_file_get_boolean(f, item->section, item->key, &e);
+        b = g_key_file_get_boolean(f, section_, key_, &e);
         if (!e) {
-            set_bool(item, b);
+            set_bool(b);
         }
         break;
     case ST_INT:
-        i = g_key_file_get_integer(f, item->section, item->key, &e);
+        i = g_key_file_get_integer(f, section_, key_, &e);
         if (!e) {
-            set_int(item, i);
+            set_int(i);
         }
         break;
     case ST_FLOAT:
-        s = g_key_file_get_string(f, item->section, item->key, &e);
+        s = g_key_file_get_string(f, section_, key_, &e);
         if (!e && s) {
-            set_float_str(item, s);
+            set_float_str(s);
             g_free(s);
         }
         break;
     case ST_COLOR:
-        s = g_key_file_get_string(f, item->section, item->key, &e);
+        s = g_key_file_get_string(f, section_, key_, &e);
         if (!e && s) {
-            set_color(item, s);
+            set_color(s);
             g_free(s);
         }
         break;
     case ST_FONT:
-        s = g_key_file_get_string(f, item->section, item->key, &e);
+        s = g_key_file_get_string(f, section_, key_, &e);
         if (!e && s) {
-            set_font(item, s);
+            set_font(s);
             g_free(s);
         }
         break;
     case ST_META_STRING:
-        s = g_key_file_get_string(f, item->section, item->key, &e);
+        s = g_key_file_get_string(f, section_, key_, &e);
         if (!e && s) {
-            set_string(item, s);
+            set_string(s);
             g_free(s);
         }
         break;
     case ST_STRING_COMBO:
-        s = g_key_file_get_string(f, item->section, item->key, &e);
+        s = g_key_file_get_string(f, section_, key_, &e);
         if (!e && s) {
-            set_string_combo(item, s);
+            set_string_combo(s);
             g_free(s);
         }
         break;
     case ST_IMG_FILE:
-        /*s = g_key_file_get_string(f,item->section,item->key,&e);
+        /*s = g_key_file_get_string(f,section_,key_,&e);
         if (!e && s)
         {
             set_img_file(item,s);
             g_free(s);
         }*/
-        s = g_strdup_printf("%s/.emerald/theme/%s.%s.png", g_get_home_dir(), item->section, item->key);
-        set_img_file(item, s);
+        s = g_strdup_printf("%s/.emerald/theme/%s.%s.png", g_get_home_dir(), section_, key_);
+        set_img_file(s);
         g_free(s);
         break;
     case ST_ENGINE_COMBO:
-        s = g_key_file_get_string(f, item->section, item->key, &e);
+        s = g_key_file_get_string(f, section_, key_, &e);
         if (!e && s) {
-            set_engine_combo(item, s);
+            set_engine_combo(s);
             g_free(s);
         }
         break;
     case ST_SFILE_INT:
         if (f == global_theme_file) {
             i = g_key_file_get_integer(global_settings_file,
-                                       item->section, item->key, &e);
+                                       section_, key_, &e);
             if (!e) {
-                set_int(item, i);
+                set_int(i);
             }
         }
         break;
     case ST_SFILE_BOOL:
         if (f == global_theme_file) {
             b = g_key_file_get_boolean(global_settings_file,
-                                       item->section, item->key, &e);
+                                       section_, key_, &e);
             if (!e) {
-                set_bool(item, b);
+                set_bool(b);
             }
         }
         break;
     case ST_SFILE_INT_COMBO:
         if (f == global_theme_file) {
             i = g_key_file_get_integer(global_settings_file,
-                                       item->section, item->key, &e);
+                                       section_, key_, &e);
             if (!e) {
-                set_sf_int_combo(item, i);
+                set_sf_int_combo(i);
             }
         }
         break;
@@ -381,4 +381,80 @@ void read_setting(SettingItem* item, void** p)
         break;
         //unhandled types
     }
+}
+
+SettingItem* SettingItem::register_img_file_setting(GtkWidget* widget, const char* section,
+                                                    const char* key, GtkImage* image)
+{
+    SettingItem* item = register_setting(widget, ST_IMG_FILE, section, key);
+    gtk_file_chooser_button_set_width_chars(GTK_FILE_CHOOSER_BUTTON(widget), 0);
+    item->image_ = image;
+    item->preview_ = GTK_IMAGE(gtk_image_new());
+    gtk_file_chooser_set_preview_widget(GTK_FILE_CHOOSER(widget), GTK_WIDGET(item->preview_));
+    g_signal_connect(widget, "update-preview", G_CALLBACK(update_preview_cb),
+                     item->preview_);
+    return item;
+}
+SettingItem* SettingItem::register_setting(GtkWidget* widget, SettingType type, char* section, char* key)
+{
+    SettingItem* item;
+    item = malloc(sizeof(SettingItem));
+    item->type_ = type;
+    item->key_ = g_strdup(key);
+    item->section_ = g_strdup(section);
+    item->widget_ = widget;
+    item->fvalue_ = g_strdup("");
+    SettingList = g_slist_append(SettingList, item);
+    switch (item->type_) {
+    case ST_BOOL:
+    case ST_SFILE_BOOL:
+        g_signal_connect(widget, "toggled",
+                         G_CALLBACK(cb_apply_setting),
+                         item);
+        break;
+    case ST_INT:
+    case ST_SFILE_INT:
+        g_signal_connect(widget, "value-changed",
+                         G_CALLBACK(cb_apply_setting),
+                         item);
+        break;
+    case ST_FLOAT:
+        g_signal_connect(widget, "value-changed",
+                         G_CALLBACK(cb_apply_setting),
+                         item);
+        break;
+    case ST_COLOR:
+        g_signal_connect(widget, "color-set",
+                         G_CALLBACK(cb_apply_setting),
+                         item);
+        break;
+    case ST_FONT:
+        g_signal_connect(widget, "font-set",
+                         G_CALLBACK(cb_apply_setting),
+                         item);
+        break;
+    case ST_IMG_FILE:
+        g_signal_connect(widget, "selection-changed",
+                         G_CALLBACK(cb_apply_setting),
+                         item);
+        break;
+    case ST_STRING_COMBO:
+        g_signal_connect(gtk_bin_get_child(GTK_BIN(widget)), "changed",
+                         G_CALLBACK(cb_apply_setting),
+                         item);
+        break;
+    case ST_SFILE_INT_COMBO:
+        g_signal_connect(widget, "changed",
+                         G_CALLBACK(cb_apply_setting),
+                         item);
+        break;
+    case ST_ENGINE_COMBO:
+        g_signal_connect(widget, "changed",
+                         G_CALLBACK(cb_apply_setting),
+                         item);
+    default:
+        break;
+        //unconnected types
+    }
+    return item;
 }

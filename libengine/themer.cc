@@ -85,12 +85,12 @@ void add_color_alpha_value(const char* caption, const char* basekey,
 
     w = gtk_color_button_new();
     table_append(w, FALSE);
-    register_setting(w, ST_COLOR, sect, colorkey);
+    SettingItem::register_setting(w, ST_COLOR, sect, colorkey);
 
     w = scaler_new(0.0, 1.0, 0.01);
     table_append(w, TRUE);
-    register_setting(w, ST_FLOAT, sect, alphakey);
-    //we don't g_free because they are registered with register_setting
+    SettingItem::register_setting(w, ST_FLOAT, sect, alphakey);
+    //we don't g_free because they are registered with SettingItem::register_setting
 }
 void make_labels(const char* header)
 {
@@ -108,81 +108,6 @@ GtkWidget* build_frame(GtkWidget* vbox, const char* title, bool is_hbox)
     gtk_container_set_border_widthC(box, 8);
     gtk_container_addC(frame, box);
     return box;
-}
-SettingItem* register_img_file_setting(GtkWidget* widget, const char* section,
-                                       const char* key, GtkImage* image)
-{
-    SettingItem* item = register_setting(widget, ST_IMG_FILE, section, key);
-    gtk_file_chooser_button_set_width_chars(GTK_FILE_CHOOSER_BUTTON(widget), 0);
-    item->image = image;
-    item->preview = GTK_IMAGE(gtk_image_new());
-    gtk_file_chooser_set_preview_widget(GTK_FILE_CHOOSER(widget), GTK_WIDGET(item->preview));
-    g_signal_connect(widget, "update-preview", G_CALLBACK(update_preview_cb),
-                     item->preview);
-    return item;
-}
-SettingItem* register_setting(GtkWidget* widget, SettingType type, char* section, char* key)
-{
-    SettingItem* item;
-    item = malloc(sizeof(SettingItem));
-    item->type = type;
-    item->key = g_strdup(key);
-    item->section = g_strdup(section);
-    item->widget = widget;
-    item->fvalue = g_strdup("");
-    SettingList = g_slist_append(SettingList, item);
-    switch (item->type) {
-    case ST_BOOL:
-    case ST_SFILE_BOOL:
-        g_signal_connect(widget, "toggled",
-                         G_CALLBACK(cb_apply_setting),
-                         item);
-        break;
-    case ST_INT:
-    case ST_SFILE_INT:
-        g_signal_connect(widget, "value-changed",
-                         G_CALLBACK(cb_apply_setting),
-                         item);
-        break;
-    case ST_FLOAT:
-        g_signal_connect(widget, "value-changed",
-                         G_CALLBACK(cb_apply_setting),
-                         item);
-        break;
-    case ST_COLOR:
-        g_signal_connect(widget, "color-set",
-                         G_CALLBACK(cb_apply_setting),
-                         item);
-        break;
-    case ST_FONT:
-        g_signal_connect(widget, "font-set",
-                         G_CALLBACK(cb_apply_setting),
-                         item);
-        break;
-    case ST_IMG_FILE:
-        g_signal_connect(widget, "selection-changed",
-                         G_CALLBACK(cb_apply_setting),
-                         item);
-        break;
-    case ST_STRING_COMBO:
-        g_signal_connect(gtk_bin_get_child(GTK_BIN(widget)), "changed",
-                         G_CALLBACK(cb_apply_setting),
-                         item);
-        break;
-    case ST_SFILE_INT_COMBO:
-        g_signal_connect(widget, "changed",
-                         G_CALLBACK(cb_apply_setting),
-                         item);
-        break;
-    case ST_ENGINE_COMBO:
-        g_signal_connect(widget, "changed",
-                         G_CALLBACK(cb_apply_setting),
-                         item);
-    default:
-        break;
-        //unconnected types
-    }
-    return item;
 }
 
 static int current_table_width;
@@ -288,7 +213,10 @@ void apply_settings()
     char* file = g_strjoin("/", g_get_home_dir(), ".emerald/theme/theme.ini", NULL);
     char* path = g_strjoin("/", g_get_home_dir(), ".emerald/theme/", NULL);
     char* at;
-    g_slist_foreach(SettingList, (GFunc) write_setting, global_theme_file);
+    for (auto list = SettingList; list; list = list->next) {
+        SettingItem* st = list->data;
+        st->write_setting(global_theme_file);
+    }
     g_key_file_set_string(global_theme_file, "theme", "version", VERSION);
     g_mkdir_with_parents(path, 00755);
     at = g_key_file_to_data(global_theme_file, NULL, NULL);
@@ -303,20 +231,20 @@ void apply_settings()
 void cb_apply_setting(GtkWidget* w, void* p)
 {
     SettingItem* item = p;
-    if (item->type == ST_IMG_FILE) {
+    if (item->type_ == ST_IMG_FILE) {
         char* s;
-        if (!(s = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(item->widget)))) {
+        if (!(s = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(item->widget_)))) {
             return;    // for now just ignore setting it to an invalid name
         }
-        if (!strcmp(s, item->fvalue)) {
+        if (!strcmp(s, item->fvalue_)) {
             g_free(s);
             return;
         }
-        g_free(item->fvalue);
-        item->fvalue = s;
-        check_file(item, s);
+        g_free(item->fvalue_);
+        item->fvalue_ = s;
+        item->check_file(s);
     }
-    write_setting(p, (void*) global_theme_file);
+    item->write_setting((void*) global_theme_file);
     if (apply) {
         apply_settings();
     } else {
@@ -407,7 +335,10 @@ void init_settings()
     file = g_strjoin("/", g_get_home_dir(), ".emerald/settings.ini", NULL);
     g_key_file_load_from_file(global_settings_file, file, G_KEY_FILE_KEEP_COMMENTS, NULL);
     g_free(file);
-    g_slist_foreach(SettingList, (GFunc) read_setting, global_theme_file);
+    for (auto list = SettingList; list; list = list->next) {
+        SettingItem* st = list->data;
+        st->read_setting((void*)global_theme_file);
+    }
 }
 
 void set_changed(bool schanged)
@@ -421,10 +352,10 @@ void set_apply(bool sapply)
 void cb_clear_file(GtkWidget* button, void* p)
 {
     SettingItem* item = p;
-    check_file(item, "");
-    item->fvalue = "";
-    gtk_file_chooser_unselect_all(GTK_FILE_CHOOSER(item->widget));
-    write_setting(p, global_theme_file);
+    item->check_file("");
+    item->fvalue_ = "";
+    gtk_file_chooser_unselect_all(GTK_FILE_CHOOSER(item->widget_));
+    item->write_setting(global_theme_file);
     if (apply) {
         apply_settings();
     }
@@ -573,7 +504,7 @@ void init_engine_list()
     g_free(local_engine_dir);
     engine_scan_dir(ENGINE_DIR);
 
-    register_setting(EngineCombo, ST_ENGINE_COMBO, "engine", "engine");
+    SettingItem::register_setting(EngineCombo, ST_ENGINE_COMBO, "engine", "engine");
 }
 GtkWidget* build_notebook_page(char* title, GtkWidget* notebook)
 {

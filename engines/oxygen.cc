@@ -432,19 +432,19 @@ void layout_corners_frame(GtkWidget* vbox)
 
     junk = gtk_check_button_new_with_label(_("Round Top Left Corner"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "round_top_left");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "round_top_left");
 
     junk = gtk_check_button_new_with_label(_("Round Top Right Corner"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "round_top_right");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "round_top_right");
 
     junk = gtk_check_button_new_with_label(_("Round Bottom Left Corner"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "round_bottom_left");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "round_bottom_left");
 
     junk = gtk_check_button_new_with_label(_("Round Bottom Right Corner"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "round_bottom_right");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "round_bottom_right");
 
     hbox = gtk_hbox_new(FALSE, 2);
     gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
@@ -453,7 +453,7 @@ void layout_corners_frame(GtkWidget* vbox)
 
     junk = scaler_new(0, 20, 0.5);
     gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
-    register_setting(junk, ST_FLOAT, SECT, "radius");
+    SettingItem::register_setting(junk, ST_FLOAT, SECT, "radius");
 }
 
 void my_engine_settings(GtkWidget* hbox, bool active)

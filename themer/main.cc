@@ -368,7 +368,10 @@ static void cb_load(GtkWidget* w, void* d)
     g_free(at);
     set_changed(TRUE);
     set_apply(FALSE);
-    g_slist_foreach(get_setting_list(), (GFunc) read_setting, f);
+    for (auto list = get_setting_list(); list; list = list->next) {
+        SettingItem* st = list->data;
+        st->read_setting((void*)f);
+    }
     {
         char* c;
         c = g_key_file_get_string(f, "theme", "version", NULL);
@@ -480,7 +483,10 @@ static void cb_save(GtkWidget* w, void* d)
     fn = g_strdup_printf("%s/.emerald/themes/%s/theme.ini", g_get_home_dir(), at);
     f = g_key_file_new();
     g_key_file_load_from_file(f, fn, 0, NULL);
-    g_slist_foreach(get_setting_list(), (GFunc) write_setting, f);
+    for (auto list = get_setting_list(); list; list = list->next) {
+        SettingItem* st = list->data;
+        st->write_setting(f);
+    }
     g_key_file_set_string(f, "theme", "version", VERSION);
     if (g_file_test(fn, G_FILE_TEST_EXISTS)) {
         if (!confirm_dialog(_("Overwrite Theme %s?"), at)) {
@@ -614,7 +620,7 @@ static void layout_button_box(GtkWidget* vbox, int b_t)
 
     image = gtk_image_new();
 
-    item = register_img_file_setting(filesel, "buttons", b_types[b_t], GTK_IMAGE(image));
+    item = SettingItem::register_img_file_setting(filesel, "buttons", b_types[b_t], GTK_IMAGE(image));
 
     table_append(image, TRUE);
 
@@ -628,15 +634,15 @@ void layout_general_buttons_frame(GtkWidget* hbox)
 
     junk = gtk_check_button_new_with_label(_("Use Pixmap Buttons"));
     gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
-    register_setting(junk, ST_BOOL, "buttons", "use_pixmap_buttons");
+    SettingItem::register_setting(junk, ST_BOOL, "buttons", "use_pixmap_buttons");
 
     junk = gtk_check_button_new_with_label(_("Use Button Halo/Glow"));
     gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
-    register_setting(junk, ST_BOOL, "buttons", "use_button_glow");
+    SettingItem::register_setting(junk, ST_BOOL, "buttons", "use_button_glow");
 
     junk = gtk_check_button_new_with_label(_("Use Button Halo/Glow For Inactive Windows"));
     gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
-    register_setting(junk, ST_BOOL, "buttons", "use_button_inactive_glow");
+    SettingItem::register_setting(junk, ST_BOOL, "buttons", "use_button_inactive_glow");
 }
 void layout_button_pane(GtkWidget* vbox)
 {
@@ -701,7 +707,7 @@ void add_color_button_row(GtkWidget* vbox, char* title, char* key, char* sect)
 {
     GtkWidget* color_button;
     color_button = gtk_color_button_new();
-    register_setting(color_button, ST_COLOR, sect, key);
+    SettingItem::register_setting(color_button, ST_COLOR, sect, key);
     add_row(vbox, color_button, title);
 }
 void add_int_range_row(GtkWidget* vbox, char* title, char* key,
@@ -709,7 +715,7 @@ void add_int_range_row(GtkWidget* vbox, char* title, char* key,
 {
     GtkWidget* scaler;
     scaler = scaler_new(start, end, 1);
-    register_setting(scaler, ST_INT, sect, key);
+    SettingItem::register_setting(scaler, ST_INT, sect, key);
     add_row(vbox, scaler, title);
 }
 void add_float_range_row(GtkWidget* vbox, char* title, char* key,
@@ -717,7 +723,7 @@ void add_float_range_row(GtkWidget* vbox, char* title, char* key,
 {
     GtkWidget* scaler;
     scaler = scaler_new(start, end, prec);
-    register_setting(scaler, ST_FLOAT, sect, key);
+    SettingItem::register_setting(scaler, ST_FLOAT, sect, key);
     add_row(vbox, scaler, title);
 }
 void layout_shadows_frame(GtkWidget* vbox)
@@ -741,7 +747,7 @@ void layout_title_frame(GtkWidget* vbox)
     gtk_box_pack_startC(hbox, gtk_label_new(_("Title-Text Font")), FALSE, FALSE, 0);
     junk = gtk_font_button_new();
     gtk_box_pack_endC(hbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_FONT, "titlebar", "titlebar_font");
+    SettingItem::register_setting(junk, ST_FONT, "titlebar", "titlebar_font");
 
 
     table_new(2, FALSE, FALSE);
@@ -750,19 +756,19 @@ void layout_title_frame(GtkWidget* vbox)
     junk = scaler_new(0, 64, 1);
     gtk_range_set_value(GTK_RANGE(junk), 17);
     table_append(junk, TRUE);
-    register_setting(junk, ST_INT, "titlebar", "min_titlebar_height");
+    SettingItem::register_setting(junk, ST_INT, "titlebar", "min_titlebar_height");
 
     table_append(gtk_label_new(_("Vertical Button Offset")), FALSE);
     junk = scaler_new(0, 64, 1);
     gtk_range_set_value(GTK_RANGE(junk), 1);
     table_append(junk, TRUE);
-    register_setting(junk, ST_INT, "buttons", "vertical_offset");
+    SettingItem::register_setting(junk, ST_INT, "buttons", "vertical_offset");
 
     table_append(gtk_label_new(_("Horizontal Button Offset")), FALSE);
     junk = scaler_new(0, 64, 1);
     gtk_range_set_value(GTK_RANGE(junk), 1);
     table_append(junk, TRUE);
-    register_setting(junk, ST_INT, "buttons", "horizontal_offset");
+    SettingItem::register_setting(junk, ST_INT, "buttons", "horizontal_offset");
 
     hbox = gtk_hbox_new(FALSE, 2);
     gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
@@ -770,7 +776,7 @@ void layout_title_frame(GtkWidget* vbox)
     junk = gtk_combo_box_entry_new_text();
     gtk_combo_box_append_text(GTK_COMBO_BOX(junk), "IT::HNXC:Normal Layout");
     gtk_combo_box_append_text(GTK_COMBO_BOX(junk), "CNX:IT:HM:OSX Layout");
-    register_setting(junk, ST_STRING_COMBO, "titlebar", "title_object_layout");
+    SettingItem::register_setting(junk, ST_STRING_COMBO, "titlebar", "title_object_layout");
     gtk_box_pack_startC(hbox, junk, FALSE, FALSE, 0);
 
     gtk_box_pack_startC(vbox, gtk_label_new(
@@ -786,7 +792,7 @@ void layout_title_frame(GtkWidget* vbox)
 
     /*junk = gtk_check_button_new_with_label("Use active colors for whole active frame, not just titlebar.");
     gtk_box_pack_startC(vbox,junk,FALSE,FALSE,0);
-    register_setting(junk,ST_BOOL,SECT,"use_active_colors");*/
+    SettingItem::register_setting(junk,ST_BOOL,SECT,"use_active_colors");*/
 }
 void add_meta_string_value(char* title, char* key)
 {
@@ -794,7 +800,7 @@ void add_meta_string_value(char* title, char* key)
     table_append(gtk_label_new(title), FALSE);
     entry = gtk_entry_new();
     table_append(entry, TRUE);
-    register_setting(entry, ST_META_STRING, "theme", key);
+    SettingItem::register_setting(entry, ST_META_STRING, "theme", key);
 }
 static void cb_export(GtkWidget* w, void* p)
 {
@@ -880,7 +886,7 @@ void add_border_slider(char* text, char* key, int value)
     w = scaler_new(0, 20, 1);
     table_append(w, TRUE);
     gtk_range_set_value(GTK_RANGE(w), value);
-    register_setting(w, ST_INT, "borders", key);
+    SettingItem::register_setting(w, ST_INT, "borders", key);
 }
 void layout_borders_frame(GtkWidget* vbox)
 {
@@ -990,7 +996,7 @@ void layout_screenshot_frame(GtkWidget* vbox)
     gtk_file_filter_add_pixbuf_formats(imgfilter);
     gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(filesel), imgfilter);
 
-    item = register_img_file_setting(filesel, "theme", "screenshot", GTK_IMAGE(image));
+    item = SettingItem::register_img_file_setting(filesel, "theme", "screenshot", GTK_IMAGE(image));
 
     clearer = gtk_button_new_from_stock(GTK_STOCK_CLEAR);
     g_signal_connect(clearer, "clicked", G_CALLBACK(cb_clear_file), item);
@@ -1032,19 +1038,19 @@ void layout_settings_pane(GtkWidget* vbox)
 
     junk = gtk_check_button_new_with_label(_("Show Tooltips for Buttons"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_SFILE_BOOL, "buttons", "enable_tooltips");
+    SettingItem::register_setting(junk, ST_SFILE_BOOL, "buttons", "enable_tooltips");
 
     junk = gtk_check_button_new_with_label(_("Use Decoration Cropping"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_SFILE_BOOL, "decorations", "use_decoration_cropping");
+    SettingItem::register_setting(junk, ST_SFILE_BOOL, "decorations", "use_decoration_cropping");
 
     junk = gtk_check_button_new_with_label(_("Use Button Fade"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_SFILE_BOOL, "buttons", "use_button_fade");
+    SettingItem::register_setting(junk, ST_SFILE_BOOL, "buttons", "use_button_fade");
 
     junk = gtk_check_button_new_with_label(_("Use Button Fade Pulse"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_SFILE_BOOL, "buttons", "use_button_fade_pulse");
+    SettingItem::register_setting(junk, ST_SFILE_BOOL, "buttons", "use_button_fade_pulse");
 
     table_new(2, FALSE, FALSE);
     gtk_box_pack_startC(vbox, get_current_table(), FALSE, FALSE, 0);
@@ -1053,25 +1059,25 @@ void layout_settings_pane(GtkWidget* vbox)
     junk = scaler_new(1, 4000, 1);
     gtk_range_set_value(GTK_RANGE(junk), 250);
     table_append(junk, TRUE);
-    register_setting(junk, ST_SFILE_INT, "buttons", "button_fade_total_duration");
+    SettingItem::register_setting(junk, ST_SFILE_INT, "buttons", "button_fade_total_duration");
 
     table_append(gtk_label_new(_("Button Fade Step Duration")), FALSE);
     junk = scaler_new(1, 2000, 1);
     gtk_range_set_value(GTK_RANGE(junk), 50);
     table_append(junk, TRUE);
-    register_setting(junk, ST_SFILE_INT, "buttons", "button_fade_step_duration");
+    SettingItem::register_setting(junk, ST_SFILE_INT, "buttons", "button_fade_step_duration");
 
     table_append(gtk_label_new(_("Button Pulse Wait Duration")), FALSE);
     junk = scaler_new(0, 4000, 1);
     gtk_range_set_value(GTK_RANGE(junk), 0);
     table_append(junk, TRUE);
-    register_setting(junk, ST_SFILE_INT, "buttons", "button_fade_pulse_wait_duration");
+    SettingItem::register_setting(junk, ST_SFILE_INT, "buttons", "button_fade_pulse_wait_duration");
 
     table_append(gtk_label_new(_("Button Pulse Min Opacity %")), FALSE);
     junk = scaler_new(0, 100, 1);
     gtk_range_set_value(GTK_RANGE(junk), 0);
     table_append(junk, TRUE);
-    register_setting(junk, ST_SFILE_INT, "buttons", "button_fade_pulse_min_opacity");
+    SettingItem::register_setting(junk, ST_SFILE_INT, "buttons", "button_fade_pulse_min_opacity");
 
     table_append(gtk_label_new(_("Titlebar Double-Click Action")), FALSE);
     combo = gtk_combo_box_new_text();
@@ -1080,7 +1086,7 @@ void layout_settings_pane(GtkWidget* vbox)
     }
     gtk_combo_box_set_active(GTK_COMBO_BOX(combo), 0);
     table_append(combo, TRUE);
-    register_setting(combo, ST_SFILE_INT_COMBO, "titlebars",
+    SettingItem::register_setting(combo, ST_SFILE_INT_COMBO, "titlebars",
                      "double_click_action");
 
     table_append(gtk_label_new(_("Button Hover Cursor")), FALSE);
@@ -1089,7 +1095,7 @@ void layout_settings_pane(GtkWidget* vbox)
     gtk_combo_box_append_text(GTK_COMBO_BOX(combo), _("Pointing Finger"));
     gtk_combo_box_set_active(GTK_COMBO_BOX(combo), 1);
     table_append(combo, TRUE);
-    register_setting(combo, ST_SFILE_INT_COMBO, "buttons",
+    SettingItem::register_setting(combo, ST_SFILE_INT_COMBO, "buttons",
                      "hover_cursor");
 
     table_append(gtk_label_new(_("Compiz Decoration Blur Type")), FALSE);
@@ -1099,7 +1105,7 @@ void layout_settings_pane(GtkWidget* vbox)
     gtk_combo_box_append_text(GTK_COMBO_BOX(combo), _("All decoration"));
     gtk_combo_box_set_active(GTK_COMBO_BOX(combo), BLUR_TYPE_NONE);
     table_append(combo, TRUE);
-    register_setting(combo, ST_SFILE_INT_COMBO, "decorations",
+    SettingItem::register_setting(combo, ST_SFILE_INT_COMBO, "decorations",
                      "blur_type");
 
     /*table_append(gtk_label_new("Icon Click Action"),FALSE);
@@ -1108,7 +1114,7 @@ void layout_settings_pane(GtkWidget* vbox)
     gtk_combo_box_append_text(GTK_COMBO_BOX(combo),"Window Menu");
     gtk_combo_box_set_active(GTK_COMBO_BOX(combo),0);
     table_append(combo,FALSE);
-    register_setting(combo,ST_SFILE_INT_COMBO,"window_icon",
+    SettingItem::register_setting(combo,ST_SFILE_INT_COMBO,"window_icon",
             "click_action");
 
     table_append(gtk_label_new("Icon Double-Click Action"),FALSE);
@@ -1117,7 +1123,7 @@ void layout_settings_pane(GtkWidget* vbox)
     gtk_combo_box_append_text(GTK_COMBO_BOX(combo),"Close Window");
     gtk_combo_box_set_active(GTK_COMBO_BOX(combo),0);
     table_append(combo,FALSE);
-    register_setting(combo,ST_SFILE_INT_COMBO,"window_icon",
+    SettingItem::register_setting(combo,ST_SFILE_INT_COMBO,"window_icon",
             "double_click_action");*/
     //TODO - implement the emerald side of these, so for now they won't be here.
 }

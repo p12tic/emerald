@@ -37,15 +37,54 @@ enum SettingType {
     ST_NUM
 };
 
-struct SettingItem {
-    SettingType type;
-    char* key;
-    char* section;
-    GtkWidget* widget;
+class SettingItem {
+public:
 
-    char* fvalue;
-    GtkImage* image;
-    GtkImage* preview;
+    void write_setting(void* p);
+    static void write_setting_file();
+    bool get_bool();
+    double get_float();
+    int get_int();
+    const char* get_float_str();
+    const char* get_color();
+    const char* get_font();
+    const char* get_string();
+    void check_file(char* f);
+    const char* get_file();
+    const char* get_string_combo();
+    int get_sf_int_combo();
+    void set_file(char* f);
+    void set_bool(bool b);
+    void set_float(double f);
+    void set_int(int i);
+    void set_float_str(char* s);
+    void set_color(char* s);
+    void set_font(char* f);
+    void set_string(char* s);
+    void set_string_combo(char* s);
+    void set_sf_int_combo(int i);
+    void read_setting(void** p);
+    const char* get_engine_combo();
+
+    static SettingItem* register_img_file_setting(GtkWidget* widget, const char* section,
+                                                  const char* key, GtkImage* image);
+    static SettingItem* register_setting(GtkWidget* widget, SettingType type,
+                                         char* section, char* key);
+
+private:
+    const char* get_img_file();
+    void set_engine_combo(char* val);
+    void set_img_file(char* f);
+
+public:
+    SettingType type_;
+    char* key_;
+    char* section_;
+    GtkWidget* widget_;
+
+    char* fvalue_;
+    GtkImage* image_;
+    GtkImage* preview_;
 };
 
 struct EngineMetaInfo {// TODO: move to a separate file
@@ -75,32 +114,6 @@ enum EngineCol { // TODO: move to a separate file
     ENGINE_COL_ICON,
     ENGINE_COL_COUNT
 };
-
-void write_setting(SettingItem* item, void* p);
-void write_setting_file();
-bool get_bool(SettingItem* item);
-double get_float(SettingItem* item);
-int get_int(SettingItem* item);
-const char* get_float_str(SettingItem* item);
-const char* get_color(SettingItem* item);
-const char* get_font(SettingItem* item);
-const char* get_string(SettingItem* item);
-void check_file(SettingItem* item, char* f);
-const char* get_file(SettingItem* item);
-const char* get_string_combo(SettingItem* item);
-int get_sf_int_combo(SettingItem* item);
-void set_file(SettingItem* item, char* f);
-void set_bool(SettingItem* item, bool b);
-void set_float(SettingItem* item, double f);
-void set_int(SettingItem* item, int i);
-void set_float_str(SettingItem* item, char* s);
-void set_color(SettingItem* item, char* s);
-void set_font(SettingItem* item, char* f);
-void set_string(SettingItem* item, char* s);
-void set_string_combo(SettingItem* item, char* s);
-void set_sf_int_combo(SettingItem* item, int i);
-void read_setting(SettingItem* item, void** p);
-const char* get_engine_combo(SettingItem* item);
 
 void search_engine(EngineData* d, void* p);
 

@@ -569,19 +569,19 @@ void layout_corners_frame(GtkWidget* vbox)
 
     junk = gtk_check_button_new_with_label(_("Round Top Left Corner"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "round_top_left");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "round_top_left");
 
     junk = gtk_check_button_new_with_label(_("Round Top Right Corner"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "round_top_right");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "round_top_right");
 
     junk = gtk_check_button_new_with_label(_("Round Bottom Left Corner"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "round_bottom_left");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "round_bottom_left");
 
     junk = gtk_check_button_new_with_label(_("Round Bottom Right Corner"));
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
-    register_setting(junk, ST_BOOL, SECT, "round_bottom_right");
+    SettingItem::register_setting(junk, ST_BOOL, SECT, "round_bottom_right");
 
     hbox = gtk_hbox_new(FALSE, 2);
     gtk_box_pack_startC(vbox, hbox, FALSE, FALSE, 0);
@@ -590,7 +590,7 @@ void layout_corners_frame(GtkWidget* vbox)
 
     junk = scaler_new(0, 20, 0.5);
     gtk_box_pack_startC(hbox, junk, TRUE, TRUE, 0);
-    register_setting(junk, ST_FLOAT, SECT, "radius");
+    SettingItem::register_setting(junk, ST_FLOAT, SECT, "radius");
 
 }
 void my_engine_settings(GtkWidget* hbox,  bool active)
@@ -626,9 +626,9 @@ void my_engine_settings(GtkWidget* hbox,  bool active)
     junk = scaler_new(0, 1, 0.01);
     table_append(junk,  FALSE);
     if (active) {
-        register_setting(junk, ST_FLOAT, SECT, "active_color_contrast");
+        SettingItem::register_setting(junk, ST_FLOAT, SECT, "active_color_contrast");
     } else {
-        register_setting(junk, ST_FLOAT, SECT, "inactive_color_contrast");
+        SettingItem::register_setting(junk, ST_FLOAT, SECT, "inactive_color_contrast");
     }
 
     junk = gtk_label_new(_("Contrast"));
@@ -638,9 +638,9 @@ void my_engine_settings(GtkWidget* hbox,  bool active)
     junk = scaler_new(0, 1, 0.01);
     table_append(junk, FALSE);
     if (active) {
-        register_setting(junk, ST_FLOAT, SECT, "active_alpha_contrast");
+        SettingItem::register_setting(junk, ST_FLOAT, SECT, "active_alpha_contrast");
     } else {
-        register_setting(junk, ST_FLOAT, SECT, "inactive_alpha_contrast");
+        SettingItem::register_setting(junk, ST_FLOAT, SECT, "inactive_alpha_contrast");
     }
 
     junk = gtk_label_new(_("Notch"));
@@ -651,9 +651,9 @@ void my_engine_settings(GtkWidget* hbox,  bool active)
     gtk_range_set_value(GTK_RANGE(junk), 0.5);
     table_append(junk, FALSE);
     if (active) {
-        register_setting(junk, ST_FLOAT, SECT, "active_title_notch_position");
+        SettingItem::register_setting(junk, ST_FLOAT, SECT, "active_title_notch_position");
     } else {
-        register_setting(junk, ST_FLOAT, SECT, "inactive_title_notch_position");
+        SettingItem::register_setting(junk, ST_FLOAT, SECT, "inactive_title_notch_position");
     }
 
     junk = gtk_label_new(_("Curve"));
@@ -664,9 +664,9 @@ void my_engine_settings(GtkWidget* hbox,  bool active)
     gtk_range_set_value(GTK_RANGE(junk), 0);
     table_append(junk, FALSE);
     if (active) {
-        register_setting(junk, ST_FLOAT, SECT, "active_curve_offset");
+        SettingItem::register_setting(junk, ST_FLOAT, SECT, "active_curve_offset");
     } else {
-        register_setting(junk, ST_FLOAT, SECT, "inactive_curve_offset");
+        SettingItem::register_setting(junk, ST_FLOAT, SECT, "inactive_curve_offset");
     }
 
     table_append_separator();
@@ -675,9 +675,9 @@ void my_engine_settings(GtkWidget* hbox,  bool active)
     gtk_box_pack_startC(vbox, junk, FALSE, FALSE, 0);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(junk), FALSE);
     if (active) {
-        register_setting(junk, ST_BOOL, SECT, "active_use_glow");
+        SettingItem::register_setting(junk, ST_BOOL, SECT, "active_use_glow");
     } else {
-        register_setting(junk, ST_BOOL, SECT, "inactive_use_glow");
+        SettingItem::register_setting(junk, ST_BOOL, SECT, "inactive_use_glow");
     }
 
     add_color_alpha_value(_("Title Glow"), "glow_inner", SECT, active);
@@ -689,9 +689,9 @@ void my_engine_settings(GtkWidget* hbox,  bool active)
     gtk_range_set_value(GTK_RANGE(junk), 7.0);
     table_append(junk, FALSE);
     if (active) {
-        register_setting(junk, ST_FLOAT, SECT, "active_glow_radius");
+        SettingItem::register_setting(junk, ST_FLOAT, SECT, "active_glow_radius");
     } else {
-        register_setting(junk, ST_FLOAT, SECT, "inactive_glow_radius");
+        SettingItem::register_setting(junk, ST_FLOAT, SECT, "inactive_glow_radius");
     }
 
     table_append_separator();
