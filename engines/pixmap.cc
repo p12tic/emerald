@@ -109,7 +109,7 @@ void get_meta_info(EngineMetaInfo* emi)
     emi->version = g_strdup("0.2");
     emi->description = g_strdup(_("Everything done with customizable pixmaps!"));
     emi->last_compat = g_strdup("0.0"); // old themes marked still compatible
-    emi->icon = gdk_pixbuf_new_from_inline(-1, my_pixbuf, true, NULL);
+    emi->icon = Gdk::Pixbuf::create_from_inline(sizeof(my_pixbuf), my_pixbuf, true);
 }
 
 void
@@ -538,57 +538,59 @@ void fini_engine(window_settings* ws)
     delete ((private_fs*)ws->fs_inact->engine_fs);
 }
 
-void layout_corners_frame(GtkWidget* vbox)
+void layout_corners_frame(Gtk::Box& vbox)
 {
-    GtkWidget* hbox;
     GtkWidget* junk;
 
-    junk = gtk_check_button_new_with_label(_("Round Top Left Corner"));
-    gtk_box_pack_startC(vbox, junk, false, false, 0);
-    SettingItem::register_setting(junk, ST_BOOL, SECT, "round_top_left");
+    Gtk::CheckButton* btn;
+    btn = Gtk::manage(new Gtk::CheckButton(_("Round Top Left Corner")));
+    vbox.pack_start(*btn, false, false);
+    SettingItem::create(*btn, SECT, "round_top_left");
 
-    junk = gtk_check_button_new_with_label(_("Round Top Right Corner"));
-    gtk_box_pack_startC(vbox, junk, false, false, 0);
-    SettingItem::register_setting(junk, ST_BOOL, SECT, "round_top_right");
+    btn = Gtk::manage(new Gtk::CheckButton(_("Round Top Right Corner")));
+    vbox.pack_start(*btn, false, false);
+    SettingItem::create(*btn, SECT, "round_top_right");
 
-    junk = gtk_check_button_new_with_label(_("Round Bottom Left Corner"));
-    gtk_box_pack_startC(vbox, junk, false, false, 0);
-    SettingItem::register_setting(junk, ST_BOOL, SECT, "round_bottom_left");
+    btn = Gtk::manage(new Gtk::CheckButton(_("Round Bottom Left Corner")));
+    vbox.pack_start(*btn, false, false);
+    SettingItem::create(*btn, SECT, "round_bottom_left");
 
-    junk = gtk_check_button_new_with_label(_("Round Bottom Right Corner"));
-    gtk_box_pack_startC(vbox, junk, false, false, 0);
-    SettingItem::register_setting(junk, ST_BOOL, SECT, "round_bottom_right");
+    btn = Gtk::manage(new Gtk::CheckButton(_("Round Bottom Right Corner")));
+    vbox.pack_start(*btn, false, false);
+    SettingItem::create(*btn, SECT, "round_bottom_right");
 
-    hbox = gtk_hbox_new(false, 2);
-    gtk_box_pack_startC(vbox, hbox, false, false, 0);
-    gtk_box_pack_startC(hbox, gtk_label_new(_("Top Rounding Radius")), false, false, 0);
-    junk = scaler_new(0, 20, 0.5);
-    gtk_box_pack_startC(hbox, junk, true, true, 0);
-    SettingItem::register_setting(junk, ST_FLOAT, SECT, "top_radius");
-
-    hbox = gtk_hbox_new(false, 2);
-    gtk_box_pack_startC(vbox, hbox, false, false, 0);
-    gtk_box_pack_startC(hbox, gtk_label_new(_("Bottom Rounding Radius")), false, false, 0);
-    junk = scaler_new(0, 20, 0.5);
-    gtk_box_pack_startC(hbox, junk, true, true, 0);
-    SettingItem::register_setting(junk, ST_FLOAT, SECT, "bottom_radius");
+    {
+    auto& hbox = *Gtk::manage(new Gtk::HBox(false, 2));
+    vbox.pack_start(hbox, false, false);
+    hbox.pack_start(*Gtk::manage(new Gtk::Label(_("Top Rounding Radius"))),
+                    false, false, 0);
+    auto& scaler = *scaler_new(0, 20, 0.5);
+    hbox.pack_start(scaler, true, true);
+    SettingItem::create(scaler, SECT, "top_radius");
+    }{
+    auto& hbox = *Gtk::manage(new Gtk::HBox(false, 2));
+    vbox.pack_start(hbox, false, false);
+    hbox.pack_start(*Gtk::manage(new Gtk::Label(_("Bottom Rounding Radius"))),
+                    false, false, 0);
+    auto& scaler = *scaler_new(0, 20, 0.5);
+    hbox.pack_start(scaler, true, true);
+    SettingItem::create(scaler, SECT, "bottom_radius");
+    }
 }
-void my_engine_settings(GtkWidget* hbox,  bool active)
+void my_engine_settings(Gtk::Box& hbox, bool active)
 {
-    GtkWidget* vbox;
-    GtkWidget* scroller;
-    vbox = gtk_vbox_new(false, 2);
-    gtk_box_pack_startC(hbox, vbox, true, true, 0);
-    gtk_box_pack_startC(vbox, gtk_label_new(active ? "Active Window" : "Inactive Window"), false, false, 0);
-    gtk_box_pack_startC(vbox, gtk_hseparator_new(), false, false, 0);
-    scroller = gtk_scrolled_window_new(NULL, NULL);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller),
-                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-    gtk_box_pack_startC(vbox, scroller, true, true, 0);
+    auto& vbox = *Gtk::manage(new Gtk::VBox(false, 2));
+    hbox.pack_start(vbox, true, true);
+    vbox.pack_start(*Gtk::manage(new Gtk::Label(active ? "Active Window" : "Inactive Window")),
+                    false, false);
+    vbox.pack_start(*Gtk::manage(new Gtk::HSeparator()), false, false);
+    auto& scroller = *Gtk::manage(new Gtk::ScrolledWindow());
+    scroller.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+    vbox.pack_start(scroller, true, true);
 
     table_new(3, false, false);
 
-    gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scroller), GTK_WIDGET(get_current_table()));
+    scroller.add(get_current_table());
 
     make_labels("Colors");
     table_append_separator();
@@ -600,145 +602,126 @@ void my_engine_settings(GtkWidget* hbox,  bool active)
     table_append_separator();
     add_color_alpha_value(_("Titlebar Separator"), "separator_line", SECT, active);
 }
-void layout_engine_colors(GtkWidget* vbox)
+
+void layout_engine_colors(Gtk::Box& vbox)
 {
-    GtkWidget* hbox;
-    hbox = gtk_hbox_new(false, 2);
-    gtk_box_pack_startC(vbox, hbox, true, true, 0);
+    auto& hbox = *Gtk::manage(new Gtk::HBox(false, 2));
+    vbox.pack_start(hbox, true, true);
     my_engine_settings(hbox, true);
-    gtk_box_pack_startC(hbox, gtk_vseparator_new(), false, false, 0);
+    hbox.pack_start(*Gtk::manage(new Gtk::VSeparator()), false, false);
     my_engine_settings(hbox, false);
 }
-static void layout_pixmap_box(GtkWidget* vbox, int b_t, bool active)
+
+static void layout_pixmap_box(Gtk::Box& vbox, int b_t, bool active)
 {
-    GtkWidget* filesel;
-    GtkWidget* scroller;
-    GtkFileFilter* imgfilter;
-    GtkWidget* clearer;
-    GtkWidget* use_scaled;
-    GtkWidget* width;
-    GtkWidget* use_my_width;
-    GtkWidget* height;
-    GtkWidget* use_my_height;
-    GtkWidget* image;
-    GtkWidget* tbox;
-    GtkWidget* ttbox;
-    SettingItem* item;
-    char* pre = "active";
+    const char* pre = "active";
     if (!active) {
         pre = "inactive";
     }
+    std::string key = std::string(pre) + "_" + p_types[b_t];
 
-    table_append(gtk_label_new(names[b_t]), false);
-
-    filesel = gtk_file_chooser_button_new(g_strdup_printf("%s Pixmap", names[b_t]),
-                                          GTK_FILE_CHOOSER_ACTION_OPEN);
+    table_append(*Gtk::manage(new Gtk::Label(names[b_t])), false);
+    std::string fc_title = std::string(names[b_t]) + " Pixmap";
+    auto& filesel = *Gtk::manage(new Gtk::FileChooserButton(fc_title, Gtk::FILE_CHOOSER_ACTION_OPEN));
     table_append(filesel, false);
-    imgfilter = gtk_file_filter_new();
-    gtk_file_filter_set_name(imgfilter, "Images");
-    gtk_file_filter_add_pixbuf_formats(imgfilter);
-    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(filesel), imgfilter);
 
-    scroller = gtk_scrolled_window_new(NULL, NULL);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller),
-                                   GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-    gtk_widget_set_size_request(scroller,  150, 50);
+    Gtk::FileFilter filter;
+    filter.set_name("Images");
+    filter.add_pixbuf_formats();
+    filesel.add_filter(filter);
 
-    image = gtk_image_new();
-    item = SettingItem::register_img_file_setting(filesel, "pixmaps",  g_strdup_printf("%s_%s", pre, p_types[b_t]), (GtkImage*)image);
-    gtk_scrolled_window_add_with_viewport(
-        GTK_SCROLLED_WINDOW(scroller), GTK_WIDGET(image));
+    auto& scroller = *Gtk::manage(new Gtk::ScrolledWindow());
+    scroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+    scroller.set_size_request(150, 50);
+
+    auto& image = *Gtk::manage(new Gtk::Image());
+    auto* item = SettingItem::register_img_file_setting(filesel, "pixmaps",
+                                                        key.c_str(), &image);
+    scroller.add(image);
     table_append(scroller, true);
 
-    clearer = gtk_button_new_from_stock(GTK_STOCK_CLEAR);
-    g_signal_connect(clearer, "clicked", G_CALLBACK(cb_clear_file), item);
+    auto& clearer = *Gtk::manage(new Gtk::Button(Gtk::Stock::CLEAR));
+    clearer.signal_clicked().connect(sigc::bind(&cb_clear_file, item));
     table_append(clearer, false);
 
     // Style : Use Tiled or Scaled pixmaps
-    use_scaled = gtk_check_button_new_with_label(_("Scaled"));
-    SettingItem::register_setting(use_scaled,  ST_BOOL,  SECT,  g_strdup_printf("%s_%s_use_scaled", pre, p_types[b_t]));
+    auto& use_scaled = *Gtk::manage(new Gtk::ToggleButton(_("Scaled")));
+    SettingItem::create(use_scaled, SECT, (key + "_use_scaled").c_str());
     table_append(use_scaled, false);
 
     // Width : Checkbox (Use my width) + Number (0-500)
     if (b_t == 0 || b_t == 5 || b_t == 8) {
-        table_append(gtk_label_new(_("Not adjustable")), false);
+        table_append(*Gtk::manage(new Gtk::Label(_("Not adjustable"))), false);
     } else {
-        width = gtk_spin_button_new_with_range(0, 500, 1);
-        SettingItem::register_setting(width,
-                         ST_INT, SECT, g_strdup_printf("%s_%s_width", pre, p_types[b_t]));
+        auto& width = *Gtk::manage(new Gtk::SpinButton(1));
+        width.set_range(0, 500);
+        SettingItem::create(width, SECT, (key + "_%s_width").c_str());
 
-        use_my_width = gtk_check_button_new_with_label("");
-        SettingItem::register_setting(use_my_width, ST_BOOL, SECT, g_strdup_printf("%s_%s_use_width", pre, p_types[b_t]));
+        auto& use_my_width = *Gtk::manage(new Gtk::CheckButton(""));
+        SettingItem::create(use_my_width, SECT, (key + "_use_width").c_str());
 
-        tbox = gtk_hbox_new(false, 2);
-        gtk_box_pack_startC(tbox, width, false, false, 0);
-        gtk_box_pack_startC(tbox, use_my_width, false, false, 0);
+        auto& tbox = *Gtk::manage(new Gtk::HBox(false, 2));
+        tbox.pack_start(width, false, false);
+        tbox.pack_start(use_my_width, false, false);
         table_append(tbox, false);
     }
 
     // Height : Checkbox (Use my width) + Number (0-500)
     if (b_t == 1 || b_t == 2 || b_t == 6 || b_t == 7) {
-        height = gtk_spin_button_new_with_range(0, 500, 1);
-        SettingItem::register_setting(height, ST_INT, SECT, g_strdup_printf("%s_%s_height", pre, p_types[b_t]));
+        auto& height = *Gtk::manage(new Gtk::SpinButton(1));
+        height.set_range(0, 500);
+        SettingItem::create(height, SECT, g_strdup_printf("%s_%s_height", pre, p_types[b_t]));
 
-        use_my_height = gtk_check_button_new_with_label("");
-        SettingItem::register_setting(use_my_height, ST_BOOL, SECT, g_strdup_printf("%s_%s_use_height", pre, p_types[b_t]));
-
-        ttbox = gtk_hbox_new(false, 2);
-        gtk_box_pack_startC(ttbox, height, false, false, 0);
-        gtk_box_pack_startC(ttbox, use_my_height, false, false, 0);
-        table_append(ttbox, false);
+        auto& use_my_height = *Gtk::manage(new Gtk::CheckButton(""));
+        SettingItem::create(use_my_height, SECT, g_strdup_printf("%s_%s_use_height", pre, p_types[b_t]));
+        
+        auto& tbox = *Gtk::manage(new Gtk::HBox(false, 2));
+        tbox.pack_start(height, false, false);
+        tbox.pack_start(use_my_height, false, false);
+        table_append(tbox, false);
     } else {
-        table_append(gtk_label_new(_("Not adjustable")), false);
+        table_append(*Gtk::manage(new Gtk::Label(_("Not adjustable"))), false);
     }
 
 }
-void layout_engine_pixmaps(GtkWidget* vbox, bool active)
+void layout_engine_pixmaps(Gtk::Box& vbox, bool active)
 {
-    GtkWidget* scroller;
-    GtkWidget* hbox;
-    GtkWidget* junk;
-    int i;
-
-    hbox = gtk_hbox_new(true, 2);
-    gtk_box_pack_startC(vbox, hbox, false, false, 0);
+    auto& hbox = *Gtk::manage(new Gtk::HBox(true, 2));
+    vbox.pack_start(hbox, false, false);
 
     if (!active) {
-        junk = gtk_check_button_new_with_label(_("Same as Active"));
-        gtk_box_pack_startC(hbox, junk, true, true, 0);
-        SettingItem::register_setting(junk, ST_BOOL, SECT, "inactive_use_active_pixmaps");
+        auto& btn = *Gtk::manage(new Gtk::CheckButton(_("Same as Active")));
+        hbox.pack_start(btn, true, true);
+        SettingItem::create(btn, SECT, "inactive_use_active_pixmaps");
     }
 
-    scroller = gtk_scrolled_window_new(NULL, NULL);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller),
-                                   GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-    gtk_box_pack_startC(vbox, scroller, true, true, 0);
+    auto& scroller = *Gtk::manage(new Gtk::ScrolledWindow());
+    scroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+    vbox.pack_start(scroller, true, true);
 
     table_new(7, false, false);
-    gtk_scrolled_window_add_with_viewport(
-        GTK_SCROLLED_WINDOW(scroller), GTK_WIDGET(get_current_table()));
+    scroller.add(get_current_table());
 
-    table_append(gtk_label_new(_("Pixmap")), false);
-    table_append(gtk_label_new(_("File")), false);
-    table_append(gtk_label_new(_("Preview")), false);
-    table_append(gtk_label_new(_("Clear")), false);
-    table_append(gtk_label_new(_("Tiled/Scaled")), false);
-    table_append(gtk_label_new(_("Width Override")), false);
-    table_append(gtk_label_new(_("Height Override")), false);
+    table_append(*Gtk::manage(new Gtk::Label(_("Pixmap"))), false);
+    table_append(*Gtk::manage(new Gtk::Label(_("File"))), false);
+    table_append(*Gtk::manage(new Gtk::Label(_("Preview"))), false);
+    table_append(*Gtk::manage(new Gtk::Label(_("Clear"))), false);
+    table_append(*Gtk::manage(new Gtk::Label(_("Tiled/Scaled"))), false);
+    table_append(*Gtk::manage(new Gtk::Label(_("Width Override"))), false);
+    table_append(*Gtk::manage(new Gtk::Label(_("Height Override"))), false);
 
-    for (i = 0; i < 11; i++) {
+    for (int i = 0; i < 11; i++) {
         layout_pixmap_box(vbox, i, active);
     }
 }
 
 extern "C"
-void layout_engine_settings(GtkWidget* vbox)
+void layout_engine_settings(Gtk::Box& vbox)
 {
-    GtkWidget* note;
-    note = gtk_notebook_new();
-    gtk_box_pack_startC(vbox, note, true, true, 0);
-    layout_engine_pixmaps(build_notebook_page("Pixmaps (Active)", note), true);
-    layout_engine_pixmaps(build_notebook_page("Pixmaps (Inactive)", note), false);
-    layout_engine_colors(build_notebook_page("Colors", note));
-    layout_corners_frame(build_notebook_page("Frame", note));
+    auto* note = Gtk::manage(new Gtk::Notebook());
+    vbox.pack_start(*note, true, true);
+    layout_engine_pixmaps(*build_notebook_page("Pixmaps (Active)", *note), true);
+    layout_engine_pixmaps(*build_notebook_page("Pixmaps (Inactive)", *note), false);
+    layout_engine_colors(*build_notebook_page("Colors", *note));
+    layout_corners_frame(*build_notebook_page("Frame", *note));
 }

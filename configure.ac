@@ -27,7 +27,8 @@ AC_SUBST(enginesdir)
 AC_C_BIGENDIAN
 
 EMERALD_REQUIRES=" xrender >= 0.8.4  \
-		    gtk+-2.0 >= 2.8.0 \
+            gtk+-2.0 >= 2.8.0  \
+            gtkmm-2.4 >= 2.8.0 \
 		    libwnck-1.0	      \
 		    libdecoration     \
 		    pangocairo"

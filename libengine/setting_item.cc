@@ -20,12 +20,12 @@
 #include "setting_item.h"
 #include "libengine.h"
 #include <list>
+#include <cstdlib>
 
 extern GKeyFile* global_theme_file;
 extern GKeyFile* global_settings_file;
 extern std::list<SettingItem> g_setting_list;
 extern std::list<EngineData> g_engine_list;
-extern GtkListStore* EngineModel;
 
 char* globalStr = NULL;
 char globalFloatStr[G_ASCII_DTOSTR_BUF_SIZE + 1];
@@ -47,25 +47,25 @@ void SettingItem::write_setting(void* p)
         g_key_file_set_string(f, section_, key_, get_color());
         break;
     case ST_FONT:
-        g_key_file_set_string(f, section_, key_, get_font());
+        g_key_file_set_string(f, section_, key_, get_font().c_str());
         break;
     case ST_META_STRING:
-        g_key_file_set_string(f, section_, key_, get_string());
+        g_key_file_set_string(f, section_, key_, get_string().c_str());
         break;
     case ST_STRING_COMBO:
-        g_key_file_set_string(f, section_, key_, get_string_combo());
+        g_key_file_set_string(f, section_, key_, get_string_combo().c_str());
         break;
     case ST_IMG_FILE:
         //g_key_file_set_string(f,section_,key_,get_img_file(item));
     {
-        char* s = g_strdup_printf("%s/.emerald/theme/%s.%s.png", g_get_home_dir(), section_, key_);
-        GdkPixbuf* pbuf = gtk_image_get_pixbuf(image_);
+        std::string fn = std::string{g_get_home_dir()} + "/.emerald/theme/" +
+                         section_ + "." + key_ + ".png";
+        auto pbuf = image_->get_pixbuf();
         if (pbuf) {
-            gdk_pixbuf_savev(pbuf, s, "png", NULL, NULL, NULL);
+            pbuf->save(fn, "png");
         } else {
-            g_unlink(s); // to really clear out a clear'd image
+            std::remove(fn.c_str());
         }
-        g_free(s);
     }
     break;
     case ST_ENGINE_COMBO: {
@@ -118,73 +118,77 @@ void SettingItem::write_setting_file()
     g_free(file);
     g_free(path);
 }
+
 bool SettingItem::get_bool()
 {
-    return gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget_));
+    return ((Gtk::ToggleButton*) widget_)->get_active();
 }
+
 double SettingItem::get_float()
 {
-    if (!strcmp(G_OBJECT_TYPE_NAME(widget_), "GtkSpinButton")) {
-        return gtk_spin_button_get_value((GtkSpinButton*)widget_);
+    if (is_spin_button_) {
+        return ((Gtk::SpinButton*) widget_)->get_value();
     } else {
-        return gtk_range_get_value(GTK_RANGE(widget_));
+        return ((Gtk::Range*) widget_)->get_value();
     }
 }
+
 int SettingItem::get_int()
 {
     return get_float();
 }
+
 const char* SettingItem::get_float_str()
 {
     g_ascii_dtostr(globalFloatStr, G_ASCII_DTOSTR_BUF_SIZE,
                    get_float());
     return globalFloatStr;
 }
+
 const char* SettingItem::get_color()
 {
-    GdkColor c;
     if (globalStr) {
         g_free(globalStr);
     }
-    gtk_color_button_get_color(GTK_COLOR_BUTTON(widget_), &c);
-    globalStr = g_strdup_printf("#%02x%02x%02x", c.red >> 8, c.green >> 8, c.blue >> 8);
+    Gdk::Color c = ((Gtk::ColorButton*) widget_)->get_color();
+    globalStr = g_strdup_printf("#%02x%02x%02x", c.get_red() >> 8,
+                                c.get_green() >> 8, c.get_blue() >> 8);
     return globalStr;
 }
-const char* SettingItem::get_font()
+
+std::string SettingItem::get_font()
 {
-    return gtk_font_button_get_font_name(GTK_FONT_BUTTON(widget_));
+    return ((Gtk::FontButton*) widget_)->get_font_name();
 }
-const char* SettingItem::get_string()
+
+std::string SettingItem::get_string()
 {
-    return gtk_entry_get_text(GTK_ENTRY(widget_));
+    return ((Gtk::Entry*) widget_)->get_text();
 }
+
 void SettingItem::check_file(const char* f)
 {
-    GdkPixbuf* p;
-    p = gdk_pixbuf_new_from_file(f, NULL);
-    if (p) {
-        gtk_image_set_from_pixbuf(image_, p);
-        gtk_image_set_from_pixbuf(preview_, p);
-    } else {
-        gtk_image_clear(image_);
-        gtk_image_clear(preview_);
-    }
-    if (p) {
-        g_object_unref(p);
+    try { //FIXME: bad idea
+        auto p = Gdk::Pixbuf::create_from_file(f); // throws on error
+        image_->set(p);
+        preview_->set(p);
+    } catch (...) {
+        image_->clear();
+        preview_->clear();
     }
 }
+
 const char* SettingItem::get_img_file()
 {
-    return fvalue_;
+    return fvalue_.c_str();
 }
-const char* SettingItem::get_string_combo()
+std::string SettingItem::get_string_combo()
 {
-    const char* s;
-    s = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(widget_))));
-    if (strlen(s)) {
-        return s;
+    auto *w = ((Gtk::Bin*) widget_)->get_child();
+    std::string s = ((Gtk::Entry*) w)->get_text();
+    if (s.empty()) {
+        s = "IT::HNXC:Default Layout (Blank Entry)";
     }
-    s = "IT::HNXC:Default Layout (Blank Entry)";
     return s;
 }
 
@@ -194,7 +198,7 @@ void SettingItem::set_engine_combo(const char* val)
     bool found = false;
     for (auto& item : g_engine_list) {
         if (strcmp(item.canname, val) == 0) {
-            gtk_combo_box_set_active(GTK_COMBO_BOX(widget_), i);
+            ((Gtk::ComboBox*) widget_)->set_active(i);
             found = true;
             break;
         }
@@ -206,7 +210,7 @@ void SettingItem::set_engine_combo(const char* val)
         i = 0;
         for (auto& item : g_engine_list) {
             if (strcmp(item.canname, "legacy") == 0) {
-                gtk_combo_box_set_active(GTK_COMBO_BOX(widget_), i);
+                ((Gtk::ComboBox*) widget_)->set_active(i);
                 break;
             }
             i++;
@@ -216,74 +220,86 @@ void SettingItem::set_engine_combo(const char* val)
 }
 const char* SettingItem::get_engine_combo()
 {
-    static char* s = NULL;
+    static std::string s;
     GtkTreeIter i;
-    if (s) {
-        g_free(s);
-    }
+
     //s = gtk_combo_box_get_active_text(GTK_COMBO_BOX(widget_));
-    if (gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget_), &i)) {
-        gtk_tree_model_get(GTK_TREE_MODEL(EngineModel), &i, ENGINE_COL_NAME, &s, -1);
-        if (!strlen(s)) {
-            g_free(s);
-            s = g_strdup("legacy");
+    Gtk::ComboBox* cv = widget_;
+    auto it = cv->get_active();
+    if (it) {
+        s = (*it)[g_engine_columns.name];
+        if (s == "") {
+            s = "legacy";
         }
     }
-    return s;
+    return s.c_str();
 }
+
 int SettingItem::get_sf_int_combo()
 {
-    return gtk_combo_box_get_active(GTK_COMBO_BOX(widget_));
+    return ((Gtk::ComboBox*) widget_)->get_active_row_number();
 }
+
 void SettingItem::set_img_file(const char* f)
 {
-    g_free(fvalue_);
-    fvalue_ = g_strdup(f);
-    gtk_file_chooser_select_filename(GTK_FILE_CHOOSER(widget_), f);
+    fvalue_ = f;
+    ((Gtk::FileChooser*) widget_)->select_filename(f);
     check_file(f);
 }
+
 void SettingItem::set_bool(bool b)
 {
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget_), b);
+    ((Gtk::ToggleButton*) widget_)->set_active(b);
 }
+
 void SettingItem::set_float(double f)
 {
-    if (!strcmp(G_OBJECT_TYPE_NAME(widget_), "GtkSpinButton")) {
-        gtk_spin_button_set_value((GtkSpinButton*)widget_, f);
+    if (is_spin_button_) {
+        ((Gtk::SpinButton*) widget_)->set_value(f);
     } else {
-        gtk_range_set_value(GTK_RANGE(widget_), f);
+        ((Gtk::Range*) widget_)->set_value(f);
     }
 }
+
 void SettingItem::set_int(int i)
 {
     set_float(i);
 }
+
 void SettingItem::set_float_str(const char* s)
 {
     set_float(g_ascii_strtod(s, NULL));
 }
+
 void SettingItem::set_color(const char* s)
 {
-    GdkColor c;
-    gdk_color_parse(s, &c);
-    gtk_color_button_set_color(GTK_COLOR_BUTTON(widget_), &c);
+    Gdk::Color color;
+    if (color.parse(s)) {
+        ((Gtk::ColorButton*) widget_)->set_color(color);
+    }
 }
+
 void SettingItem::set_font(const char* f)
 {
-    gtk_font_button_set_font_name(GTK_FONT_BUTTON(widget_), f);
+    ((Gtk::FontButton*) widget_)->set_font_name(f);
 }
+
 void SettingItem::set_string(const char* s)
 {
-    gtk_entry_set_text(GTK_ENTRY(widget_), s);
+    ((Gtk::Entry*) widget_)->set_text(s);
 }
+
 void SettingItem::set_string_combo(const char* s)
 {
-    gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(widget_))), s);
+    auto child = ((Gtk::Bin*) widget_)->get_child();
+    ((Gtk::Entry*) child)->set_text(s);
 }
+
 void SettingItem::set_sf_int_combo(int i)
 {
-    gtk_combo_box_set_active(GTK_COMBO_BOX(widget_), i);
+    ((Gtk::ComboBox*) widget_)->set_active(i);
 }
+
 void SettingItem::read_setting(void** p)
 {
     GKeyFile* f = (GKeyFile*) p;
@@ -299,12 +315,12 @@ void SettingItem::read_setting(void** p)
         }
         break;
     case ST_INT:
+    case ST_FLOAT:
         i = g_key_file_get_integer(f, section_, key_, &e);
         if (!e) {
             set_int(i);
+            break;
         }
-        break;
-    case ST_FLOAT:
         s = g_key_file_get_string(f, section_, key_, &e);
         if (!e && s) {
             set_float_str(s);
@@ -390,77 +406,119 @@ void SettingItem::read_setting(void** p)
     }
 }
 
-SettingItem* SettingItem::register_img_file_setting(GtkWidget* widget, const char* section,
-                                                    const char* key, GtkImage* image)
+SettingItem* SettingItem::register_img_file_setting(Gtk::FileChooserButton& widget, const char* section,
+                                                    const char* key, Gtk::Image* image)
 {
-    SettingItem* item = register_setting(widget, ST_IMG_FILE, section, key);
-    gtk_file_chooser_button_set_width_chars(GTK_FILE_CHOOSER_BUTTON(widget), 0);
+    SettingItem* item = create_impl(widget, ST_IMG_FILE, section, key);
+    widget.signal_selection_changed().connect(sigc::bind(&cb_apply_setting, item));
+    widget.set_width_chars(0);
     item->image_ = image;
-    item->preview_ = GTK_IMAGE(gtk_image_new());
-    gtk_file_chooser_set_preview_widget(GTK_FILE_CHOOSER(widget), GTK_WIDGET(item->preview_));
-    g_signal_connect(widget, "update-preview", G_CALLBACK(update_preview_cb),
-                     item->preview_);
+    item->preview_ = Gtk::manage(new Gtk::Image());
+    widget.set_preview_widget(*(item->preview_));
+    widget.signal_update_preview().connect(sigc::bind(&update_preview_cb, &widget, item->preview_));
     return item;
 }
-SettingItem* SettingItem::register_setting(GtkWidget* widget, SettingType type, const char* section, const char* key)
+
+SettingItem* SettingItem::create_global(Gtk::ComboBoxText& widget,
+                                        const char* section, const char* key)
+{
+    auto item = SettingItem::create_impl(widget, ST_SFILE_INT_COMBO, section, key);
+    widget.signal_changed().connect(sigc::bind(&cb_apply_setting, item));
+    return item;
+}
+
+SettingItem* SettingItem::create(Gtk::ComboBoxEntryText& widget,
+                                 const char* section, const char* key)
+{
+    auto item = SettingItem::create_impl(widget, ST_STRING_COMBO, section, key);
+    widget.signal_changed().connect(sigc::bind(&cb_apply_setting, item));
+    return item;
+}
+
+SettingItem* SettingItem::create_engine(Gtk::ComboBox& widget,
+                                        const char* section, const char* key)
+{
+    auto item = SettingItem::create_impl(widget, ST_ENGINE_COMBO, section, key);
+    widget.signal_changed().connect(sigc::bind(&cb_apply_setting, item));
+    return item;
+}
+
+SettingItem* SettingItem::create(Gtk::Entry& widget,
+                                 const char* section, const char* key)
+{
+    auto item = SettingItem::create_impl(widget, ST_META_STRING, section, key);
+    return item;
+}
+
+SettingItem* SettingItem::create(Gtk::FontButton& widget,
+                                 const char* section, const char* key)
+{
+    auto item = SettingItem::create_impl(widget, ST_COLOR, section, key);
+    widget.signal_font_set().connect(sigc::bind(&cb_apply_setting, item));
+    return item;
+}
+
+SettingItem* SettingItem::create(Gtk::ColorButton& widget,
+                                 const char* section, const char* key)
+{
+    auto item = SettingItem::create_impl(widget, ST_COLOR, section, key);
+    widget.signal_color_set().connect(sigc::bind(&cb_apply_setting, item));
+    return item;
+}
+
+SettingItem* SettingItem::create(Gtk::SpinButton& widget,
+                                 const char* section, const char* key)
+{
+    auto item = SettingItem::create_impl(widget, ST_FLOAT, section, key);
+    item->is_spin_button_ = true;
+    widget.signal_value_changed().connect(sigc::bind(&cb_apply_setting, item));
+    return item;
+}
+
+SettingItem* SettingItem::create(Gtk::Range& widget,
+                                 const char* section, const char* key)
+{
+    auto item = SettingItem::create_impl(widget, ST_FLOAT, section, key);
+    item->is_spin_button_ = false;
+    widget.signal_value_changed().connect(sigc::bind(&cb_apply_setting, item));
+    return item;
+}
+
+SettingItem* SettingItem::create_global(Gtk::Range& widget,
+                                        const char* section, const char* key)
+{
+    auto item = SettingItem::create_impl(widget, ST_SFILE_INT, section, key);
+    widget.signal_value_changed().connect(sigc::bind(&cb_apply_setting, item));
+    return item;
+}
+
+SettingItem* SettingItem::create(Gtk::ToggleButton& widget,
+                                 const char* section, const char* key)
+{
+    auto item = SettingItem::create_impl(widget, ST_BOOL, section, key);
+    widget.signal_toggled().connect(sigc::bind(&cb_apply_setting, item));
+    return item;
+}
+
+SettingItem* SettingItem::create_global(Gtk::ToggleButton& widget,
+                                        const char* section, const char* key)
+{
+    auto item = SettingItem::create_impl(widget, ST_SFILE_BOOL, section, key);
+    widget.signal_toggled().connect(sigc::bind(&cb_apply_setting, item));
+    return item;
+}
+
+
+SettingItem* SettingItem::create_impl(Gtk::Widget& widget, SettingType type,
+                                      const char* section, const char* key)
 {
     g_setting_list.push_front(SettingItem());
     SettingItem* item = &g_setting_list.front();
     item->type_ = type;
     item->key_ = g_strdup(key);
     item->section_ = g_strdup(section);
-    item->widget_ = widget;
+    item->widget_ = &widget;
     item->fvalue_ = g_strdup("");
-    switch (item->type_) {
-    case ST_BOOL:
-    case ST_SFILE_BOOL:
-        g_signal_connect(widget, "toggled",
-                         G_CALLBACK(cb_apply_setting),
-                         item);
-        break;
-    case ST_INT:
-    case ST_SFILE_INT:
-        g_signal_connect(widget, "value-changed",
-                         G_CALLBACK(cb_apply_setting),
-                         item);
-        break;
-    case ST_FLOAT:
-        g_signal_connect(widget, "value-changed",
-                         G_CALLBACK(cb_apply_setting),
-                         item);
-        break;
-    case ST_COLOR:
-        g_signal_connect(widget, "color-set",
-                         G_CALLBACK(cb_apply_setting),
-                         item);
-        break;
-    case ST_FONT:
-        g_signal_connect(widget, "font-set",
-                         G_CALLBACK(cb_apply_setting),
-                         item);
-        break;
-    case ST_IMG_FILE:
-        g_signal_connect(widget, "selection-changed",
-                         G_CALLBACK(cb_apply_setting),
-                         item);
-        break;
-    case ST_STRING_COMBO:
-        g_signal_connect(gtk_bin_get_child(GTK_BIN(widget)), "changed",
-                         G_CALLBACK(cb_apply_setting),
-                         item);
-        break;
-    case ST_SFILE_INT_COMBO:
-        g_signal_connect(widget, "changed",
-                         G_CALLBACK(cb_apply_setting),
-                         item);
-        break;
-    case ST_ENGINE_COMBO:
-        g_signal_connect(widget, "changed",
-                         G_CALLBACK(cb_apply_setting),
-                         item);
-    default:
-        break;
-        //unconnected types
-    }
     return item;
 }
+

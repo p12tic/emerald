@@ -51,45 +51,41 @@ rounded_rectangle(cairo_t* cr,
 
 #include <titlebar.h>
 
-#define gtk_box_pack_startC(a,b,c,d,e) gtk_box_pack_start(GTK_BOX(a),GTK_WIDGET(b),c,d,e)
-#define gtk_box_pack_endC(a,b,c,d,e) gtk_box_pack_end(GTK_BOX(a),b,c,d,e)
-#define gtk_container_addC(a,b) gtk_container_add(GTK_CONTAINER(a),b)
-#define gtk_container_set_border_widthC(a,b) gtk_container_set_border_width(GTK_CONTAINER(a),b)
-
 bool get_engine_meta_info(const char* engine, EngineMetaInfo* inf);   // returns false if couldn't find engine
 
-GtkWidget* scaler_new(double low, double high, double prec);
+Gtk::Scale* scaler_new(double low, double high, double prec);
 void add_color_alpha_value(const char* caption, const char* basekey,
                            const char* sect, bool active);
 
 void make_labels(const char* header);
-GtkWidget* build_frame(GtkWidget* vbox, const char* title, bool is_hbox);
+Gtk::Box* build_frame(Gtk::Box& vbox, const char* title, bool is_hbox);
 
 void table_new(int width, bool same, bool labels);
-void table_append(GtkWidget* child, bool stretch);
+void table_append(Gtk::Widget& child, bool stretch);
 void table_append_separator();
-GtkTable* get_current_table();
+Gtk::Table& get_current_table();
 
 void send_reload_signal();
 void apply_settings();
-void cb_apply_setting(GtkWidget* w, void* p);
+void cb_apply_setting(SettingItem* item);
 
 #ifdef USE_DBUS
 void setup_dbus();
 #endif
 
-void update_preview(GtkFileChooser* fc, const char* filename, GtkImage* img);
-void update_preview_cb(GtkFileChooser* file_chooser, void* data);
+void update_preview(Gtk::FileChooser* fc, const std::string& filename,
+                    Gtk::Image* img);
+void update_preview_cb(Gtk::FileChooser* chooser, Gtk::Image* img);
 
 void init_settings();
 void set_changed(bool schanged);
 void set_apply(bool sapply);
-void cb_clear_file(GtkWidget* button, void* p);
+void cb_clear_file(SettingItem* item);
 void init_key_files();
 std::list<SettingItem>& get_setting_list();
 void do_engine(const char* nam);
-GtkWidget* build_notebook_page(const char* title, GtkWidget* notebook);
+Gtk::Box* build_notebook_page(const char* title, Gtk::Notebook& notebook);
 char* make_filename(const char* sect, const char* key, const char* ext);
-void layout_engine_list(GtkWidget* vbox);
+void layout_engine_list(Gtk::Box& vbox);
 void init_engine_list();
 #endif

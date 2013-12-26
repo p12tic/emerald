@@ -17,17 +17,17 @@
  *
  */
 
-////////////////////////////////////////////////////
-//themer stuff
 #include <engine.h>
 #include <signal.h>
 #include <list>
+#include <cstring>
 
+EngineColumns g_engine_columns;
 std::list<SettingItem> g_setting_list;
 std::list<EngineData> g_engine_list;
-GtkWidget* EngineCombo;
-GtkListStore* EngineModel;
-GtkWidget* EngineContainer;
+Gtk::ComboBox* engine_combo_;
+Glib::RefPtr<Gtk::ListStore> engine_model_;
+Gtk::Alignment* engine_container_;
 //GtkWidget * PreviewImage[BX_COUNT];
 //GtkWidget * ButtonImage[BX_COUNT];
 bool apply = false;
@@ -62,101 +62,108 @@ std::list<SettingItem>& get_setting_list()
 {
     return g_setting_list;
 }
-GtkWidget* scaler_new(double low, double high, double prec)
+
+Gtk::Scale* scaler_new(double low, double high, double prec)
 {
-    GtkWidget* w;
-    w = gtk_hscale_new_with_range(low, high, prec);
-    gtk_scale_set_value_pos(GTK_SCALE(w), GTK_POS_RIGHT);
-    gtk_range_set_update_policy(GTK_RANGE(w), GTK_UPDATE_DISCONTINUOUS);
-    gtk_widget_set_size_request(w, 100, -1);
+    Gtk::Scale* w = Gtk::manage(new Gtk::HScale(low, high, prec));
+    w->set_value_pos(Gtk::POS_RIGHT);
+    w->set_update_policy(Gtk::UPDATE_DISCONTINUOUS);
+    w->set_size_request(100, -1);
     return w;
 }
+
 void add_color_alpha_value(const char* caption, const char* basekey,
                            const char* sect, bool active)
 {
-    GtkWidget* w;
     char* colorkey;
     char* alphakey;
     colorkey = g_strdup_printf(active ? "active_%s" : "inactive_%s", basekey);
     alphakey = g_strdup_printf(active ? "active_%s_alpha" : "inactive_%s_alpha",
                                basekey);
 
-    w = gtk_label_new(caption);
-    table_append(w, false);
+    table_append(*Gtk::manage(new Gtk::Label(caption)), false);
 
-    w = gtk_color_button_new();
-    table_append(w, false);
-    SettingItem::register_setting(w, ST_COLOR, sect, colorkey);
+    auto* color_btn = Gtk::manage(new Gtk::ColorButton());
+    table_append(*color_btn, false);
+    SettingItem::create(*color_btn, sect, colorkey);
 
-    w = scaler_new(0.0, 1.0, 0.01);
-    table_append(w, true);
-    SettingItem::register_setting(w, ST_FLOAT, sect, alphakey);
-    //we don't g_free because they are registered with SettingItem::register_setting
+    auto* scaler = scaler_new(0.0, 1.0, 0.01);
+    table_append(*scaler, true);
+    SettingItem::create(*scaler, sect, alphakey);
+    //we don't g_free because they are registered with SettingItem::create
 }
+
 void make_labels(const char* header)
 {
-    table_append(gtk_label_new(header), false);
-    table_append(gtk_label_new("Color"), false);
-    table_append(gtk_label_new("Opacity"), false);
+    table_append(*Gtk::manage(new Gtk::Label(header)), false);
+    table_append(*Gtk::manage(new Gtk::Label("Color")), false);
+    table_append(*Gtk::manage(new Gtk::Label("Opacity")), false);
 }
-GtkWidget* build_frame(GtkWidget* vbox, const char* title, bool is_hbox)
+
+Gtk::Box* build_frame(Gtk::Box& vbox, const char* title, bool is_hbox)
 {
-    GtkWidget* frame;
-    GtkWidget* box;
-    frame = gtk_frame_new(title);
-    gtk_box_pack_startC(vbox, frame, true, true, 0);
-    box = is_hbox ? gtk_hbox_new(false, 2) : gtk_vbox_new(false, 2);
-    gtk_container_set_border_widthC(box, 8);
-    gtk_container_addC(frame, box);
+    Gtk::Frame* frame = Gtk::manage(new Gtk::Frame(title));
+    vbox.pack_start(*frame, Gtk::PACK_EXPAND_WIDGET);
+    Gtk::Box* box;
+    if (is_hbox) {
+        box = Gtk::manage(new Gtk::HBox(false, 2));
+    } else {
+        box = Gtk::manage(new Gtk::VBox(false, 2));
+    }
+    box->set_border_width(8);
+    frame->add(*box);
     return box;
 }
 
 static int current_table_width;
-static GtkTable* current_table;
+static Gtk::Table* current_table_;
 static int current_table_col;
 static int current_table_row;
 
 void table_new(int width, bool same, bool labels)
 {
     //WARNING - clobbers all the current_table_ vars.
-    current_table = GTK_TABLE(gtk_table_new(width, 1, same));
-    gtk_table_set_row_spacings(current_table, 8);
-    gtk_table_set_col_spacings(current_table, 8);
+    current_table_ = Gtk::manage(new Gtk::Table());
+    current_table_->set_homogeneous(same);
+    current_table_->resize(1, width);
+    current_table_->set_row_spacings(8);
+    current_table_->set_col_spacings(8);
     current_table_col = labels ? 1 : 0;
     current_table_row = 0;
     current_table_width = width;
 }
-void table_append(GtkWidget* child, bool stretch)
+
+void table_append(Gtk::Widget& child, bool stretch)
 {
-    gtk_table_attach(current_table, child, current_table_col, current_table_col + 1,
-                     current_table_row, current_table_row + 1,
-                     (stretch ? GTK_EXPAND : GTK_SHRINK) | GTK_FILL,
-                     (stretch ? GTK_EXPAND : GTK_SHRINK) | GTK_FILL,
-                     0, 0);
+    current_table_->attach(child, current_table_col, current_table_col+1,
+                           current_table_row, current_table_row+1,
+                           (stretch ? Gtk::EXPAND : Gtk::SHRINK) | Gtk::FILL,
+                           (stretch ? Gtk::EXPAND : Gtk::SHRINK) | Gtk::FILL);
     current_table_col++;
     if (current_table_col == current_table_width) {
         current_table_col = 0;
         current_table_row++;
-//        gtk_table_resize(current_table,current_table_width,current_table_row+1);
+    //  current_table_.resize(current_table_row+1, current_table_width);
     }
 }
+
 void table_append_separator()
 {
     current_table_col = 0;
     current_table_row++;
-//    gtk_table_resize(current_table,current_table_width,current_table_row+1);
-    gtk_table_attach_defaults(current_table,
-                              gtk_hseparator_new(),
-                              0, current_table_width,
-                              current_table_row,
-                              current_table_row + 1);
+//  current_table_->resize(current_table_row+1, current_table_width);
+    current_table_->attach(*Gtk::manage(new Gtk::HSeparator()),
+                           0, current_table_width,
+                           current_table_row, current_table_row+1);
     current_table_row++;
-//    gtk_table_resize(current_table,current_table_width,current_table_row+1);
+//  current_table_.resize(current_table_row+1, current_table_width);
 }
-GtkTable* get_current_table()
+
+Gtk::Table& get_current_table()
 {
-    return current_table;
+    return *current_table_;
 }
+
 void send_reload_signal()
 {
 #ifdef USE_DBUS
@@ -228,21 +235,18 @@ void apply_settings()
     g_free(path);
     send_reload_signal();
 }
-void cb_apply_setting(GtkWidget* w, void* p)
+void cb_apply_setting(SettingItem* item)
 {
-    SettingItem* item = p;
     if (item->type_ == ST_IMG_FILE) {
-        char* s;
-        if (!(s = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(item->widget_)))) {
+        std::string s = ((Gtk::FileChooser*) item->widget_)->get_filename();
+        if (s.empty()) {
             return;    // for now just ignore setting it to an invalid name
         }
-        if (!strcmp(s, item->fvalue_)) {
-            g_free(s);
+        if (s == item->fvalue_) {
             return;
         }
-        g_free(item->fvalue_);
         item->fvalue_ = s;
-        item->check_file(s);
+        item->check_file(s.c_str());
     }
     item->write_setting((void*) global_theme_file);
     if (apply) {
@@ -269,13 +273,11 @@ void do_engine(const char* nam)
         g_free(active_engine);
     }
     active_engine = g_strdup(nam);
-    if ((w = gtk_bin_get_child(GTK_BIN(EngineContainer)))) {
-        gtk_container_remove(GTK_CONTAINER(EngineContainer), w);
-    }
+    engine_container_->remove();
     for (auto& item : g_engine_list) {
         if (strcmp(nam, item.canname) == 0) {
-            gtk_container_add(GTK_CONTAINER(EngineContainer), item.vbox);
-            gtk_widget_show_all(EngineContainer);
+            engine_container_->add(*(item.vbox));
+            engine_container_->show_all();
         }
     }
 
@@ -291,25 +293,21 @@ bool get_engine_meta_info(const char* engine, EngineMetaInfo* inf)
     }
     return false;
 }
-void update_preview(GtkFileChooser* fc, const char* filename, GtkImage* img)
+void update_preview(Gtk::FileChooser* chooser, const std::string& filename,
+                    Gtk::Image* img)
 {
-    GdkPixbuf* pixbuf;
-    bool have_preview;
-    pixbuf = gdk_pixbuf_new_from_file(filename, NULL);
-    have_preview = (pixbuf != NULL);
-    gtk_image_set_from_pixbuf(GTK_IMAGE(img), pixbuf);
-    if (pixbuf) {
-        g_object_unref(pixbuf);
-    }
-    gtk_file_chooser_set_preview_widget_active(fc, have_preview);
+    auto pixbuf = Gdk::Pixbuf::create_from_file(filename);
+    bool have_preview = bool(pixbuf);
+    img->set(pixbuf);
+    chooser->set_preview_widget_active(have_preview);
 }
-void update_preview_cb(GtkFileChooser* file_chooser, void* data)
+
+void update_preview_cb(Gtk::FileChooser* chooser, Gtk::Image* img)
 {
-    char* filename;
-    filename = gtk_file_chooser_get_preview_filename(file_chooser);
-    update_preview(file_chooser, filename, GTK_IMAGE(data));
-    g_free(filename);
+    std::string fn = std::string(chooser->get_preview_filename());
+    update_preview(chooser, fn, img);
 }
+
 void init_settings()
 {
     char* file = g_strjoin("/", g_get_home_dir(), ".emerald/theme/theme.ini", NULL);
@@ -331,9 +329,8 @@ void set_apply(bool sapply)
 {
     apply = sapply;
 }
-void cb_clear_file(GtkWidget* button, void* p)
+void cb_clear_file(SettingItem* item)
 {
-    SettingItem* item = p;
     item->check_file("");
     item->fvalue_ = "";
     gtk_file_chooser_unselect_all(GTK_FILE_CHOOSER(item->widget_));
@@ -347,19 +344,20 @@ void init_key_files()
     global_theme_file = g_key_file_new();
     global_settings_file = g_key_file_new();
 }
-void layout_engine_list(GtkWidget* vbox)
+void layout_engine_list(Gtk::Box& vbox)
 {
-    GtkWidget* hbox;
-    EngineCombo = gtk_combo_box_new();
-    hbox = gtk_hbox_new(false, 2);
-    gtk_box_pack_startC(vbox, hbox, false, false, 0);
-    gtk_box_pack_startC(hbox, gtk_label_new(_("Select\nEngine")), false, false, 0);
-    gtk_box_pack_startC(hbox, EngineCombo, false, false, 0);
-    gtk_box_pack_startC(vbox, gtk_hseparator_new(), false, false, 0);
-    EngineContainer = gtk_alignment_new(0, 0, 1, 1); // really only needed for the bin-ness
-    gtk_box_pack_startC(vbox, EngineContainer, true, true, 0);
+    engine_combo_ = Gtk::manage(new Gtk::ComboBox{});
+    auto hbox = Gtk::manage(new Gtk::HBox(false, 2));
+    vbox.pack_start(*hbox, Gtk::PACK_SHRINK);
+    vbox.pack_start(*Gtk::manage(new Gtk::Label(_("Select\nEngine"))), Gtk::PACK_SHRINK);
+    vbox.pack_start(*engine_combo_, Gtk::PACK_SHRINK);
+    vbox.pack_start(*Gtk::manage(new Gtk::HSeparator()));
+    // really only needed for the bin-ness
+    engine_container_ = Gtk::manage(new Gtk::Alignment(0.0, 0.0, 1.0, 1.0));
+    vbox.pack_start(*engine_container_, Gtk::PACK_EXPAND_WIDGET);
 }
-static char* canonize_name(const char* dlname)
+
+static char* canonize_name(char* dlname)
 {
     char* end;
     char* begin = g_strrstr(dlname, "/lib");
@@ -399,8 +397,7 @@ static void append_engine(const char* dlname)
     }
     can = canonize_name(dlname);
     if (engine_is_unique(can)) {
-        layout_settings_proc lay;
-        lay = dlsym(hand, "layout_engine_settings");
+        layout_settings_proc lay = dlsym(hand, "layout_engine_settings");
         if ((err = dlerror())) {
             g_warning("%s", err);
         }
@@ -419,8 +416,9 @@ static void append_engine(const char* dlname)
             d->meta.description = g_strdup("No Description");
             d->meta.version = g_strdup("0.0");
             d->meta.last_compat = g_strdup("0.0");
-            d->meta.icon = gtk_widget_render_icon(EngineCombo, GTK_STOCK_MISSING_IMAGE,
-                                                  GTK_ICON_SIZE_LARGE_TOOLBAR, "themeengine");
+            auto icon_theme = Gtk::IconTheme::get_default();
+            d->meta.icon = icon_theme->load_icon(GTK_STOCK_MISSING_IMAGE, Gtk::ICON_SIZE_LARGE_TOOLBAR);
+
             if (meta) {
                 meta(&(d->meta));
             } else {
@@ -429,21 +427,23 @@ static void append_engine(const char* dlname)
 
             d->dlname = dlname;
             d->canname = can;
-            d->vbox = gtk_vbox_new(false, 2);
-            g_object_ref(d->vbox);
-            lay(d->vbox);
-            gtk_list_store_append(EngineModel, &i);
+            d->vbox = Gtk::manage(new Gtk::VBox{false, 2});
+            lay(*(d->vbox));
 
-            gtk_list_store_set(EngineModel, &i, ENGINE_COL_DLNAME, d->dlname, ENGINE_COL_NAME, d->canname,
-                               ENGINE_COL_VER, d->meta.version, ENGINE_COL_LAST_COMPAT, d->meta.last_compat,
-                               ENGINE_COL_ICON, d->meta.icon, ENGINE_COL_MARKUP,
-                               g_markup_printf_escaped(format, d->canname, d->meta.version, d->meta.description),
-                               -1);
-            //gtk_combo_box_prepend_text(GTK_COMBO_BOX(EngineCombo),d->canname);
+            Gtk::TreeModel::Row row = *(engine_model_->append());
+            row[g_engine_columns.dlname] = d->dlname;
+            row[g_engine_columns.name] = d->canname;
+            row[g_engine_columns.version] = d->meta.version;
+            row[g_engine_columns.last_compat] = d->meta.last_compat;
+            row[g_engine_columns.icon] = d->meta.icon;
+            row[g_engine_columns.markup] = g_markup_printf_escaped(format, d->canname, d->meta.version, d->meta.description); // FIXME: LEAK possible
+
+            //engine_combo_->prepend_text(d->canname);
         }
     }
     dlclose(hand);
 }
+
 static void engine_scan_dir(const char* dir)
 {
     GDir* d;
@@ -466,31 +466,29 @@ void init_engine_list()
 {
     //presumes the container & combo are created
     //presumes the combo is NOT registered
-    GtkCellRenderer* r;
+    Gtk::CellRenderer* r;
 
-    EngineModel = gtk_list_store_new(ENGINE_COL_COUNT, G_TYPE_STRING,
-                                     G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, GDK_TYPE_PIXBUF);
-    char* local_engine_dir = g_strjoin("/", g_get_home_dir(), ".emerald/engines", NULL);
-    gtk_combo_box_set_model(GTK_COMBO_BOX(EngineCombo), GTK_TREE_MODEL(EngineModel));
-    r = gtk_cell_renderer_pixbuf_new();
-    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(EngineCombo), r, false);
-    gtk_cell_layout_add_attribute(GTK_CELL_LAYOUT(EngineCombo), r, "pixbuf", ENGINE_COL_ICON);
-    r = gtk_cell_renderer_text_new();
-    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(EngineCombo), r, true);
-    gtk_cell_layout_add_attribute(GTK_CELL_LAYOUT(EngineCombo), r, "markup", ENGINE_COL_MARKUP);
-    engine_scan_dir(local_engine_dir);
-    g_free(local_engine_dir);
+    std::string local_engine_dir{g_get_home_dir()};
+    local_engine_dir += "/.emerald/engines";
+
+    engine_model_ = Gtk::ListStore::create(g_engine_columns);
+    engine_combo_->set_model(engine_model_);
+    r = Gtk::manage(new Gtk::CellRendererPixbuf());
+    engine_combo_->pack_start(*r, false);
+    engine_combo_->add_attribute(*r, "pixbuf", g_engine_columns.icon.index());
+    r = Gtk::manage(new Gtk::CellRendererText());
+    engine_combo_->pack_start(*r, true);
+    engine_combo_->add_attribute(*r, "markup", g_engine_columns.markup.index());
+    engine_scan_dir(local_engine_dir.c_str());
     engine_scan_dir(ENGINE_DIR);
-
-    SettingItem::register_setting(EngineCombo, ST_ENGINE_COMBO, "engine", "engine");
+    SettingItem::create_engine(*engine_combo_, "engine", "engine");
 }
-GtkWidget* build_notebook_page(const char* title, GtkWidget* notebook)
+
+Gtk::Box* build_notebook_page(const char* title, Gtk::Notebook& notebook)
 {
-    GtkWidget* vbox;
-    vbox = gtk_vbox_new(false, 2);
-    gtk_container_set_border_widthC(vbox, 8);
-    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), vbox,
-                             gtk_label_new(title));
+    auto* vbox = Gtk::manage(new Gtk::VBox(false, 2));
+    vbox->set_border_width(8);
+    notebook.append_page(*vbox, title, "");
     return vbox;
 }
 

@@ -50,7 +50,7 @@ void get_meta_info(EngineMetaInfo* emi)
     emi->version = g_strdup("0.1");
     emi->description = g_strdup(_("Based on original legacy"));
     emi->last_compat = g_strdup("0.0"); // old themes still compatible
-    emi->icon = gdk_pixbuf_new_from_inline(-1, my_pixbuf, true, NULL);
+    emi->icon = Gdk::Pixbuf::create_from_inline(sizeof(my_pixbuf), my_pixbuf, true);
 }
 
 #ifdef SHADOW_FIX
@@ -217,21 +217,20 @@ void fini_engine(window_settings* ws)
     delete ((private_fs*)ws->fs_inact->engine_fs);
 }
 
-void my_engine_settings(GtkWidget* hbox, bool active)
+void my_engine_settings(Gtk::Box& hbox, bool active)
 {
-    GtkWidget* vbox;
-    GtkWidget* scroller;
-    vbox = gtk_vbox_new(false, 2);
-    gtk_box_pack_startC(hbox, vbox, true, true, 0);
-    gtk_box_pack_startC(vbox, gtk_label_new(active ? "Active Window" : "Inactive Window"), false, false, 0);
-    gtk_box_pack_startC(vbox, gtk_hseparator_new(), false, false, 0);
-    scroller = gtk_scrolled_window_new(NULL, NULL);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-    gtk_box_pack_startC(vbox, scroller, true, true, 0);
+    auto& vbox = *Gtk::manage(new Gtk::VBox(false, 2));
+    hbox.pack_start(vbox, true, true);
+    vbox.pack_start(*Gtk::manage(new Gtk::Label(active ? "Active Window" : "Inactive Window")),
+                    false, false);
+    vbox.pack_start(*Gtk::manage(new Gtk::HSeparator()), false, false);
+    auto& scroller = *Gtk::manage(new Gtk::ScrolledWindow());
+    scroller.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+    vbox.pack_start(scroller, true, true);
 
     table_new(3, false, false);
 
-    gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scroller), GTK_WIDGET(get_current_table()));
+    scroller.add(get_current_table());
 
     make_labels(_("Colors"));
     table_append_separator();
@@ -239,21 +238,19 @@ void my_engine_settings(GtkWidget* hbox, bool active)
     add_color_alpha_value(_("Title Bar"), "title_bar", SECT, active);
 }
 
-void layout_engine_colors(GtkWidget* vbox)
+void layout_engine_colors(Gtk::Box& vbox)
 {
-    GtkWidget* hbox;
-    hbox = gtk_hbox_new(false, 2);
-    gtk_box_pack_startC(vbox, hbox, true, true, 0);
+    auto& hbox = *Gtk::manage(new Gtk::HBox(false, 2));
+    vbox.pack_start(hbox, true, true);
     my_engine_settings(hbox, true);
-    gtk_box_pack_startC(hbox, gtk_vseparator_new(), false, false, 0);
+    hbox.pack_start(*Gtk::manage(new Gtk::VSeparator()), false, false);
     my_engine_settings(hbox, false);
 }
 
 extern "C"
-void layout_engine_settings(GtkWidget* vbox)
+void layout_engine_settings(Gtk::Box& vbox)
 {
-    GtkWidget* note;
-    note = gtk_notebook_new();
-    gtk_box_pack_startC(vbox, note, true, true, 0);
-    layout_engine_colors(build_notebook_page(_("Colors"), note));
+    auto* note = Gtk::manage(new Gtk::Notebook());
+    vbox.pack_start(*note, true, true);
+    layout_engine_colors(*build_notebook_page(_("Colors"), *note));
 }

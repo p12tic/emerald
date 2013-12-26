@@ -24,7 +24,7 @@
 //legacy engine
 #include <emerald.h>
 #include <engine.h>
-#include <legacy_icon.h>
+#include "legacy_icon.h"
 
 #define SECT "legacy_settings"
 
@@ -59,7 +59,7 @@ void get_meta_info(EngineMetaInfo* emi)
     emi->version = g_strdup("0.1");
     emi->description = g_strdup(_("Based on original gnome-window-decorator"));
     emi->last_compat = g_strdup("0.0"); // old themes still compatible
-    emi->icon = gdk_pixbuf_new_from_inline(-1, my_pixbuf, true, NULL);
+    emi->icon = Gdk::Pixbuf::create_from_inline(sizeof(my_pixbuf), my_pixbuf, true);
 }
 
 extern "C"
@@ -353,53 +353,50 @@ void fini_engine(window_settings* ws)
     delete ((private_fs*)ws->fs_inact->engine_fs);
 }
 
-void layout_corners_frame(GtkWidget* vbox)
+void layout_corners_frame(Gtk::Box& vbox)
 {
-    GtkWidget* hbox;
-    GtkWidget* junk;
+    Gtk::CheckButton* btn;
+    btn = Gtk::manage(new Gtk::CheckButton(_("Round Top Left Corner")));
+    vbox.pack_start(*btn, false, false);
+    SettingItem::create(*btn, SECT, "round_top_left");
 
-    junk = gtk_check_button_new_with_label(_("Round Top Left Corner"));
-    gtk_box_pack_startC(vbox, junk, false, false, 0);
-    SettingItem::register_setting(junk, ST_BOOL, SECT, "round_top_left");
+    btn = Gtk::manage(new Gtk::CheckButton(_("Round Top Right Corner")));
+    vbox.pack_start(*btn, false, false);
+    SettingItem::create(*btn, SECT, "round_top_right");
 
-    junk = gtk_check_button_new_with_label(_("Round Top Right Corner"));
-    gtk_box_pack_startC(vbox, junk, false, false, 0);
-    SettingItem::register_setting(junk, ST_BOOL, SECT, "round_top_right");
+    btn = Gtk::manage(new Gtk::CheckButton(_("Round Bottom Left Corner")));
+    vbox.pack_start(*btn, false, false);
+    SettingItem::create(*btn, SECT, "round_bottom_left");
 
-    junk = gtk_check_button_new_with_label(_("Round Bottom Left Corner"));
-    gtk_box_pack_startC(vbox, junk, false, false, 0);
-    SettingItem::register_setting(junk, ST_BOOL, SECT, "round_bottom_left");
+    btn = Gtk::manage(new Gtk::CheckButton(_("Round Bottom Right Corner")));
+    vbox.pack_start(*btn, false, false);
+    SettingItem::create(*btn, SECT, "round_bottom_right");
 
-    junk = gtk_check_button_new_with_label(_("Round Bottom Right Corner"));
-    gtk_box_pack_startC(vbox, junk, false, false, 0);
-    SettingItem::register_setting(junk, ST_BOOL, SECT, "round_bottom_right");
+    auto hbox = Gtk::manage(new Gtk::HBox(false, 2));
+    vbox.pack_start(*hbox, false, false);
+    hbox->pack_start(*Gtk::manage(new Gtk::Label(_("Rounding Radius"))),
+                     false, false);
 
-    hbox = gtk_hbox_new(false, 2);
-    gtk_box_pack_startC(vbox, hbox, false, false, 0);
-
-    gtk_box_pack_startC(hbox, gtk_label_new(_("Rounding Radius")), false, false, 0);
-
-    junk = scaler_new(0, 20, 0.5);
-    gtk_box_pack_startC(hbox, junk, true, true, 0);
-    SettingItem::register_setting(junk, ST_FLOAT, SECT, "radius");
+    Gtk::Scale* scaler = scaler_new(0, 20, 0.5);
+    hbox->pack_start(*scaler, true, true);
+    SettingItem::create(*scaler, SECT, "radius");
 }
 
-void my_engine_settings(GtkWidget* hbox, bool active)
+void my_engine_settings(Gtk::Box& hbox, bool active)
 {
-    GtkWidget* vbox;
-    GtkWidget* scroller;
-    vbox = gtk_vbox_new(false, 2);
-    gtk_box_pack_startC(hbox, vbox, true, true, 0);
-    gtk_box_pack_startC(vbox, gtk_label_new(active ? "Active Window" : "Inactive Window"), false, false, 0);
-    gtk_box_pack_startC(vbox, gtk_hseparator_new(), false, false, 0);
-    scroller = gtk_scrolled_window_new(NULL, NULL);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroller),
-                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-    gtk_box_pack_startC(vbox, scroller, true, true, 0);
+    auto& vbox = *Gtk::manage(new Gtk::VBox(false, 2));
+    hbox.pack_start(vbox, true, true);
+    vbox.pack_start(*Gtk::manage(new Gtk::Label(active ? "Active Window" : "Inactive Window")),
+                    false, false);
+    vbox.pack_start(*Gtk::manage(new Gtk::HSeparator()), false, false);
+
+    auto& scroller = *Gtk::manage(new Gtk::ScrolledWindow());
+    scroller.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+    vbox.pack_start(scroller, true, true);
 
     table_new(3, false, false);
 
-    gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scroller), GTK_WIDGET(get_current_table()));
+    scroller.add(get_current_table());
 
     make_labels(_("Colors"));
     table_append_separator();
@@ -420,22 +417,20 @@ void my_engine_settings(GtkWidget* hbox, bool active)
     add_color_alpha_value(_("Contents Shadow"), "contents_shadow", SECT, active);
 }
 
-void layout_engine_colors(GtkWidget* vbox)
+void layout_engine_colors(Gtk::Box& vbox)
 {
-    GtkWidget* hbox;
-    hbox = gtk_hbox_new(false, 2);
-    gtk_box_pack_startC(vbox, hbox, true, true, 0);
+    auto& hbox = *Gtk::manage(new Gtk::HBox(false, 2));
+    vbox.pack_start(hbox, true, true);
     my_engine_settings(hbox, true);
-    gtk_box_pack_startC(hbox, gtk_vseparator_new(), false, false, 0);
+    hbox.pack_start(*Gtk::manage(new Gtk::VSeparator()), false, false);
     my_engine_settings(hbox, false);
 }
 
 extern "C"
-void layout_engine_settings(GtkWidget* vbox)
+void layout_engine_settings(Gtk::Box& vbox)
 {
-    GtkWidget* note;
-    note = gtk_notebook_new();
-    gtk_box_pack_startC(vbox, note, true, true, 0);
-    layout_engine_colors(build_notebook_page(_("Colors"), note));
-    layout_corners_frame(build_notebook_page(_("Frame"), note));
+    auto* note = Gtk::manage(new Gtk::Notebook());
+    vbox.pack_start(*note, true, true);
+    layout_engine_colors(*build_notebook_page(_("Colors"), *note));
+    layout_corners_frame(*build_notebook_page(_("Frame"), *note));
 }

@@ -4,6 +4,9 @@
 #include <config.h>
 #endif
 
+// include gtkmm before decoration.h
+#include <gtkmm.h>
+
 #include <decoration.h>
 
 /*

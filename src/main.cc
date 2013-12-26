@@ -30,6 +30,7 @@
 //#define BASE_PROP_SIZE 12
 //#define QUAD_PROP_SIZE 9
 
+
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/Xregion.h>
@@ -131,8 +132,8 @@ static GtkWidget* action_menu = NULL;
 static bool action_menu_mapped = false;
 static int double_click_timeout = 250;
 
-static GtkWidget* tip_window;
-static GtkWidget* tip_label;
+static Gtk::Window* tip_window;
+static Gtk::Label* tip_label;
 static GTimeVal tooltip_last_popdown = { -1, -1 };
 static int tooltip_timer_tag = 0;
 
@@ -2370,6 +2371,10 @@ update_default_decorations(GdkScreen* screen, frame_settings* fs_act,
 
         (*d.draw)(&d);
 
+        if (!data) {
+            data = decor_alloc_property(1, WINDOW_DECORATION_TYPE_PIXMAP);
+        }
+
         decor_quads_to_property(data, 0, GDK_PIXMAP_XID(d.p_inactive),
                                 &extents, &extents, &extents, &extents,
                                 0, 0, quads, nQuad, 0xffffff, 0, 0);
@@ -3609,55 +3614,61 @@ static void restack_window(WnckWindow* win, int stack_mode)
 
 static void show_tooltip(const char* text)
 {
-    GdkDisplay* gdkdisplay;
-    GtkRequisition requisition;
-    int x, y, w, h;
-    GdkScreen* screen;
-    int monitor_num;
-    GdkRectangle monitor;
-
-    if (enable_tooltips) {
-
-        gdkdisplay = gdk_display_get_default();
-
-        gtk_label_set_text(GTK_LABEL(tip_label), text);
-
-        gtk_widget_size_request(tip_window, &requisition);
-
-        w = requisition.width;
-        h = requisition.height;
-
-        gdk_display_get_pointer(gdkdisplay, &screen, &x, &y, NULL);
-
-        x -= (w / 2 + 4);
-
-        monitor_num = gdk_screen_get_monitor_at_point(screen, x, y);
-        gdk_screen_get_monitor_geometry(screen, monitor_num, &monitor);
-
-        if ((x + w) > monitor.x + monitor.width) {
-            x -= (x + w) - (monitor.x + monitor.width);
-        } else if (x < monitor.x) {
-            x = monitor.x;
-        }
-
-        if ((y + h + 16) > monitor.y + monitor.height) {
-            y = y - h - 16;
-        } else {
-            y = y + 16;
-        }
-
-        gtk_window_move(GTK_WINDOW(tip_window), x, y);
-        gtk_widget_show(tip_window);
+    if (!enable_tooltips) {
+        return;
     }
+    int x, y, w, h;
+
+    auto gdkdisplay = Gdk::Display::get_default();
+
+    tip_label->set_text(text);
+
+    Gtk::Requisition req;
+    tip_window->set_size_request(req.width, req.height);
+
+    w = req.width;
+    h = req.height;
+
+    /*
+    Gdk::ModifierType dummy;
+    Glib::RefPtr<Gdk::Screen> screen;
+    gdkdisplay->get_pointer(screen, x, y, dummy);
+        get_pointer is buggy. It takes a reference when it should not.
+    */
+    GdkScreen* screen;
+    gdk_display_get_pointer(gdkdisplay->gobj(), &screen, x, y, nullptr);
+
+    x -= (w / 2 + 4);
+
+    //int monitor_num = screen->get_monitor_at_point(x, y);
+    int monitor_num = gdk_screen_get_monitor_at_point(screen, x, y);
+    Gdk::Rectangle monitor;
+    //screen->get_monitor_geometry(monitor_num, monitor);
+    gdk_screen_get_monitor_geometry(screen, monitor_num, monitor.gobj());
+
+    if ((x + w) > monitor.get_x() + monitor.get_width()) {
+        x -= (x + w) - (monitor.get_x() + monitor.get_width());
+    } else if (x < monitor.get_x()) {
+        x = monitor.get_x();
+    }
+
+    if ((y + h + 16) > monitor.get_y() + monitor.get_height()) {
+        y = y - h - 16;
+    } else {
+        y = y + 16;
+    }
+
+    tip_window->move(x, y);
+    tip_window->show();
 }
 
 static void hide_tooltip(void)
 {
-    if (gtk_widget_get_visible(tip_window)) {
+    if (tip_window->get_visible()) {
         g_get_current_time(&tooltip_last_popdown);
     }
 
-    gtk_widget_hide(tip_window);
+    tip_window->hide();
 
     if (tooltip_timer_tag) {
         g_source_remove(tooltip_timer_tag);
@@ -3703,46 +3714,49 @@ static void tooltip_start_delay(const char* text)
                                       tooltip_timeout, (void*) text);
 }
 
-static int tooltip_paint_window(GtkWidget* tooltip)
+static int tooltip_paint_window()
 {
-    GtkRequisition req;
-
-    gtk_widget_size_request(tip_window, &req);
-    gtk_paint_flat_box(tip_window->style, tip_window->window,
-                       GTK_STATE_NORMAL, GTK_SHADOW_OUT,
-                       NULL, GTK_WIDGET(tip_window), "tooltip",
-                       0, 0, req.width, req.height);
+    Gtk::Requisition req = tip_window->size_request();
+    Gdk::Rectangle dummy;
+    tip_window->get_style()->paint_box(tip_window->get_window(),
+                                       Gtk::STATE_NORMAL,
+                                       Gtk::SHADOW_OUT,
+                                       dummy,
+                                       *tip_window, "tooltip", 0, 0, req.width,
+                                       req.height);
 
     return false;
 }
 
-static bool create_tooltip_window(void)
+bool tooltip_paint_window_lambda(GdkEventExpose*)
 {
-    tip_window = gtk_window_new(GTK_WINDOW_POPUP);
+    return tooltip_paint_window();
+}
 
-    gtk_widget_set_app_paintable(tip_window, true);
-    gtk_window_set_resizable(GTK_WINDOW(tip_window), false);
-    gtk_widget_set_name(tip_window, "gtk-tooltips");
-    gtk_container_set_border_width(GTK_CONTAINER(tip_window), 4);
+static bool create_tooltip_window()
+{
+    tip_window = new Gtk::Window(Gtk::WINDOW_POPUP); // FIXME: this is a leak
+
+    tip_window->set_app_paintable(true);
+    tip_window->set_resizable(false);
+    tip_window->set_name("gtk-tooltips");
+    tip_window->set_border_width(4);
 
 #if GTK_CHECK_VERSION (2, 10, 0)
-    if (!gtk_check_version(2, 10, 0))
-        gtk_window_set_type_hint(GTK_WINDOW(tip_window),
-                                 GDK_WINDOW_TYPE_HINT_TOOLTIP);
+    if (!gtk_check_version(2, 10, 0)) {
+        tip_window->set_type_hint(Gdk::WINDOW_TYPE_HINT_TOOLTIP);
+    }
 #endif
 
-    g_signal_connect_swapped(tip_window,
-                             "expose_event",
-                             G_CALLBACK(tooltip_paint_window), 0);
+    tip_window->signal_expose_event().connect(&tooltip_paint_window_lambda);
 
-    tip_label = gtk_label_new(NULL);
-    gtk_label_set_line_wrap(GTK_LABEL(tip_label), true);
-    gtk_misc_set_alignment(GTK_MISC(tip_label), 0.5, 0.5);
-    gtk_widget_show(tip_label);
+    tip_label = Gtk::manage(new Gtk::Label());
+    tip_label->set_line_wrap();
+    tip_label->set_alignment(0.5, 0.5);
+    tip_label->show();
 
-    gtk_container_add(GTK_CONTAINER(tip_window), tip_label);
-
-    gtk_widget_ensure_style(tip_window);
+    tip_window->add(*tip_label);
+    tip_window->ensure_style();
 
     return true;
 }
@@ -5333,7 +5347,7 @@ int main(int argc, char* argv[])
     for (i = 0; i < (S_COUNT * B_COUNT); i++) {
         ws->ButtonPix[i] = NULL;
     }
-    gtk_init(&argc, &argv);
+    Gtk::Main kit(argc, argv);
     gdk_error_trap_push();
 #ifdef USE_DBUS
     if (!g_thread_supported()) {
@@ -5488,7 +5502,7 @@ int main(int argc, char* argv[])
 
     g_timeout_add(500, reload_if_needed, NULL);
 
-    gtk_main();
+    kit.run();
     gdk_error_trap_pop();
 
     return 0;

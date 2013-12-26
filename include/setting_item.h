@@ -47,11 +47,11 @@ public:
     int get_int();
     const char* get_float_str();
     const char* get_color();
-    const char* get_font();
-    const char* get_string();
+    std::string get_font();
+    std::string get_string();
     void check_file(const char* f);
     const char* get_file();
-    const char* get_string_combo();
+    std::string get_string_combo();
     int get_sf_int_combo();
     void set_file(const char* f);
     void set_bool(bool b);
@@ -66,39 +66,87 @@ public:
     void read_setting(void** p);
     const char* get_engine_combo();
 
-    static SettingItem* register_img_file_setting(GtkWidget* widget, const char* section,
-                                                  const char* key, GtkImage* image);
-    static SettingItem* register_setting(GtkWidget* widget, SettingType type,
-                                         const char* section, const char* key);
+    static SettingItem* register_img_file_setting(Gtk::FileChooserButton& widget, const char* section,
+                                                  const char* key, Gtk::Image* image);
+
+    static SettingItem* create_global(Gtk::ComboBoxText& widget,
+                                      const char* section, const char* key);
+    static SettingItem* create_engine(Gtk::ComboBox& widget,
+                                      const char* section, const char* key);
+    static SettingItem* create(Gtk::Entry& widget,
+                               const char* section, const char* key);
+    static SettingItem* create(Gtk::ComboBoxEntryText& widget,
+                               const char* section, const char* key);
+    static SettingItem* create(Gtk::FontButton& widget,
+                               const char* section, const char* key);
+    static SettingItem* create(Gtk::ColorButton& widget,
+                               const char* section, const char* key);
+    static SettingItem* create(Gtk::SpinButton& widget,
+                               const char* section, const char* key);
+    static SettingItem* create(Gtk::Range& widget,
+                               const char* section, const char* key);
+    static SettingItem* create_global(Gtk::Range& widget,
+                                      const char* section, const char* key);
+    static SettingItem* create(Gtk::ToggleButton& widget,
+                               const char* section, const char* key);
+    static SettingItem* create_global(Gtk::ToggleButton& widget,
+                                      const char* section, const char* key);
 
 private:
+    static SettingItem* create_impl(Gtk::Widget& widget, SettingType type,
+                                    const char* section, const char* key);
+
     const char* get_img_file();
     void set_engine_combo(const char* val);
     void set_img_file(const char* f);
 
 public:
     SettingType type_;
-    char* key_;
-    char* section_;
-    GtkWidget* widget_;
+    const char* key_;
+    const char* section_;
+    Gtk::Widget* widget_;
 
-    char* fvalue_;
-    GtkImage* image_;
-    GtkImage* preview_;
+    std::string fvalue_;
+    Gtk::Image* image_;
+    Gtk::Image* preview_;
+private:
+    bool is_spin_button_; // if type is ST_FLOAT
 };
 
 struct EngineMetaInfo {// TODO: move to a separate file
     char* description;
     char* version;
     char* last_compat;
-    GdkPixbuf* icon;
+    Glib::RefPtr<Gdk::Pixbuf> icon;
 };
 struct EngineData { // TODO: move to a separate file
     const char* canname;
     char* dlname;
-    GtkWidget* vbox;
+    Gtk::Box* vbox;
     EngineMetaInfo meta;
 };
+
+class EngineColumns :
+    public Gtk::TreeModel::ColumnRecord	{
+public:
+    EngineColumns()
+    {
+        add(dlname);
+        add(name);
+        add(version);
+        add(last_compat);
+        add(markup);
+        add(icon);
+    }
+    Gtk::TreeModelColumn<std::string> dlname;
+    Gtk::TreeModelColumn<std::string> name;
+    Gtk::TreeModelColumn<std::string> version;
+    Gtk::TreeModelColumn<std::string> last_compat;
+    Gtk::TreeModelColumn<std::string> markup;
+    Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> icon;
+};
+
+extern EngineColumns g_engine_columns;
 
 enum EngineCol { // TODO: move to a separate file
     ENGINE_COL_DLNAME,

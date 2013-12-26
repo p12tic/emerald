@@ -41,5 +41,5 @@ engine_LTLIBRARIES = \
 					 libvrunner.la \
 					 libtruglass.la \
 					 liboxygen.la \
-					 libpixmap.la \
+					 libpixmap.la	\
 					 libzootreeves.la
