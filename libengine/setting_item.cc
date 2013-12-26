@@ -19,10 +19,11 @@
 
 #include "setting_item.h"
 #include "libengine.h"
+#include <list>
 
 extern GKeyFile* global_theme_file;
 extern GKeyFile* global_settings_file;
-extern GSList* SettingList;
+extern std::list<SettingItem> g_setting_list;
 extern GSList* EngineList;
 extern GtkListStore* EngineModel;
 
@@ -397,14 +398,13 @@ SettingItem* SettingItem::register_img_file_setting(GtkWidget* widget, const cha
 }
 SettingItem* SettingItem::register_setting(GtkWidget* widget, SettingType type, char* section, char* key)
 {
-    SettingItem* item;
-    item = malloc(sizeof(SettingItem));
+    g_setting_list.push_front(SettingItem());
+    SettingItem* item = &g_setting_list.front();
     item->type_ = type;
     item->key_ = g_strdup(key);
     item->section_ = g_strdup(section);
     item->widget_ = widget;
     item->fvalue_ = g_strdup("");
-    SettingList = g_slist_append(SettingList, item);
     switch (item->type_) {
     case ST_BOOL:
     case ST_SFILE_BOOL:

@@ -21,8 +21,9 @@
 //themer stuff
 #include <engine.h>
 #include <signal.h>
+#include <list>
 
-GSList* SettingList = NULL;
+std::list<SettingItem> g_setting_list;
 GSList* EngineList = NULL;
 GtkWidget* EngineCombo;
 GtkListStore* EngineModel;
@@ -57,9 +58,9 @@ static char* display_part(const char* p)
     return name;
 }
 
-GSList* get_setting_list()
+std::list<SettingItem>& get_setting_list()
 {
-    return SettingList;
+    return g_setting_list;
 }
 GtkWidget* scaler_new(double low, double high, double prec)
 {
@@ -213,9 +214,8 @@ void apply_settings()
     char* file = g_strjoin("/", g_get_home_dir(), ".emerald/theme/theme.ini", NULL);
     char* path = g_strjoin("/", g_get_home_dir(), ".emerald/theme/", NULL);
     char* at;
-    for (auto list = SettingList; list; list = list->next) {
-        SettingItem* st = list->data;
-        st->write_setting(global_theme_file);
+    for (auto& item : g_setting_list) {
+        item.write_setting(global_theme_file);
     }
     g_key_file_set_string(global_theme_file, "theme", "version", VERSION);
     g_mkdir_with_parents(path, 00755);
@@ -335,9 +335,8 @@ void init_settings()
     file = g_strjoin("/", g_get_home_dir(), ".emerald/settings.ini", NULL);
     g_key_file_load_from_file(global_settings_file, file, G_KEY_FILE_KEEP_COMMENTS, NULL);
     g_free(file);
-    for (auto list = SettingList; list; list = list->next) {
-        SettingItem* st = list->data;
-        st->read_setting((void*)global_theme_file);
+    for (auto& item : g_setting_list) {
+        item.read_setting((void*)global_theme_file);
     }
 }
 

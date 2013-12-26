@@ -3,6 +3,7 @@
 
 #include <emerald.h>
 #include "setting_item.h"
+#include <list>
 
 void copy_from_defaults_if_needed();
 void load_color_setting(GKeyFile* f, decor_color_t* color, const char* key,
@@ -85,7 +86,7 @@ void set_changed(bool schanged);
 void set_apply(bool sapply);
 void cb_clear_file(GtkWidget* button, void* p);
 void init_key_files();
-GSList* get_setting_list();
+std::list<SettingItem>& get_setting_list();
 void do_engine(const char* nam);
 GtkWidget* build_notebook_page(char* title, GtkWidget* notebook);
 char* make_filename(const char* sect, const char* key, const char* ext);

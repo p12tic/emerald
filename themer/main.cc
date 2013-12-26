@@ -368,9 +368,8 @@ static void cb_load(GtkWidget* w, void* d)
     g_free(at);
     set_changed(true);
     set_apply(false);
-    for (auto list = get_setting_list(); list; list = list->next) {
-        SettingItem* st = list->data;
-        st->read_setting((void*)f);
+    for (auto& item : get_setting_list()) {
+        item.read_setting((void*)f);
     }
     {
         char* c;
@@ -483,9 +482,8 @@ static void cb_save(GtkWidget* w, void* d)
     fn = g_strdup_printf("%s/.emerald/themes/%s/theme.ini", g_get_home_dir(), at);
     f = g_key_file_new();
     g_key_file_load_from_file(f, fn, 0, NULL);
-    for (auto list = get_setting_list(); list; list = list->next) {
-        SettingItem* st = list->data;
-        st->write_setting(f);
+    for (auto& item : get_setting_list()) {
+        item.write_setting(f);
     }
     g_key_file_set_string(f, "theme", "version", VERSION);
     if (g_file_test(fn, G_FILE_TEST_EXISTS)) {
