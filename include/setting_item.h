@@ -99,12 +99,7 @@ struct EngineData { // TODO: move to a separate file
     GtkWidget* vbox;
     EngineMetaInfo meta;
 };
-struct FindEngine { // TODO: move to a separate file
-    const char* canname;
-    bool found;
-    int i;
-    EngineData* d;
-};
+
 enum EngineCol { // TODO: move to a separate file
     ENGINE_COL_DLNAME,
     ENGINE_COL_NAME,
@@ -114,7 +109,5 @@ enum EngineCol { // TODO: move to a separate file
     ENGINE_COL_ICON,
     ENGINE_COL_COUNT
 };
-
-void search_engine(EngineData& d, FindEngine& fe);
 
 #endif

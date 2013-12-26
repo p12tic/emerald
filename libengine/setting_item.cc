@@ -190,27 +190,29 @@ const char* SettingItem::get_string_combo()
 
 void SettingItem::set_engine_combo(const char* val)
 {
-    FindEngine fe;
-    fe.canname = val;
-    fe.found = false;
-    fe.i = 0;
+    int i = 0;
+    bool found = false;
     for (auto& item : g_engine_list) {
-        search_engine(item, fe);
+        if (strcmp(item.canname, val) == 0) {
+            gtk_combo_box_set_active(GTK_COMBO_BOX(widget_), i);
+            found = true;
+            break;
+        }
+        i++;
     }
-    if (fe.found) {
-        gtk_combo_box_set_active(GTK_COMBO_BOX(widget_), fe.i);
+    if (found) {
+        do_engine(val);
     } else {
-        fe.canname = "legacy";
-        fe.found = false;
-        fe.i = 0;
+        i = 0;
         for (auto& item : g_engine_list) {
-            search_engine(item, fe);
+            if (strcmp(item.canname, "legacy") == 0) {
+                gtk_combo_box_set_active(GTK_COMBO_BOX(widget_), i);
+                break;
+            }
+            i++;
         }
-        if (fe.found) {
-            gtk_combo_box_set_active(GTK_COMBO_BOX(widget_), fe.i);
-        }
+        do_engine("legacy");
     }
-    do_engine(fe.canname);
 }
 const char* SettingItem::get_engine_combo()
 {

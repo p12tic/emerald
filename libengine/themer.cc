@@ -259,13 +259,6 @@ void setup_dbus()
 }
 #endif
 
-void show_engine_named(EngineData& d, const char* nam)
-{
-    if (!strcmp(nam, d.canname)) {
-        gtk_container_add(GTK_CONTAINER(EngineContainer), d.vbox);
-        gtk_widget_show_all(EngineContainer);
-    }
-}
 void do_engine(const char* nam)
 {
     GtkWidget* w;
@@ -280,35 +273,23 @@ void do_engine(const char* nam)
         gtk_container_remove(GTK_CONTAINER(EngineContainer), w);
     }
     for (auto& item : g_engine_list) {
-        show_engine_named(item, nam);
+        if (strcmp(nam, item.canname) == 0) {
+            gtk_container_add(GTK_CONTAINER(EngineContainer), item.vbox);
+            gtk_widget_show_all(EngineContainer);
+        }
     }
 
 }
-void search_engine(EngineData& d, FindEngine& fe)
-{
-    if (!fe.found) {
-        if (!strcmp(d.canname, fe.canname)) {
-            fe.d = &d;
-            fe.found = true;
-        } else {
-            fe.i++;
-        }
-    }
-}
+
 bool get_engine_meta_info(const char* engine, EngineMetaInfo* inf)
 {
-    FindEngine fe;
-    fe.canname = engine;
-    fe.found = false;
-    fe.i = 0;
-    fe.d = NULL;
     for (auto& item : g_engine_list) {
-        search_engine(item, fe);
+        if (!strcmp(item.canname, engine) == 0) {
+            *inf = item.meta;
+            return true;
+        }
     }
-    if (fe.found) {
-        memcpy(inf, &(fe.d->meta), sizeof(EngineMetaInfo));
-    }
-    return fe.found;
+    return false;
 }
 void update_preview(GtkFileChooser* fc, const char* filename, GtkImage* img)
 {
@@ -391,22 +372,17 @@ static char* canonize_name(const char* dlname)
     end[0] = '\0';
     return begin;
 }
-static void engine_comp(EngineData& d, FindEngine& e)
-{
-    if (!strcmp(e.canname, d.canname)) {
-        e.found = true;
-    }
-}
+
 static bool engine_is_unique(const char* canname)
 {
-    FindEngine e;
-    e.canname = canname;
-    e.found = false;
     for (auto& item : g_engine_list) {
-        engine_comp(item, e);
+        if (strcmp(item.canname, canname) == 0) {
+            return false;
+        }
     }
-    return !e.found;
+    return true;
 }
+
 static void append_engine(const char* dlname)
 {
     char* can;
