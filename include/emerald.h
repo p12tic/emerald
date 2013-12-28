@@ -35,6 +35,7 @@
 //#include <gconf/gconf-client.h>
 
 #define WNCK_I_KNOW_THIS_IS_UNSTABLE
+#include <wnckmm.h>
 #include <libwnck/libwnck.h>
 #include <libwnck/window-action-menu.h>
 
@@ -125,7 +126,7 @@ struct decor_color_t {
 
 #include <titlebar.h>
 
-typedef void (*event_callback)(WnckWindow* win, XEvent* event);
+typedef void (*event_callback)(Wnck::Window* win, XEvent* event);
 
 #define ACOLOR(pfs,idn,zr,zg,zb,za) \
     (pfs)->idn.color.r = (zr);\
@@ -315,8 +316,8 @@ struct decor_t {
     cairo_pattern_t*   icon;
     GdkPixmap*         icon_pixmap;
     GdkPixbuf*         icon_pixbuf;
-    WnckWindowState   state;
-    WnckWindowActions actions;
+    Wnck::WindowState   state;
+    Wnck::WindowActions actions;
     XID           prop_xid;
     GtkWidget*         force_quit_dialog;
     frame_settings* fs;

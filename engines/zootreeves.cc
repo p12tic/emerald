@@ -681,7 +681,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
         ((pws->round_bottom_right) ? CORNER_BOTTOMRIGHT : 0);
 
 
-    if (d->state & (WNCK_WINDOW_STATE_MAXIMIZED_HORIZONTALLY | WNCK_WINDOW_STATE_MAXIMIZED_VERTICALLY)) {
+    if (d->state & (Wnck::WINDOW_STATE_MAXIMIZED_HORIZONTALLY | Wnck::WINDOW_STATE_MAXIMIZED_VERTICALLY)) {
         corners = 0;
         maximised = true;
         enable_left_bar_dip = false;
@@ -715,7 +715,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
         inner_title_color = pfs->title_inner;
         outer_title_color = pfs->title_outer;
 
-        if (pws->enable_left_bar_dip == true && !(d->state & (WNCK_WINDOW_STATE_SHADED))) {
+        if (pws->enable_left_bar_dip == true && !(d->state & (Wnck::WINDOW_STATE_SHADED))) {
             enable_left_bar_dip = true;
             left_bar_dip_offset = (2 * pws->left_bar_dip_radius);
 

@@ -24,30 +24,32 @@
 
 GdkPixmap* create_pixmap(int w, int h);
 GdkPixmap* pixmap_new_from_pixbuf(GdkPixbuf* pixbuf);
-void position_title_object(char obj, WnckWindow* win, window_settings* ws,
+void position_title_object(char obj, Wnck::Window* win, window_settings* ws,
                            int x, int s);
-void layout_title_objects(WnckWindow* win);
-void update_event_windows(WnckWindow* win);
-int max_window_name_width(WnckWindow* win);
-void update_window_decoration_name(WnckWindow* win);
-void update_window_decoration_icon(WnckWindow* win);
-void update_window_decoration_state(WnckWindow* win);
-void update_window_decoration_actions(WnckWindow* win);
-bool update_window_decoration_size(WnckWindow* win);
-void add_frame_window(WnckWindow* win, Window frame);
-bool update_switcher_window(WnckWindow* win, Window selected);
-void remove_frame_window(WnckWindow* win);
-void window_name_changed(WnckWindow* win);
-void window_geometry_changed(WnckWindow* win);
-void window_icon_changed(WnckWindow* win);
-void window_state_changed(WnckWindow* win);
-void window_actions_changed(WnckWindow* win);
-void connect_window(WnckWindow* win);
-void active_window_changed(WnckScreen* screen);
-void window_opened(WnckScreen* screen, WnckWindow* win);
-void window_closed(WnckScreen* screen, WnckWindow* win);
-void connect_screen(WnckScreen* screen);
-void move_resize_window(WnckWindow* win, int direction, XEvent* xevent);
-void restack_window(WnckWindow* win, int stack_mode);
+void layout_title_objects(Wnck::Window* win);
+void update_event_windows(Wnck::Window* win);
+int max_window_name_width(Wnck::Window* win);
+void update_window_decoration_name(Wnck::Window* win);
+void update_window_decoration_icon(Wnck::Window* win);
+void update_window_decoration_state(Wnck::Window* win);
+void update_window_decoration_actions(Wnck::Window* win);
+bool update_window_decoration_size(Wnck::Window* win);
+void add_frame_window(Wnck::Window* win, Window frame);
+bool update_switcher_window(Wnck::Window* win, Window selected);
+void remove_frame_window(Wnck::Window* win);
+void window_name_changed(Wnck::Window* win);
+void window_geometry_changed(Wnck::Window* win);
+void window_icon_changed(Wnck::Window* win);
+void window_state_changed(Wnck::WindowState, Wnck::WindowState,
+                          Wnck::Window* win);
+void window_actions_changed(Wnck::WindowActions changed_mask,
+                            Wnck::WindowActions new_state, Wnck::Window* win);
+void connect_window(Wnck::Window* win);
+void active_window_changed(Wnck::Window* previously_active_win, Wnck::Screen* screen);
+void window_opened(Wnck::Window* win);
+void window_closed(Wnck::Window* win);
+void connect_screen(Wnck::Screen* screen);
+void move_resize_window(Wnck::Window* win, int direction, XEvent* xevent);
+void restack_window(Wnck::Window* win, int stack_mode);
 
 #endif

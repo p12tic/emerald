@@ -1310,8 +1310,8 @@ void decor_update_window_property(decor_t* d)
     stretch_offset = 60;
 
     nQuad = my_set_window_quads(quads, d->width, d->height, ws,
-                                d->state & WNCK_WINDOW_STATE_MAXIMIZED_HORIZONTALLY,
-                                d->state & WNCK_WINDOW_STATE_MAXIMIZED_VERTICALLY);
+                                d->state & Wnck::WINDOW_STATE_MAXIMIZED_HORIZONTALLY,
+                                d->state & Wnck::WINDOW_STATE_MAXIMIZED_VERTICALLY);
 
     extents.top += ws->titlebar_height;
 

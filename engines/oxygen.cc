@@ -91,8 +91,8 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
         ((pws->round_bottom_right) ? CORNER_BOTTOMRIGHT : 0);
 
     // maximize work-a-round
-    if (d->state & (WNCK_WINDOW_STATE_MAXIMIZED_HORIZONTALLY |
-                    WNCK_WINDOW_STATE_MAXIMIZED_VERTICALLY)) {
+    if (d->state & (Wnck::WINDOW_STATE_MAXIMIZED_HORIZONTALLY |
+                    Wnck::WINDOW_STATE_MAXIMIZED_VERTICALLY)) {
         corners = 0;
     }
 

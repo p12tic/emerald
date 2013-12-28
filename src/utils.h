@@ -54,7 +54,7 @@ extern _cursor button_cursor;
 extern window_settings* global_ws;
 
 extern bool action_menu_mapped;
-extern GtkWidget* action_menu;
+extern Wnck::ActionMenu* action_menu;
 extern std::string program_name;
 
 extern std::vector<decor_t*> g_draw_list;

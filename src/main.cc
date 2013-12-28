@@ -76,7 +76,7 @@ std::string program_name;
 GtkWidget* style_window;
 
 GHashTable* frame_table;
-GtkWidget* action_menu = NULL;
+Wnck::ActionMenu* action_menu = NULL;
 bool action_menu_mapped = false;
 int double_click_timeout = 250;
 
@@ -381,7 +381,7 @@ static bool create_tooltip_window()
 }
 
 static void
-handle_tooltip_event(WnckWindow* win,
+handle_tooltip_event(Wnck::Window* win,
                      XEvent* xevent, unsigned state, const char* tip)
 {
     switch (xevent->type) {
@@ -392,7 +392,7 @@ handle_tooltip_event(WnckWindow* win,
         break;
     case EnterNotify:
         if (!(state & PRESSED_EVENT_WINDOW)) {
-            if (wnck_window_is_active(win)) {
+            if (win->is_active()) {
                 tooltip_start_delay(tip);
             }
         }
@@ -402,13 +402,16 @@ handle_tooltip_event(WnckWindow* win,
         break;
     }
 }
-static void action_menu_unmap(GObject* object)
+static void action_menu_unmap()
 {
     action_menu_mapped = false;
 }
 
-static void action_menu_map(WnckWindow* win, long button, Time time)
+static void action_menu_map(Wnck::Window* win, long button, Time time)
 {
+    // FIXME:
+    // do not convert to gdkmm for now since get_default_screen has a bug that
+    // makes it unusable
     GdkDisplay* gdkdisplay;
     GdkScreen* screen;
 
@@ -417,40 +420,37 @@ static void action_menu_map(WnckWindow* win, long button, Time time)
 
     if (action_menu) {
         if (action_menu_mapped) {
-            gtk_widget_destroy(action_menu);
+            delete action_menu;
             action_menu_mapped = false;
             action_menu = NULL;
             return;
         } else {
-            gtk_widget_destroy(action_menu);
+            delete action_menu;
         }
     }
 
-    switch (wnck_window_get_window_type(win)) {
-    case WNCK_WINDOW_DESKTOP:
-    case WNCK_WINDOW_DOCK:
+    switch (win->get_window_type()) {
+    case Wnck::WINDOW_DESKTOP:
+    case Wnck::WINDOW_DOCK:
         /* don't allow window action */
         return;
-    case WNCK_WINDOW_NORMAL:
-    case WNCK_WINDOW_DIALOG:
-    case WNCK_WINDOW_TOOLBAR:
-    case WNCK_WINDOW_MENU:
-    case WNCK_WINDOW_UTILITY:
-    case WNCK_WINDOW_SPLASHSCREEN:
+    case Wnck::WINDOW_NORMAL:
+    case Wnck::WINDOW_DIALOG:
+    case Wnck::WINDOW_TOOLBAR:
+    case Wnck::WINDOW_MENU:
+    case Wnck::WINDOW_UTILITY:
+    case Wnck::WINDOW_SPLASHSCREEN:
         /* allow window action menu */
         break;
     }
 
-    action_menu = wnck_create_window_action_menu(win);
+    action_menu = new Wnck::ActionMenu(win);
+    gtk_menu_set_screen(GTK_MENU(action_menu->gobj()), screen);
 
-    gtk_menu_set_screen(GTK_MENU(action_menu), screen);
+    action_menu->signal_unmap().connect(&action_menu_unmap);
 
-    g_signal_connect_object(G_OBJECT(action_menu), "unmap",
-                            G_CALLBACK(action_menu_unmap), 0, 0);
-
-    gtk_widget_show(action_menu);
-    gtk_menu_popup(GTK_MENU(action_menu),
-                   NULL, NULL, NULL, NULL, button, time);
+    action_menu->show();
+    action_menu->popup(button, time);
 
     action_menu_mapped = true;
 }
@@ -459,7 +459,7 @@ static void action_menu_map(WnckWindow* win, long button, Time time)
  * 0: nothing, hover, ButtonPress
  * XEvent Button code: ButtonRelease (mouse click)
  */
-static int generic_button_event(WnckWindow* win, XEvent* xevent,
+static int generic_button_event(Wnck::Window* win, XEvent* xevent,
                                  int button, int bpict)
 {
     // Display *xdisplay = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
@@ -478,7 +478,7 @@ static int generic_button_event(WnckWindow* win, XEvent* xevent,
         _("UnStick Window"),
     };
 
-    decor_t* d = g_object_get_data(G_OBJECT(win), "decor");
+    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
     unsigned state = d->button_states[button];
     int ret = 0;
 
@@ -526,75 +526,75 @@ static int generic_button_event(WnckWindow* win, XEvent* xevent,
     return ret;
 }
 
-static void close_button_event(WnckWindow* win, XEvent* xevent)
+static void close_button_event(Wnck::Window* win, XEvent* xevent)
 {
     if (generic_button_event(win, xevent, B_T_CLOSE, B_CLOSE)) {
-        wnck_window_close(win, xevent->xbutton.time);
+        win->close(xevent->xbutton.time);
     }
 }
 
-static void max_button_event(WnckWindow* win, XEvent* xevent)
+static void max_button_event(Wnck::Window* win, XEvent* xevent)
 {
-    bool maximized = wnck_window_is_maximized(win);
+    bool maximized = win->is_maximized();
 
     switch (generic_button_event(win,
                                  xevent,
                                  B_T_MAXIMIZE,
                                  (maximized ? B_RESTORE : B_MAXIMIZE))) {
     case Button1:
-        maximized ? wnck_window_unmaximize(win) : wnck_window_maximize(win);
+        maximized ? win->unmaximize() : win->maximize();
         break;
     case Button2:
-        if (wnck_window_is_maximized_vertically(win)) {
-            wnck_window_unmaximize_vertically(win);
+        if (win->is_maximized_vertically()) {
+            win->unmaximize_vertically();
         } else {
-            wnck_window_maximize_vertically(win);
+            win->maximize_vertically();
         }
         break;
     case Button3:
-        if (wnck_window_is_maximized_horizontally(win)) {
-            wnck_window_unmaximize_horizontally(win);
+        if (win->is_maximized_horizontally()) {
+            win->unmaximize_horizontally();
         } else {
-            wnck_window_maximize_horizontally(win);
+            win->maximize_horizontally();
         }
         break;
     }
 }
 
-static void min_button_event(WnckWindow* win, XEvent* xevent)
+static void min_button_event(Wnck::Window* win, XEvent* xevent)
 {
     if (generic_button_event(win, xevent, B_T_MINIMIZE, B_MINIMIZE)) {
-        wnck_window_minimize(win);
+        win->minimize();
     }
 }
 
-static void above_button_event(WnckWindow* win, XEvent* xevent)
+static void above_button_event(Wnck::Window* win, XEvent* xevent)
 {
-    if (wnck_window_is_above(win)) {
+    if (win->is_above()) {
         if (generic_button_event(win, xevent, B_T_ABOVE, B_UNABOVE)) {
-            wnck_window_unmake_above(win);
+            win->unmake_above();
         }
     } else {
         if (generic_button_event(win, xevent, B_T_ABOVE, B_ABOVE)) {
-            wnck_window_make_above(win);
+            win->make_above();
         }
     }
 }
 
-static void sticky_button_event(WnckWindow* win, XEvent* xevent)
+static void sticky_button_event(Wnck::Window* win, XEvent* xevent)
 {
-    if (wnck_window_is_sticky(win)) {
+    if (win->is_sticky()) {
         if (generic_button_event(win, xevent, B_T_STICKY, B_UNSTICK)) {
-            wnck_window_unstick(win);
+            win->unstick();
         }
     } else {
         if (generic_button_event(win, xevent, B_T_STICKY, B_STICK)) {
-            wnck_window_stick(win);
+            win->stick();
         }
     }
 }
 
-static void send_help_message(WnckWindow* win)
+static void send_help_message(Wnck::Window* win)
 {
     Display* xdisplay;
     GdkDisplay* gdkdisplay;
@@ -607,7 +607,7 @@ static void send_help_message(WnckWindow* win)
     xdisplay = GDK_DISPLAY_XDISPLAY(gdkdisplay);
     //screen     = gdk_display_get_default_screen (gdkdisplay);
     //xroot      = RootWindowOfScreen (gdk_x11_screen_get_xscreen (screen));
-    id = wnck_window_get_xid(win);
+    id = win->get_xid();
 
     ev.xclient.type = ClientMessage;
     //ev.xclient.display = xdisplay;
@@ -626,64 +626,64 @@ static void send_help_message(WnckWindow* win)
     XSync(xdisplay, false);
 }
 
-static void help_button_event(WnckWindow* win, XEvent* xevent)
+static void help_button_event(Wnck::Window* win, XEvent* xevent)
 {
     if (generic_button_event(win, xevent, B_T_HELP, B_HELP)) {
         send_help_message(win);
     }
 }
-static void menu_button_event(WnckWindow* win, XEvent* xevent)
+static void menu_button_event(Wnck::Window* win, XEvent* xevent)
 {
     if (generic_button_event(win, xevent, B_T_MENU, B_MENU)) {
         action_menu_map(win, xevent->xbutton.button, xevent->xbutton.time);
     }
 }
-static void shade_button_event(WnckWindow* win, XEvent* xevent)
+static void shade_button_event(Wnck::Window* win, XEvent* xevent)
 {
     if (generic_button_event(win, xevent, B_T_SHADE, B_SHADE)) {
-        if (wnck_window_is_shaded(win)) {
-            wnck_window_unshade(win);
+        if (win->is_shaded()) {
+            win->unshade();
         } else {
-            wnck_window_shade(win);
+            win->shade();
         }
     }
 }
 
 
-static void top_left_event(WnckWindow* win, XEvent* xevent)
+static void top_left_event(Wnck::Window* win, XEvent* xevent)
 {
     if (xevent->xbutton.button == 1) {
         move_resize_window(win, WM_MOVERESIZE_SIZE_TOPLEFT, xevent);
     }
 }
 
-static void top_event(WnckWindow* win, XEvent* xevent)
+static void top_event(Wnck::Window* win, XEvent* xevent)
 {
     if (xevent->xbutton.button == 1) {
         move_resize_window(win, WM_MOVERESIZE_SIZE_TOP, xevent);
     }
 }
 
-static void top_right_event(WnckWindow* win, XEvent* xevent)
+static void top_right_event(Wnck::Window* win, XEvent* xevent)
 {
     if (xevent->xbutton.button == 1) {
         move_resize_window(win, WM_MOVERESIZE_SIZE_TOPRIGHT, xevent);
     }
 }
 
-static void left_event(WnckWindow* win, XEvent* xevent)
+static void left_event(Wnck::Window* win, XEvent* xevent)
 {
     if (xevent->xbutton.button == 1) {
         move_resize_window(win, WM_MOVERESIZE_SIZE_LEFT, xevent);
     }
 }
 
-static void title_event(WnckWindow* win, XEvent* xevent)
+static void title_event(Wnck::Window* win, XEvent* xevent)
 {
     static unsigned int last_button_num = 0;
     static Window last_button_xwindow = None;
     static Time last_button_time = 0;
-    decor_t* d = g_object_get_data(G_OBJECT(win), "decor");
+    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
     window_settings* ws = d->fs->ws;
 
     if (xevent->type != ButtonPress) {
@@ -696,21 +696,21 @@ static void title_event(WnckWindow* win, XEvent* xevent)
                 xevent->xbutton.time < last_button_time + double_click_timeout) {
             switch (ws->double_click_action) {
             case DOUBLE_CLICK_SHADE:
-                if (wnck_window_is_shaded(win)) {
-                    wnck_window_unshade(win);
+                if (win->is_shaded()) {
+                    win->unshade();
                 } else {
-                    wnck_window_shade(win);
+                    win->shade();
                 }
                 break;
             case DOUBLE_CLICK_MAXIMIZE:
-                if (wnck_window_is_maximized(win)) {
-                    wnck_window_unmaximize(win);
+                if (win->is_maximized()) {
+                    win->unmaximize();
                 } else {
-                    wnck_window_maximize(win);
+                    win->maximize();
                 }
                 break;
             case DOUBLE_CLICK_MINIMIZE:
-                wnck_window_minimize(win);
+                win->minimize();
                 break;
             default:
                 break;
@@ -733,38 +733,38 @@ static void title_event(WnckWindow* win, XEvent* xevent)
     } else if (xevent->xbutton.button == 3) {
         action_menu_map(win, xevent->xbutton.button, xevent->xbutton.time);
     } else if (xevent->xbutton.button == 4) {
-        if (!wnck_window_is_shaded(win)) {
-            wnck_window_shade(win);
+        if (!win->is_shaded()) {
+            win->shade();
         }
     } else if (xevent->xbutton.button == 5) {
-        if (wnck_window_is_shaded(win)) {
-            wnck_window_unshade(win);
+        if (win->is_shaded()) {
+            win->unshade();
         }
     }
 }
 
-static void right_event(WnckWindow* win, XEvent* xevent)
+static void right_event(Wnck::Window* win, XEvent* xevent)
 {
     if (xevent->xbutton.button == 1) {
         move_resize_window(win, WM_MOVERESIZE_SIZE_RIGHT, xevent);
     }
 }
 
-static void bottom_left_event(WnckWindow* win, XEvent* xevent)
+static void bottom_left_event(Wnck::Window* win, XEvent* xevent)
 {
     if (xevent->xbutton.button == 1) {
         move_resize_window(win, WM_MOVERESIZE_SIZE_BOTTOMLEFT, xevent);
     }
 }
 
-static void bottom_event(WnckWindow* win, XEvent* xevent)
+static void bottom_event(Wnck::Window* win, XEvent* xevent)
 {
     if (xevent->xbutton.button == 1) {
         move_resize_window(win, WM_MOVERESIZE_SIZE_BOTTOM, xevent);
     }
 }
 
-static void bottom_right_event(WnckWindow* win, XEvent* xevent)
+static void bottom_right_event(Wnck::Window* win, XEvent* xevent)
 {
     if (xevent->xbutton.button == 1) {
         move_resize_window(win, WM_MOVERESIZE_SIZE_BOTTOMRIGHT, xevent);
@@ -773,12 +773,12 @@ static void bottom_right_event(WnckWindow* win, XEvent* xevent)
 
 static void force_quit_dialog_realize(GtkWidget* dialog, void* data)
 {
-    WnckWindow* win = data;
+    Wnck::Window* win = data;
 
     gdk_error_trap_push();
     XSetTransientForHint(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()),
                          GDK_WINDOW_XID(dialog->window),
-                         wnck_window_get_xid(win));
+                         win->get_xid());
     XSync(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), false);
     gdk_error_trap_pop();
 }
@@ -821,17 +821,15 @@ static char* get_client_machine(Window xwindow)
     return retval;
 }
 
-static void kill_window(WnckWindow* win)
+static void kill_window(Wnck::Window* win)
 {
-    WnckApplication* app;
-
-    app = wnck_window_get_application(win);
+    Wnck::Application* app = win->get_application();
     if (app) {
         char buf[257], *client_machine;
         int pid;
 
-        pid = wnck_application_get_pid(app);
-        client_machine = get_client_machine(wnck_application_get_xid(app));
+        pid = app->get_pid();
+        client_machine = get_client_machine(app->get_xid());
 
         if (client_machine && pid > 0) {
             if (gethostname(buf, sizeof(buf) - 1) == 0) {
@@ -847,7 +845,7 @@ static void kill_window(WnckWindow* win)
     }
 
     gdk_error_trap_push();
-    XKillClient(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), wnck_window_get_xid(win));
+    XKillClient(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), win->get_xid());
     XSync(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), false);
     gdk_error_trap_pop();
 }
@@ -855,8 +853,8 @@ static void kill_window(WnckWindow* win)
 static void
 force_quit_dialog_response(GtkWidget* dialog, int response, void* data)
 {
-    WnckWindow* win = data;
-    decor_t* d = g_object_get_data(G_OBJECT(win), "decor");
+    Wnck::Window* win = data;
+    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
 
     if (response == GTK_RESPONSE_ACCEPT) {
         kill_window(win);
@@ -868,23 +866,19 @@ force_quit_dialog_response(GtkWidget* dialog, int response, void* data)
     }
 }
 
-static void show_force_quit_dialog(WnckWindow* win, Time timestamp)
+static void show_force_quit_dialog(Wnck::Window* win, Time timestamp)
 {
-    decor_t* d = g_object_get_data(G_OBJECT(win), "decor");
+    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
     GtkWidget* dialog;
     char* str, *tmp;
-    const char* name;
 
     if (d->force_quit_dialog) {
         return;
     }
 
-    name = wnck_window_get_name(win);
-    if (!name) {
-        name = "";
-    }
+    std::string name = win->get_name();
 
-    tmp = g_markup_escape_text(name, -1);
+    tmp = g_markup_escape_text(name.c_str(), -1);
     str = g_strdup_printf(_("The window \"%s\" is not responding."), tmp);
 
     g_free(tmp);
@@ -930,9 +924,9 @@ static void show_force_quit_dialog(WnckWindow* win, Time timestamp)
     d->force_quit_dialog = dialog;
 }
 
-static void hide_force_quit_dialog(WnckWindow* win)
+static void hide_force_quit_dialog(Wnck::Window* win)
 {
-    decor_t* d = g_object_get_data(G_OBJECT(win), "decor");
+    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
 
     if (d->force_quit_dialog) {
         gtk_widget_destroy(d->force_quit_dialog);
@@ -972,11 +966,11 @@ event_filter_func(GdkXEvent* gdkxevent, GdkEvent* event, void* data)
         break;
     case PropertyNotify:
         if (xevent->xproperty.atom == frame_window_atom) {
-            WnckWindow* win;
+            Wnck::Window* win;
 
             xid = xevent->xproperty.window;
 
-            win = wnck_window_get(xid);
+            win = Wnck::Window::get_for_xid(xid);
             if (win) {
                 Window frame;
 
@@ -987,13 +981,13 @@ event_filter_func(GdkXEvent* gdkxevent, GdkEvent* event, void* data)
                 }
             }
         } else if (xevent->xproperty.atom == mwm_hints_atom) {
-            WnckWindow* win;
+            Wnck::Window* win;
 
             xid = xevent->xproperty.window;
 
-            win = wnck_window_get(xid);
+            win = Wnck::Window::get_for_xid(xid);
             if (win) {
-                decor_t* d = g_object_get_data(G_OBJECT(win), "decor");
+                decor_t* d = win->get_data(Glib::QueryQuark("decor"));
                 bool decorated = false;
 
                 if (get_mwm_prop(xid) & (MWM_DECOR_ALL | MWM_DECOR_TITLE)) {
@@ -1016,11 +1010,11 @@ event_filter_func(GdkXEvent* gdkxevent, GdkEvent* event, void* data)
                 }
             }
         } else if (xevent->xproperty.atom == select_window_atom) {
-            WnckWindow* win;
+            Wnck::Window* win;
 
             xid = xevent->xproperty.window;
 
-            win = wnck_window_get(xid);
+            win = Wnck::Window::get_for_xid(xid);
             if (win) {
                 Window select;
 
@@ -1040,18 +1034,16 @@ event_filter_func(GdkXEvent* gdkxevent, GdkEvent* event, void* data)
 
             action = xevent->xclient.data.l[0];
             if (action == toolkit_action_window_menu_atom) {
-                WnckWindow* win;
-
-                win = wnck_window_get(xevent->xclient.window);
+                Wnck::Window* win = Wnck::Window::get_for_xid(xevent->xclient.window);
                 if (win) {
                     action_menu_map(win,
                                     xevent->xclient.data.l[2],
                                     xevent->xclient.data.l[1]);
                 }
             } else if (action == toolkit_action_force_quit_dialog_atom) {
-                WnckWindow* win;
+                Wnck::Window* win;
 
-                win = wnck_window_get(xevent->xclient.window);
+                win = Wnck::Window::get_for_xid(xevent->xclient.window);
                 if (win) {
                     if (xevent->xclient.data.l[2])
                         show_force_quit_dialog(win,
@@ -1070,9 +1062,9 @@ event_filter_func(GdkXEvent* gdkxevent, GdkEvent* event, void* data)
     }
 
     if (xid) {
-        WnckWindow* win;
+        Wnck::Window* win;
 
-        win = wnck_window_get(xid);
+        win = Wnck::Window::get_for_xid(xid);
         if (win) {
             static event_callback callback[3][3] = {
                 {top_left_event, top_event, top_right_event},
@@ -1089,7 +1081,7 @@ event_filter_func(GdkXEvent* gdkxevent, GdkEvent* event, void* data)
                 above_button_event,
                 sticky_button_event,
             };
-            decor_t* d = g_object_get_data(G_OBJECT(win), "decor");
+            decor_t* d = win->get_data(Glib::QueryQuark("decor"));
 
             if (d->decorated) {
                 int i, j;
@@ -1811,7 +1803,7 @@ static void update_settings(window_settings* ws)
 
     // Display    *xdisplay;
     GdkScreen* gdkscreen;
-    WnckScreen* screen = wnck_screen_get_default();
+    Wnck::Screen* screen = Wnck::Screen::get_default();
     GList* windows;
 
     load_settings(ws);
@@ -1825,16 +1817,14 @@ static void update_settings(window_settings* ws)
     update_shadow(ws->fs_act);
     update_default_decorations(gdkscreen, ws->fs_act, ws->fs_inact);
 
-    windows = wnck_screen_get_windows(screen);
-    while (windows) {
-        decor_t* d = g_object_get_data(G_OBJECT(windows->data), "decor");
+    for (auto* win : screen->get_windows()) {
+        decor_t* d = win->get_data(Glib::QueryQuark("decor"));
 
         if (d->decorated) {
             d->width = d->height = 0;
-            update_window_decoration_size(WNCK_WINDOW(windows->data));
-            update_event_windows(WNCK_WINDOW(windows->data));
+            update_window_decoration_size(win);
+            update_event_windows(win);
         }
-        windows = windows->next;
     }
 }
 
@@ -1881,7 +1871,6 @@ int main(int argc, char* argv[])
 {
     GdkDisplay* gdkdisplay;
     Display* xdisplay;
-    WnckScreen* screen;
     int status;
 
     int i, j;
@@ -1951,6 +1940,7 @@ int main(int argc, char* argv[])
         ws->ButtonPix[i] = NULL;
     }
     Gtk::Main kit(argc, argv);
+    Wnck::init();
     gdk_error_trap_push();
 #ifdef USE_DBUS
     if (!g_thread_supported()) {
@@ -2068,7 +2058,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    screen = wnck_screen_get_default();
+    Wnck::Screen* screen = Wnck::Screen::get_default();
 
     gdk_window_add_filter(NULL, selection_event_filter_func, NULL);
 
