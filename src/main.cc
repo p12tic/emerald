@@ -79,7 +79,7 @@ static GdkPixmap* create_pixmap(int w, int h)
 }
 
 void engine_draw_frame(decor_t* d, cairo_t* cr);
-bool load_engine(char* engine_name, window_settings* ws);
+bool load_engine(const std::string& engine_name, window_settings* ws);
 void load_engine_settings(const KeyFile& f, window_settings* ws);
 
 static Atom frame_window_atom;
@@ -123,7 +123,7 @@ static struct _cursor {
 }, button_cursor = C(hand2);
 
 
-static char* program_name;
+static std::string program_name;
 
 static GtkWidget* style_window;
 
@@ -141,7 +141,7 @@ static GSList* draw_list = NULL;
 static unsigned draw_idle_id = 0;
 
 static bool enable_tooltips = true;
-static char* engine = NULL;
+static std::string engine;
 
 static int get_b_offset(int b)
 {
@@ -1684,7 +1684,7 @@ static void draw_window_decoration_real(decor_t* d, bool shadow_time)
                 }
                 if (!button_region->bg_pixmap) {
                     fprintf(stderr,
-                            "%s: Error allocating buffer.\n", program_name);
+                            "%s: Error allocating buffer.\n", program_name.c_str());
                 } else {
                     gdk_draw_drawable(button_region->bg_pixmap, d->gc,
                                       IS_VALID(d->buffer_pixmap) ?
@@ -4940,27 +4940,21 @@ static void titlebar_font_changed(window_settings* ws)
 }
 static void load_buttons_image(window_settings* ws, int y)
 {
-    char* file;
-    int x, pix_width, pix_height, rel_button;
-
-    rel_button = get_b_offset(y);
-
-
+    int rel_button = get_b_offset(y);
 
     if (ws->ButtonArray[y]) {
         g_object_unref(ws->ButtonArray[y]);
     }
-    file = make_filename("buttons", b_types[y], "png");
-    if (!file || !(ws->ButtonArray[y] = gdk_pixbuf_new_from_file(file, NULL))) {
+    std::string file = make_filename("buttons", b_types[y], "png");
+    if (!(ws->ButtonArray[y] = gdk_pixbuf_new_from_file(file.c_str(), NULL))) {
         ws->ButtonArray[y] = gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, 16 * S_COUNT, 16);    // create a blank pixbuf
     }
-    g_free(file);
 
-    pix_width = gdk_pixbuf_get_width(ws->ButtonArray[y]) / S_COUNT;
-    pix_height = gdk_pixbuf_get_height(ws->ButtonArray[y]);
+    int pix_width = gdk_pixbuf_get_width(ws->ButtonArray[y]) / S_COUNT;
+    int pix_height = gdk_pixbuf_get_height(ws->ButtonArray[y]);
     ws->c_icon_size[rel_button].w = pix_width;
     ws->c_icon_size[rel_button].h = pix_height;
-    for (x = 0; x < S_COUNT; x++) {
+    for (unsigned x = 0; x < S_COUNT; x++) {
         if (ws->ButtonPix[x + y * S_COUNT]) {
             g_object_unref(ws->ButtonPix[x + y * S_COUNT]);
         }
@@ -4983,9 +4977,8 @@ static void load_buttons_glow_images(window_settings* ws)
         if (ws->ButtonGlowArray) {
             g_object_unref(ws->ButtonGlowArray);
         }
-        file1 = make_filename("buttons", "glow", "png");
-        if (file1 &&
-                (ws->ButtonGlowArray = gdk_pixbuf_new_from_file(file1, NULL))) {
+        std::string file1 = make_filename("buttons", "glow", "png");
+        if (ws->ButtonGlowArray = gdk_pixbuf_new_from_file(file1.c_str(), NULL)) {
             success1 = true;
         }
     }
@@ -4993,10 +4986,9 @@ static void load_buttons_glow_images(window_settings* ws)
         if (ws->ButtonInactiveGlowArray) {
             g_object_unref(ws->ButtonInactiveGlowArray);
         }
-        file2 = make_filename("buttons", "inactive_glow", "png");
-        if (file2 &&
-                (ws->ButtonInactiveGlowArray =
-                     gdk_pixbuf_new_from_file(file2, NULL))) {
+        std::string file2 = make_filename("buttons", "inactive_glow", "png");
+        if (ws->ButtonInactiveGlowArray =
+                     gdk_pixbuf_new_from_file(file2.c_str(), NULL)) {
             success2 = true;
         }
     }
@@ -5054,8 +5046,7 @@ static void load_buttons_glow_images(window_settings* ws)
     ws->c_glow_size.h = pix_height;
 
     if (ws->use_button_glow) {
-        g_free(file1);
-        for (x = 0; x < B_COUNT; x++) {
+        for (unsigned x = 0; x < B_COUNT; x++) {
             if (ws->ButtonGlowPix[x]) {
                 g_object_unref(ws->ButtonGlowPix[x]);
             }
@@ -5066,8 +5057,7 @@ static void load_buttons_glow_images(window_settings* ws)
         }
     }
     if (ws->use_button_inactive_glow) {
-        g_free(file2);
-        for (x = 0; x < B_COUNT; x++) {
+        for (unsigned x = 0; x < B_COUNT; x++) {
             if (ws->ButtonInactiveGlowPix[x]) {
                 g_object_unref(ws->ButtonInactiveGlowPix[x]);
             }
@@ -5080,9 +5070,7 @@ static void load_buttons_glow_images(window_settings* ws)
 }
 void load_button_image_setting(window_settings* ws)
 {
-    int i;
-
-    for (i = 0; i < B_COUNT; i++) {
+    for (unsigned i = 0; i < B_COUNT; i++) {
         load_buttons_image(ws, i);
     }
 
@@ -5160,12 +5148,9 @@ static void load_settings(window_settings* ws)
     path = g_strjoin("/", g_get_home_dir(), ".emerald/theme/theme.ini", NULL);
     f.load_from_file(path);
     g_free(path);
-    load_string_setting(f, &engine, "engine", "engine");
+    load_string_setting(f, engine, "engine", "engine");
     if (!load_engine(engine, ws)) {
-        if (engine) {
-            g_free(engine);
-        }
-        engine = g_strdup("legacy");
+        engine = "legacy";
         load_engine(engine, ws);
     }
     LFACSS(text, titlebar);
@@ -5188,8 +5173,10 @@ static void load_settings(window_settings* ws)
     load_int_setting(f, &ws->shadow_offset_y, "shadow_offset_y", "shadow");
     load_float_setting(f, &ws->shadow_radius, "shadow_radius", "shadow");
     load_float_setting(f, &ws->shadow_opacity, "shadow_opacity", "shadow");
-    load_string_setting(f, &ws->tobj_layout, "title_object_layout",
+    std::string tmp;
+    load_string_setting(f, tmp, "title_object_layout",
                         "titlebar");
+    ws->tobj_layout = g_strdup(tmp.c_str()); // FIXME memory leak
     load_int_setting(f, &ws->button_offset, "vertical_offset", "buttons");
     load_int_setting(f, &ws->button_hoffset, "horizontal_offset", "buttons");
     load_int_setting(f, &ws->win_extents.top, "top", "borders");
@@ -5360,11 +5347,11 @@ int main(int argc, char* argv[])
         if (strcmp(argv[i], "--replace") == 0) {
             replace = true;
         } else if (strcmp(argv[i], "--version") == 0) {
-            printf("%s: %s version %s\n", program_name, PACKAGE, VERSION);
+            printf("%s: %s version %s\n", program_name.c_str(), PACKAGE, VERSION);
             return 0;
         } else if (strcmp(argv[i], "--help") == 0) {
             fprintf(stderr, "%s [--replace] [--help] [--version]\n",
-                    program_name);
+                    program_name.c_str());
             return 0;
         }
     }
@@ -5432,7 +5419,7 @@ int main(int argc, char* argv[])
             fprintf(stderr,
                     "%s: Could not acquire decoration manager "
                     "selection on screen %d display \"%s\"\n",
-                    program_name, DefaultScreen(xdisplay),
+                    program_name.c_str(), DefaultScreen(xdisplay),
                     DisplayString(xdisplay));
         } else if (status == DECOR_ACQUIRE_STATUS_OTHER_DM_RUNNING) {
             fprintf(stderr,
@@ -5440,7 +5427,7 @@ int main(int argc, char* argv[])
                     "has a decoration manager; try using the "
                     "--replace option to replace the current "
                     "decoration manager.\n",
-                    program_name, DefaultScreen(xdisplay),
+                    program_name.c_str(), DefaultScreen(xdisplay),
                     DisplayString(xdisplay));
         }
 

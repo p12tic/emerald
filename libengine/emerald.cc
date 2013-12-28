@@ -23,52 +23,52 @@
 
 void copy_from_defaults_if_needed()
 {
-    char* opath = g_strdup_printf("%s/.emerald/theme", g_get_home_dir());
+    std::string homedir = g_get_home_dir();
+    std::string opath;
+    opath = homedir + "/.emerald/theme";
     char* fcont;
     gsize len = 0;
-    g_mkdir_with_parents(opath, 0755);
-    g_free(opath);
-    opath = g_strdup_printf("%s/.emerald/settings.ini", g_get_home_dir());
-    if (!g_file_test(opath, G_FILE_TEST_EXISTS)) {
+    g_mkdir_with_parents(opath.c_str(), 0755);
+
+    opath = homedir + "/.emerald/settings.ini";
+    if (!g_file_test(opath.c_str(), G_FILE_TEST_EXISTS)) {
         if (g_file_get_contents(DEFSETTINGSFILE, &fcont, &len, NULL)) {
-            g_file_set_contents(opath, fcont, len, NULL);
+            g_file_set_contents(opath.c_str(), fcont, len, NULL);
             g_free(fcont);
         }
     }
-    g_free(opath);
-    opath = g_strdup_printf("%s/.emerald/theme/theme.ini", g_get_home_dir());
-    if (!g_file_test(opath, G_FILE_TEST_EXISTS)) {
-        GDir* d;
-        d = g_dir_open(DEFTHEMEDIR, 0, NULL);
+
+    opath = homedir + "/.emerald/theme/theme.ini";
+    if (!g_file_test(opath.c_str(), G_FILE_TEST_EXISTS)) {
+        GDir* d = g_dir_open(DEFTHEMEDIR, 0, NULL);
         if (d) {
             const char* n;
             while ((n = g_dir_read_name(d))) {
-                char* ipath = g_strdup_printf("%s/%s", DEFTHEMEDIR, n);
-                char* npath = g_strdup_printf("%s/.emerald/theme/%s", g_get_home_dir(), n);
-                if (g_file_get_contents(ipath, &fcont, &len, NULL)) {
-                    g_file_set_contents(npath, fcont, len, NULL);
+                std::string ipath = std::string{DEFTHEMEDIR} + n;
+                std::string npath = homedir + "/.emerald/theme/" + n;
+                if (g_file_get_contents(ipath.c_str(), &fcont, &len, NULL)) {
+                    g_file_set_contents(npath.c_str(), fcont, len, NULL);
                     g_free(fcont);
                 }
-                g_free(ipath);
-                g_free(npath);
             }
             g_dir_close(d);
         }
     }
-    g_free(opath);
 }
 
-char* make_filename(const char* sect, const char* key, const char* ext)
+std::string make_filename(const std::string& sect, const std::string& key,
+                          const std::string& ext)
 {
-    return g_strdup_printf("%s/.emerald/theme/%s.%s.%s", g_get_home_dir(), sect, key, ext);
+    return std::string{g_get_home_dir()} + "/.emerald/theme/" + sect + '.' + key + '.' + ext;
 }
+
 void cairo_set_source_alpha_color(cairo_t* cr, alpha_color* c)
 {
     cairo_set_source_rgba(cr, c->color.r, c->color.g, c->color.b, c->alpha);
 }
 
-void load_color_setting(const KeyFile& f, decor_color_t* color, const char* key,
-                        const char* sect)
+void load_color_setting(const KeyFile& f, decor_color_t* color,
+                        const std::string& key, const std::string& sect)
 {
     GdkColor c;
     auto s = f.get_string_opt(sect, key);
@@ -80,8 +80,8 @@ void load_color_setting(const KeyFile& f, decor_color_t* color, const char* key,
     }
 }
 
-void load_shadow_color_setting(const KeyFile& f, int sc[3], const char* key,
-                               const char* sect)
+void load_shadow_color_setting(const KeyFile& f, int sc[3], const std::string& key,
+                               const std::string& sect)
 {
     GdkColor c;
     auto s = f.get_string_opt(sect, key);
@@ -93,7 +93,8 @@ void load_shadow_color_setting(const KeyFile& f, int sc[3], const char* key,
     }
 }
 
-void load_float_setting(const KeyFile& f, double* d, const char* key, const char* sect)
+void load_float_setting(const KeyFile& f, double* d, const std::string& key,
+                        const std::string& sect)
 {
     auto s = f.get_string_opt(sect, key);
     if (s) {
@@ -101,7 +102,8 @@ void load_float_setting(const KeyFile& f, double* d, const char* key, const char
     }
 }
 
-void load_int_setting(const KeyFile& f, int* i, const char* key, const char* sect)
+void load_int_setting(const KeyFile& f, int* i, const std::string& key,
+                      const std::string& sect)
 {
     auto ii = f.get_integer_opt(sect, key);
     if (!ii) {
@@ -109,7 +111,8 @@ void load_int_setting(const KeyFile& f, int* i, const char* key, const char* sec
     }
 }
 
-void load_bool_setting(const KeyFile& f, bool* b, const char* key, const char* sect)
+void load_bool_setting(const KeyFile& f, bool* b, const std::string& key,
+                       const std::string& sect)
 {
     auto bb = f.get_boolean_opt(sect, key);
     if (bb) {
@@ -117,8 +120,8 @@ void load_bool_setting(const KeyFile& f, bool* b, const char* key, const char* s
     }
 }
 
-void load_font_setting(const KeyFile& f, PangoFontDescription** fd, const char* key,
-                       const char* sect)
+void load_font_setting(const KeyFile& f, PangoFontDescription** fd,
+                       const std::string& key, const std::string& sect)
 {
     auto s = f.get_string_opt(sect, key);
     if (s) {
@@ -129,15 +132,12 @@ void load_font_setting(const KeyFile& f, PangoFontDescription** fd, const char* 
     }
 }
 
-void load_string_setting(const KeyFile& f, char** s, const char* key,
-                         const char* sect)
+void load_string_setting(const KeyFile& f, std::string& s, const std::string& key,
+                         const std::string& sect)
 {
     auto ss = f.get_string_opt(sect, key);
     if (ss) {
-        if (*s) {
-            g_free(*s);
-        }
-        *s = g_strdup(ss->c_str());
+        s = *ss;
     }
 }
 

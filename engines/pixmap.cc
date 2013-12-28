@@ -440,9 +440,7 @@ extern "C"
 void load_engine_settings(const KeyFile& f, window_settings* ws)
 {
     private_ws* pws = ws->engine_ws;
-    int i;
-    char* pre = "active";
-    char* junk;
+    std::string pre = "active";
     PFACS(outer);
     PFACS(inner);
     PFACS(title_outer);
@@ -457,20 +455,15 @@ void load_engine_settings(const KeyFile& f, window_settings* ws)
 
     // Active window
     private_fs* pfs = ws->fs_act->engine_fs;
-    for (i = 0; i < 11; i++) {
-        junk = g_strdup_printf("%s_%s", pre, p_types[i]);
-        TEXTURE_FROM_PNG(pfs->pixmaps[i].surface, make_filename("pixmaps", junk, "png"));
+    for (int i = 0; i < 11; i++) {
+        std::string key = pre + "_" + p_types[i];
+        TEXTURE_FROM_PNG(pfs->pixmaps[i].surface, make_filename("pixmaps", key, "png").c_str());
 
-        load_bool_setting(f, &pfs->pixmaps[i].use_scaled,
-                          g_strdup_printf("%s_%s_use_scaled", pre, p_types[i]), SECT);
-        load_bool_setting(f, &pfs->pixmaps[i].use_width,
-                          g_strdup_printf("%s_%s_use_width", pre, p_types[i]), SECT);
-        load_float_setting(f, &pfs->pixmaps[i].width,
-                           g_strdup_printf("%s_%s_width", pre, p_types[i]), SECT);
-        load_bool_setting(f, &pfs->pixmaps[i].use_height,
-                          g_strdup_printf("%s_%s_use_height", pre, p_types[i]), SECT);
-        load_float_setting(f, &pfs->pixmaps[i].height,
-                           g_strdup_printf("%s_%s_height", pre, p_types[i]), SECT);
+        load_bool_setting(f, &pfs->pixmaps[i].use_scaled, key + "_use_scaled", SECT);
+        load_bool_setting(f, &pfs->pixmaps[i].use_width, key + "_use_width", SECT);
+        load_float_setting(f, &pfs->pixmaps[i].width, key + "_width", SECT);
+        load_bool_setting(f, &pfs->pixmaps[i].use_height, key + "_use_height", SECT);
+        load_float_setting(f, &pfs->pixmaps[i].height, key + "_height", SECT);
     }
 
     // Inactive window
@@ -478,20 +471,15 @@ void load_engine_settings(const KeyFile& f, window_settings* ws)
     if (!pws->inactive_use_active_pixmaps) {
         pre = "inactive";
     }
-    for (i = 0; i < 11; i++) {
-        junk = g_strdup_printf("%s_%s", pre, p_types[i]);
-        TEXTURE_FROM_PNG(pfs->pixmaps[i].surface, make_filename("pixmaps", junk, "png"));
+    for (int i = 0; i < 11; i++) {
+        std::string key = pre + "_" + p_types[i];
+        TEXTURE_FROM_PNG(pfs->pixmaps[i].surface, make_filename("pixmaps", key, "png").c_str());
 
-        load_bool_setting(f, &pfs->pixmaps[i].use_scaled,
-                          g_strdup_printf("%s_%s_use_scaled", pre, p_types[i]), SECT);
-        load_bool_setting(f, &pfs->pixmaps[i].use_width,
-                          g_strdup_printf("%s_%s_use_width", pre, p_types[i]), SECT);
-        load_float_setting(f, &pfs->pixmaps[i].width,
-                           g_strdup_printf("%s_%s_width", pre, p_types[i]), SECT);
-        load_bool_setting(f, &pfs->pixmaps[i].use_height,
-                          g_strdup_printf("%s_%s_use_height", pre, p_types[i]), SECT);
-        load_float_setting(f, &pfs->pixmaps[i].height,
-                           g_strdup_printf("%s_%s_height", pre, p_types[i]), SECT);
+        load_bool_setting(f, &pfs->pixmaps[i].use_scaled, key + "_use_scaled", SECT);
+        load_bool_setting(f, &pfs->pixmaps[i].use_width, key + "_use_width", SECT);
+        load_float_setting(f, &pfs->pixmaps[i].width, key + "_width", SECT);
+        load_bool_setting(f, &pfs->pixmaps[i].use_height, key + "_use_height", SECT);
+        load_float_setting(f, &pfs->pixmaps[i].height, key + "_height", SECT);
     }
 }
 
@@ -614,11 +602,8 @@ void layout_engine_colors(Gtk::Box& vbox)
 
 static void layout_pixmap_box(Gtk::Box& vbox, int b_t, bool active)
 {
-    const char* pre = "active";
-    if (!active) {
-        pre = "inactive";
-    }
-    std::string key = std::string(pre) + "_" + p_types[b_t];
+    std::string pre = active ? "active" : "inactive";
+    std::string key = pre + "_" + p_types[b_t];
 
     table_append(*Gtk::manage(new Gtk::Label(names[b_t])), false);
     std::string fc_title = std::string(names[b_t]) + " Pixmap";
@@ -670,11 +655,13 @@ static void layout_pixmap_box(Gtk::Box& vbox, int b_t, bool active)
     if (b_t == 1 || b_t == 2 || b_t == 6 || b_t == 7) {
         auto& height = *Gtk::manage(new Gtk::SpinButton(1));
         height.set_range(0, 500);
-        SettingItem::create(height, SECT, g_strdup_printf("%s_%s_height", pre, p_types[b_t]));
+        std::string key = pre + "_" + p_types[b_t] + "_height";
+        SettingItem::create(height, SECT, key);
 
         auto& use_my_height = *Gtk::manage(new Gtk::CheckButton(""));
-        SettingItem::create(use_my_height, SECT, g_strdup_printf("%s_%s_use_height", pre, p_types[b_t]));
-        
+        key = pre + "_" + p_types[b_t] + "_use_height";
+        SettingItem::create(use_my_height, SECT, key);
+
         auto& tbox = *Gtk::manage(new Gtk::HBox(false, 2));
         tbox.pack_start(height, false, false);
         tbox.pack_start(use_my_height, false, false);
@@ -682,8 +669,8 @@ static void layout_pixmap_box(Gtk::Box& vbox, int b_t, bool active)
     } else {
         table_append(*Gtk::manage(new Gtk::Label(_("Not adjustable"))), false);
     }
-
 }
+
 void layout_engine_pixmaps(Gtk::Box& vbox, bool active)
 {
     auto& hbox = *Gtk::manage(new Gtk::HBox(true, 2));

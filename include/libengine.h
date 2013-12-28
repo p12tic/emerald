@@ -6,17 +6,20 @@
 #include <list>
 
 void copy_from_defaults_if_needed();
-void load_color_setting(const KeyFile& f, decor_color_t* color, const char* key,
-                        const char* sect);
-void load_shadow_color_setting(const KeyFile& f, int sc[3], const char* key,
-                               const char* sect);
-void load_float_setting(const KeyFile& f, double* d, const char* key,
-                        const char* sect);
-void load_int_setting(const KeyFile& f, int* i, const char* key, const char* sect);
-void load_bool_setting(const KeyFile& f, bool* b, const char* key, const char* sect);
+void load_color_setting(const KeyFile& f, decor_color_t* color,
+                        const std::string& key, const std::string& sect);
+void load_shadow_color_setting(const KeyFile& f, int sc[3],
+                               const std::string& key, const std::string& sect);
+void load_float_setting(const KeyFile& f, double* d, const std::string& key,
+                        const std::string& sect);
+void load_int_setting(const KeyFile& f, int* i, const std::string& key,
+                      const std::string& sect);
+void load_bool_setting(const KeyFile& f, bool* b, const std::string& key,
+                       const std::string& sect);
 void load_font_setting(const KeyFile& f, PangoFontDescription** fd,
-                       const char* key, const char* sect);
-void load_string_setting(const KeyFile& f, char** s, const char* key, const char* sect);
+                       const std::string& key, const std::string& sect);
+void load_string_setting(const KeyFile& f, std::string& s, const std::string& key,
+                         const std::string& sect);
 void cairo_set_source_alpha_color(cairo_t* cr, alpha_color* c);
 #define PFACS(zc) \
     load_color_setting(f,&((private_fs *)ws->fs_act->engine_fs)->zc.color,"active_" #zc ,SECT);\
@@ -51,14 +54,14 @@ rounded_rectangle(cairo_t* cr,
 
 #include <titlebar.h>
 
-bool get_engine_meta_info(const char* engine, EngineMetaInfo* inf);   // returns false if couldn't find engine
+bool get_engine_meta_info(const std::string& engine, EngineMetaInfo* inf);   // returns false if couldn't find engine
 
 Gtk::Scale* scaler_new(double low, double high, double prec);
-void add_color_alpha_value(const char* caption, const char* basekey,
-                           const char* sect, bool active);
+void add_color_alpha_value(const std::string& caption, const std::string& basekey,
+                           const std::string& sect, bool active);
 
-void make_labels(const char* header);
-Gtk::Box* build_frame(Gtk::Box& vbox, const char* title, bool is_hbox);
+void make_labels(const std::string& header);
+Gtk::Box* build_frame(Gtk::Box& vbox, const std::string& title, bool is_hbox);
 
 void table_new(int width, bool same, bool labels);
 void table_append(Gtk::Widget& child, bool stretch);
@@ -83,9 +86,10 @@ void set_apply(bool sapply);
 void cb_clear_file(SettingItem* item);
 void init_key_files();
 std::list<SettingItem>& get_setting_list();
-void do_engine(const char* nam);
-Gtk::Box* build_notebook_page(const char* title, Gtk::Notebook& notebook);
-char* make_filename(const char* sect, const char* key, const char* ext);
+void do_engine(const std::string& name);
+Gtk::Box* build_notebook_page(const std::string& title, Gtk::Notebook& notebook);
+std::string make_filename(const std::string& sect, const std::string& key,
+                          const std::string& ext);
 void layout_engine_list(Gtk::Box& vbox);
 void init_engine_list();
 #endif

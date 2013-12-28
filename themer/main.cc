@@ -8,6 +8,7 @@
 #include <engine.h>
 #include <keyfile.h>
 #include <gtkmm.h>
+#include <boost/algorithm/string.hpp>
 #include <functional>
 
 #define LAST_COMPAT_VER "0.1.0"
@@ -58,14 +59,14 @@ Gtk::Button* import_button_;
 Gtk::Button* fetch_button_;
 Gtk::Button* fetch_button2_;
 Gtk::Button* export_button_;
-const char* svnpath;
-const char* themecache;
+std::string svnpath;
+std::string themecache;
 
-static void theme_list_append(const char* value, const char* dir,
-                              const char* fil)
+static void theme_list_append(const std::string& value, const std::string& dir,
+                              const std::string& fil)
 {
-    std::string path = std::string(dir) + "/" + fil + "/theme.ini";
-    std::string imgpath = std::string(dir) + "/" + fil + "/theme.screenshot.png";
+    std::string path = dir + "/" + fil + "/theme.ini";
+    std::string imgpath = dir + "/" + fil + "/theme.screenshot.png";
 
     EngineMetaInfo emi;
 
@@ -163,7 +164,7 @@ static void theme_list_append(const char* value, const char* dir,
                   "</small>");
         }
 
-        char* val = g_markup_printf_escaped(format, value, s_desc.c_str(),
+        char* val = g_markup_printf_escaped(format, value.c_str(), s_desc.c_str(),
                                             s_th_version.c_str(), s_creator.c_str(),
                                             s_sugg.c_str());
         row[theme_columns_.markup] = val ? val : "";
@@ -180,55 +181,45 @@ static void theme_list_append(const char* value, const char* dir,
     }
 }
 
-static void theme_scan_dir(const char* dir, bool writable)
+static void theme_scan_dir(const std::string& dir, bool writable)
 {
-    GDir* d;
-    d = g_dir_open(dir, 0, NULL);
-    if (d) {
-        char* n;
-        while ((n = (char*) g_dir_read_name(d))) {
-            char* fn = g_strdup_printf("%s/%s/theme.ini", dir, n);
-            if (g_file_test(fn, G_FILE_TEST_IS_REGULAR)) {
-                //actually add it here
-                char* o;
-                if (writable) {
-                    o = g_strdup(n);
-                } else {
-                    o = g_strdup_printf("* %s", n);
-                }
-                theme_list_append(o, dir, n);
-                g_free(o);
-            }
-            g_free(fn);
-        }
-        g_dir_close(d);
+    GDir* d = g_dir_open(dir.c_str(), 0, NULL);
+    if (!d) {
+        return;
     }
+    const char* name;
+    while ((name = g_dir_read_name(d))) {
+        auto fn = dir + "/" + name + "/theme.ini";
+        if (g_file_test(fn.c_str(), G_FILE_TEST_IS_REGULAR)) {
+            //actually add it here
+            std::string th_name = writable ? name : std::string{"* "} + name;
+            theme_list_append(th_name, dir, name);
+        }
+    }
+    g_dir_close(d);
 }
-static void scroll_to_theme(const char* thn)
+
+static void scroll_to_theme(const std::string& theme)
 {
-    GtkTreeIter i;
-    bool c;
     auto it = theme_model_->children().begin();
     auto it_end = theme_model_->children().end();
     for (; it != it_end; ++it) {
         std::string s = (*it)[theme_columns_.name];
-        if (s == thn) {
+        if (s == theme) {
             Gtk::TreePath p = theme_model_->get_path(it);
             theme_selector_->scroll_to_row(p);
         }
     }
 }
 
-static void refresh_theme_list(const char* thn)
+static void refresh_theme_list(const std::string& theme)
 {
-    char* path;
     theme_model_->clear();
     theme_scan_dir(DATA_DIR "/emerald/themes/", false);
-    path = g_strdup_printf("%s/.emerald/themes/", g_get_home_dir());
+    auto path = std::string{g_get_home_dir()} + "/.emerald/themes/";
     theme_scan_dir(path, true);
-    g_free(path);
-    if (thn) {
-        scroll_to_theme(thn);
+    if (!theme.empty()) {
+        scroll_to_theme(theme);
     }
 }
 
@@ -237,23 +228,22 @@ static void cb_refresh()
     refresh_theme_list(NULL);
 }
 
-static bool confirm_dialog(const char* val, const char* val2)
+static bool confirm_dialog(const std::string& val, const std::string& val2)
 {
-    std::string rv = val;
-    rv += val2;
-    Gtk::MessageDialog dlg(*main_window_, rv, false, Gtk::MESSAGE_QUESTION,
+    // FIXME: val is a printf-string
+    Gtk::MessageDialog dlg(*main_window_, val + val2, false, Gtk::MESSAGE_QUESTION,
                            Gtk::BUTTONS_YES_NO, true);
     return (dlg.run() == Gtk::RESPONSE_YES);
 }
 
-static void info_dialog(const char* val)
+static void info_dialog(const std::string& val)
 {
     Gtk::MessageDialog dlg(*main_window_, val, false, Gtk::MESSAGE_INFO,
                            Gtk::BUTTONS_CLOSE, true);
     dlg.run();
 }
 
-static void error_dialog(const char* val)
+static void error_dialog(const std::string& val)
 {
     Gtk::MessageDialog dlg(*main_window_, val, false, Gtk::MESSAGE_ERROR,
                            Gtk::BUTTONS_CLOSE, true);
@@ -262,72 +252,65 @@ static void error_dialog(const char* val)
 
 static void cb_load()
 {
-    GDir* dr;
-    char* fn, *xt, *gt;
-    bool dist;
-    dist = false;
-
     //first normalize the name
     auto it = theme_select_->get_selected();
     if (!it) {
         return;
     }
-    std::string z_at = (*it)[theme_columns_.name];
-    const char* at = z_at.c_str();
-    const char* mt = at;
-    if (strlen(at) >= 1 && at[0] == '*') {
-        if (strlen(at) >= 2) {
-            mt = at + 2;
+    std::string at = (*it)[theme_columns_.name];
+    std::string mt = at;
+    bool dist = false;
+    if (at.length() >= 1 && at[0] == '*') {
+        if (at.length() >= 2) {
+            mt = at.substr(2);
             dist = true;
         } else {
             error_dialog(_("Invalid Theme Name"));
             return;
         }
     }
-    if (strlen(mt) == 0) {
+    if (mt.length() == 0) {
         error_dialog(_("Invalid Theme Name"));
         return;
     }
     delete_button_->set_sensitive(!dist);
-    xt = g_strdup_printf("%s/.emerald/theme/", g_get_home_dir());
-    dr = g_dir_open(xt, 0, NULL);
-    while (dr && (gt = (char*)g_dir_read_name(dr))) {
-        char* ft;
-        ft = g_strdup_printf("%s/%s", xt, gt);
-        g_unlink(ft);
-        g_free(ft);
+    std::string xt = std::string{g_get_home_dir()} + "/.emerald/theme/";
+    GDir* dr = g_dir_open(xt.c_str(), 0, NULL);
+    const char* gt;
+    while (dr && (gt = g_dir_read_name(dr))) {
+        auto ft = xt + "/" + gt;
+        g_unlink(ft.c_str());
     }
     if (dr) {
         g_dir_close(dr);
     }
+
+    std::string fn;
     if (dist) {
-        fn = g_strdup_printf(DATA_DIR "/emerald/themes/%s/theme.ini", mt);
-        at = g_strdup_printf(DATA_DIR "/emerald/themes/%s/", mt);
+        fn = std::string{DATA_DIR} + "/emerald/themes/" + mt + "/theme.ini";
+        at = std::string{DATA_DIR} + "/emerald/themes/" + mt + "/";
     } else {
-        fn = g_strdup_printf("%s/.emerald/themes/%s/theme.ini", g_get_home_dir(), mt);
-        at = g_strdup_printf("%s/.emerald/themes/%s/", g_get_home_dir(), mt);
+        fn = std::string{g_get_home_dir()} + "/.emerald/themes/" + mt + "/theme.ini";
+        at = std::string{g_get_home_dir()} + "/.emerald/themes/" + mt + "/";
     }
-    dr = g_dir_open(at, 0, NULL);
-    while (dr && (gt = (char*)g_dir_read_name(dr))) {
+
+    dr = g_dir_open(at.c_str(), 0, NULL);
+    while (dr && (gt = g_dir_read_name(dr))) {
         char* nt;
         gsize len;
-        char* ft;
-        ft = g_strdup_printf("%s/%s", at, gt);
-        if (g_file_get_contents(ft, &nt, &len, NULL)) {
-            g_free(ft);
-            ft = g_strdup_printf("%s/%s", xt, gt);
-            g_file_set_contents(ft, nt, len, NULL);
+        std::string ft = at + "/" + gt;
+        if (g_file_get_contents(ft.c_str(), &nt, &len, NULL)) {
+            fn = xt + "/" + gt;
+            g_file_set_contents(ft.c_str(), nt, len, NULL);
             g_free(nt);
         }
-        g_free(ft);
     }
     if (dr) {
         g_dir_close(dr);
     }
-    g_free(xt);
+
     KeyFile f;
     if (!f.load_from_file(fn)) {
-        g_free(fn);
         error_dialog("Invalid Theme File / Name");
         return;
     }
@@ -347,105 +330,99 @@ static void cb_load()
     }
     set_apply(true);
     send_reload_signal();
-    g_free(fn);
 }
 
-static char* import_theme(char* file)
+static std::string import_theme(const std::string& file)
 {
     //first make sure we have our location
-    char* fn, * at, * ot, *pot, *rstr;
-    int ex;
-    ot = g_strdup(file);
-    pot = ot;
-    if (!g_str_has_suffix(ot, ".emerald")) {
-        g_free(pot);
+    std::string ext = ".emerald";
+    if (!boost::algorithm::ends_with(file, ext)) {
         error_dialog(_("Invalid theme file.  Does not end in .emerald"));
         return NULL;
     }
-    ot[strlen(ot) - strlen(".emerald")] = '\0';
-    ot = g_strrstr(ot, "/");
-    if (!ot) {
-        ot = pot;
+
+    // extract the file component
+    std::string name;
+    unsigned slash_pos = file.find_last_of('/');
+    if (slash_pos != std::string::npos) {
+        name = file.substr(slash_pos);
     } else {
-        ot++;
+        name = file;
     }
-    rstr = g_strdup(ot);
-    fn = g_strdup_printf("%s/.emerald/themes/%s/", g_get_home_dir(), ot);
-    g_free(pot);
-    g_mkdir_with_parents(fn, 00755);
-    at = g_shell_quote(fn);
-    g_free(fn);
-    fn = g_shell_quote(file);
-    ot = g_strdup_printf("tar -xzf %s -C %s", fn, at);
-    if (!g_spawn_command_line_sync(ot, NULL, NULL, &ex, NULL) ||
+    // remove the extension
+    boost::algorithm::erase_tail(name, ext.length());
+
+    // ---
+    std::string theme_dir = std::string{g_get_home_dir()} + "/.emerald/themes/"
+            + name + "/";
+    g_mkdir_with_parents(theme_dir.c_str(), 00755);
+
+    std::string quoted_dir = Glib::shell_quote(theme_dir);
+    std::string quoted_name = Glib::shell_quote(file);
+
+    std::string command = std::string{"tar -xzf "} + quoted_name + " -C " + quoted_dir;
+    int ex;
+    if (!g_spawn_command_line_sync(command.c_str(), NULL, NULL, &ex, NULL) ||
             (WIFEXITED(ex) && WEXITSTATUS(ex))) {
-        g_free(fn);
-        g_free(ot);
-        g_free(at);
         error_dialog("Error calling tar.");
         return NULL;
     }
-    g_free(fn);
-    g_free(ot);
-    g_free(at);
 //   info_dialog(_("Theme Imported"));
-    return rstr;
+    return name;
 }
-static void export_theme(const char* file)
+
+static void export_theme(const std::string& file)
 {
     std::string themename = entry_box_->get_text();
-    char* fn, *at, *ot;
-    int ex;
     if (themename.empty() || themename[0] == '*'
             || themename.find_first_of('/') != std::string::npos) {
         error_dialog(_("Invalid Theme Name\nCould Not Export"));
         //these conditions should already have been handled but another check is ok
         return;
     }
-    if (!g_str_has_suffix(file, ".emerald")) {
+
+    if (!boost::algorithm::ends_with(file, ".emerald")) {
         error_dialog(_("Invalid File Name\nMust End in .emerald"));
         return;
     }
-    fn = g_strdup_printf("%s/.emerald/theme/", g_get_home_dir());
-    at = g_shell_quote(fn);
-    g_free(fn);
-    fn = g_shell_quote(file);
-    ot = g_strdup_printf("tar -czf %s -C %s ./ --exclude=*~", fn, at);
-    if (!g_spawn_command_line_sync(ot, NULL, NULL, &ex, NULL) ||
+    std::string theme_dir = std::string{g_get_home_dir()} + "/.emerald/theme/";
+    std::string quoted_dir = Glib::shell_quote(theme_dir);
+
+    std::string quoted_file = Glib::shell_quote(file);
+
+    std::string command = std::string{"tar -czf "} + quoted_file + " -C "
+            + quoted_dir + " ./ --exclude=*~";
+
+    int ex;
+    if (!g_spawn_command_line_sync(command.c_str(), NULL, NULL, &ex, NULL) ||
             (WIFEXITED(ex) && WEXITSTATUS(ex))) {
-        g_free(fn);
-        g_free(ot);
-        g_free(at);
         error_dialog(_("Error calling tar."));
         return;
     }
-    g_free(ot);
-    g_free(fn);
-    g_free(at);
     info_dialog(_("Theme Exported"));
 }
+
 static void cb_save()
 {
-    char* fn, *at, *mt, *gt;
-    GDir* dr;
     //first normalize the name
-    std::string at_s = entry_box_->get_text();
-    if (at_s.empty()) {
+    std::string at = entry_box_->get_text();
+    if (at.empty()) {
         return;
     }
-    at = at_s.c_str();
-    if (strlen(at) >= 1 && at[0] == '*') {
+    if (at.length() >= 1 && at[0] == '*') {
         error_dialog(_("Can't save over system themes\n(or you forgot to enter a name)"));
         return;
     }
-    if (strlen(at) == 0 || strchr(at, '/')) {
+    if (at.length() || at.find_first_of('/') != std::string::npos) {
         error_dialog(_("Invalid Theme Name"));
         return;
     }
-    fn = g_strdup_printf("%s/.emerald/themes/%s", g_get_home_dir(), at);
-    g_mkdir_with_parents(fn, 00755);
-    g_free(fn);
-    fn = g_strdup_printf("%s/.emerald/themes/%s/theme.ini", g_get_home_dir(), at);
+
+    std::string homedir = g_get_home_dir();
+    std::string fn = homedir + "/.emerald/themes/"  + at;
+    g_mkdir_with_parents(fn.c_str(), 00755);
+
+    fn += "/theme.ini";
 
     KeyFile f;
     f.load_from_file(fn);
@@ -453,108 +430,94 @@ static void cb_save()
         item.write_setting(f);
     }
     f.set_string("theme", "version", VERSION);
-    if (g_file_test(fn, G_FILE_TEST_EXISTS)) {
+    if (g_file_test(fn.c_str(), G_FILE_TEST_EXISTS)) {
         if (!confirm_dialog(_("Overwrite Theme %s?"), at)) {
             return;
         }
     }
-    mt = at;
+    std::string mt = at;
 
     std::string dt = f.to_data();
     //little fix since we're now copying from ~/.emerald/theme/*
-    g_free(fn);
-    fn = g_strdup_printf("%s/.emerald/theme/theme.ini", g_get_home_dir());
-    if (!g_file_set_contents(fn, dt.c_str(), -1, NULL)) {
+
+    fn = homedir + "/.emerald/theme/theme.ini";
+    if (!g_file_set_contents(fn.c_str(), dt.c_str(), -1, NULL)) {
         error_dialog(_("Couldn't Write Theme"));
     } else {
-        char* xt;
-        xt = g_strdup_printf("%s/.emerald/themes/%s/", g_get_home_dir(), mt);
-        dr = g_dir_open(xt, 0, NULL);
-        while (dr && (gt = (char*)g_dir_read_name(dr))) {
-            char* ft;
-            ft = g_strdup_printf("%s/%s", xt, gt);
-            g_unlink(ft);
-            g_free(ft);
+        std::string xt = homedir + "/.emerald/themes/" + mt + "/";
+        GDir* dr = g_dir_open(xt.c_str(), 0, NULL);
+        const char* gt;
+        while (dr && (gt = g_dir_read_name(dr))) {
+            auto ft = xt + "/" + gt;
+            g_unlink(ft.c_str());
         }
         if (dr) {
             g_dir_close(dr);
         }
-        at = g_strdup_printf("%s/.emerald/theme/", g_get_home_dir());
-        dr = g_dir_open(at, 0, NULL);
-        while (dr && (gt = (char*)g_dir_read_name(dr))) {
+
+        at = homedir + "/.emerald/theme/";
+        dr = g_dir_open(at.c_str(), 0, NULL);
+        while (dr && (gt = g_dir_read_name(dr))) {
             char* nt;
             gsize len;
-            char* ft;
-            ft = g_strdup_printf("%s/%s", at, gt);
-            if (g_file_get_contents(ft, &nt, &len, NULL)) {
-                g_free(ft);
-                ft = g_strdup_printf("%s/%s", xt, gt);
-                g_file_set_contents(ft, nt, len, NULL);
+            auto ft = at + "/" + gt;
+            if (g_file_get_contents(ft.c_str(), &nt, &len, NULL)) {
+                ft = xt + "/" + gt;
+                g_file_set_contents(ft.c_str(), nt, len, NULL);
                 g_free(nt);
             }
-            g_free(ft);
         }
         if (dr) {
             g_dir_close(dr);
         }
-        g_free(xt);
-        g_free(at);
         info_dialog(_("Theme Saved"));
     }
     version_entry_->set_text(VERSION);
-    g_free(fn);
     refresh_theme_list(NULL);
 }
 
 static void cb_delete(Gtk::Widget* w)
 {
-    GtkTreeIter iter;
-    GtkTreeModel* model;
-    char* fn;
     //first normalize the name
     auto row = theme_select_->get_selected();
     if (!row) {
         return;
     }
-    std::string name = (*row)[theme_columns_.name];
-    const char* at = name.c_str();
+    std::string at = (*row)[theme_columns_.name];
 
-    if (strlen(at) >= 1 && at[0] == '*') {
+    if (at.length() >= 1 && at[0] == '*') {
         error_dialog(_("Can't delete system themes\n(or you forgot to enter a name)"));
         return;
     }
-    if (strlen(at) == 0) {
+    if (at.length() == 0) {
         error_dialog(_("Invalid Theme Name"));
         return;
     }
-    fn = g_strdup_printf("%s/.emerald/themes/%s/theme.ini", g_get_home_dir(), at);
-    if (g_file_test(fn, G_FILE_TEST_EXISTS)) {
+
+    std::string homedir = g_get_home_dir();
+    std::string fn = homedir + "/.emerald/themes/" + at  + "/theme.ini";
+    if (g_file_test(fn.c_str(), G_FILE_TEST_EXISTS)) {
         if (!confirm_dialog(_("Are you sure you want to delete %s?"), at)) {
-            g_free(fn);
             return;
         } else {
-            GDir* dir;
-            char* ot, * mt, * pt;
-            pt = g_strdup_printf("%s/.emerald/themes/%s/", g_get_home_dir(), at);
-            dir = g_dir_open(pt, 0, NULL);
-            while (dir && (ot = (char*)g_dir_read_name(dir))) {
-                mt = g_strdup_printf("%s/%s", pt, ot);
-                g_unlink(mt);
-                g_free(mt);
+            auto pt = homedir + "/.emerald/themes/" + at + "/";
+            GDir* dir = g_dir_open(pt.c_str(), 0, NULL);
+            const char* ot;
+            while (dir && (ot = g_dir_read_name(dir))) {
+                auto mt = pt + "/" + ot;
+                g_unlink(mt.c_str());
             }
             if (dir) {
                 g_dir_close(dir);
-                g_rmdir(pt);
+                g_rmdir(pt.c_str());
             }
-            g_free(pt);
         }
         info_dialog(_("Theme deleted"));
         w->set_sensitive(false);
-        refresh_theme_list(NULL);
+        refresh_theme_list("");
     } else {
         error_dialog(_("No such theme to delete"));
     }
-    g_free(fn);
 }
 
 static bool cb_main_destroy(GdkEventAny*)
@@ -654,7 +617,7 @@ void layout_window_frame(Gtk::Box& vbox, bool active)
     add_color_alpha_value(_("Button Outline"), "button_halo", "buttons", active);
 }
 
-void add_row(Gtk::Box& vbox, Gtk::Widget& item, const char* title)
+void add_row(Gtk::Box& vbox, Gtk::Widget& item, const std::string& title)
 {
     //vbox.pack_start(*Gtk::manage(new Gtk::Label(title)),false,false);
     //vbox.pack_end(item,true,true,0);
@@ -662,24 +625,27 @@ void add_row(Gtk::Box& vbox, Gtk::Widget& item, const char* title)
     table_append(item, true);
 }
 
-void add_color_button_row(Gtk::Box& vbox, const char* title,
-                          const char* key, const char* sect)
+void add_color_button_row(Gtk::Box& vbox, const std::string& title,
+                          const std::string& key, const std::string& sect)
 {
     auto& color_button = *Gtk::manage(new Gtk::ColorButton());
     SettingItem::create(color_button, sect, key);
     add_row(vbox, color_button, title);
 }
 
-void add_int_range_row(Gtk::Box& vbox, const char* title, const char* key,
-                       int start, int end, const char* sect)
+void add_int_range_row(Gtk::Box& vbox, const std::string& title,
+                       const std::string& key,
+                       int start, int end, const std::string& sect)
 {
     auto& scaler = *scaler_new(start, end, 1);
     SettingItem::create(scaler, sect, key);
     add_row(vbox, scaler, title);
 }
 
-void add_float_range_row(Gtk::Box& vbox, const char* title, const char* key,
-                         double start, double end, double prec, const char* sect)
+void add_float_range_row(Gtk::Box& vbox, const std::string& title,
+                         const std::string& key,
+                         double start, double end, double prec,
+                         const std::string& sect)
 {
     auto& scaler = *scaler_new(start, end, prec);
     SettingItem::create(scaler, sect, key);
@@ -757,7 +723,7 @@ void layout_title_frame(Gtk::Box& vbox)
     vbox.pack_start(*btn,false,false,0);
     SettingItem::create(*btn,ST_BOOL,SECT,"use_active_colors");*/
 }
-void add_meta_string_value(const char* title, const char* key)
+void add_meta_string_value(const std::string& title, const std::string& key)
 {
     table_append(*Gtk::manage(new Gtk::Label(title)), false);
     auto& entry = *Gtk::manage(new Gtk::Entry());
@@ -830,7 +796,8 @@ void layout_info_frame(Gtk::Box& vbox)
     table_append(*version_entry_, true);
 }
 
-void add_border_slider(const char* text, const char* key, int value)
+void add_border_slider(const std::string& text, const std::string& key,
+                       int value)
 {
     table_append(*Gtk::manage(new Gtk::Label(text)), false);
 
@@ -1090,8 +1057,6 @@ void cb_refilter(Glib::RefPtr<Gtk::TreeModelFilter> filt)
 
 bool is_visible(const Gtk::TreeModel::const_iterator& iter, Gtk::Entry& e)
 {
-    int i;
-
     std::string tx = e.get_text();
     if (tx.empty()) {
         return true;
@@ -1233,24 +1198,20 @@ Gtk::Widget* build_tree_view()
 
 void import_cache(Gtk::ProgressBar& progbar)
 {
-    GDir* d;
-    d = g_dir_open(themecache, 0, NULL);
-    if (d) {
-        char* n;
-        while ((n = (char*) g_dir_read_name(d))) {
-
-            char* fn;
-            if (g_str_has_suffix(n, ".emerald")) {
-                fn = g_strconcat(themecache, "/", NULL);
-                fn = g_strconcat(fn, n, NULL);
-                import_theme(fn);
-                g_free(fn);
-                progbar.pulse();
-            }
+    GDir* d = g_dir_open(themecache.c_str(), 0, NULL);
+    if (!d) {
+        return;
+    }
+    const char* n;
+    while ((n = g_dir_read_name(d))) {
+        if (g_str_has_suffix(n, ".emerald")) {
+            std::string fn = themecache + "/" + n;
+            import_theme(fn);
+            progbar.pulse();
         }
         g_free(n);
-        g_dir_close(d);
     }
+    g_dir_close(d);
 }
 
 bool watcher_func(FetcherInfo* fe)
@@ -1260,7 +1221,6 @@ bool watcher_func(FetcherInfo* fe)
         import_cache(*(fe->progbar));
         refresh_theme_list(NULL);
         //fe->dialog->destroy_(); // FIXME -- private
-        g_free(themecache);
         delete fe;
         return false;
     }
@@ -1269,7 +1229,7 @@ bool watcher_func(FetcherInfo* fe)
 
 void fetch_svn()
 {
-    char* themefetcher[] = {g_strdup("svn"), g_strdup("co"), g_strdup(svnpath), g_strdup(themecache), NULL };
+    char* themefetcher[] = {g_strdup("svn"), g_strdup("co"), g_strdup(svnpath.c_str()), g_strdup(themecache.c_str()), NULL };
     GPid pd;
     FetcherInfo* fe = new FetcherInfo();
     Gtk::Dialog& dialog = *Gtk::manage(new Gtk::Dialog(_("Fetching Themes"),
@@ -1410,7 +1370,7 @@ int main(int argc, char* argv[])
     set_changed(false);
     set_apply(false);
 
-    char* input_file = NULL;
+    std::string input_file;
     setlocale(LC_ALL, "");
     bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
     bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
@@ -1424,7 +1384,7 @@ int main(int argc, char* argv[])
             //-i arg found so next option should be the file to install
             if (loop_count + 1 < argc) {
                 input_file = argv[loop_count + 1];
-                printf("File To Install %s\n", input_file);
+                printf("File To Install %s\n", input_file.c_str());
                 install_file = 1;
             } else {
                 printf("Usage: -i /file/to/install\n");

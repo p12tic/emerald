@@ -31,7 +31,7 @@ extern std::list<EngineData> g_engine_list;
 char* globalStr = NULL;
 char globalFloatStr[G_ASCII_DTOSTR_BUF_SIZE + 1];
 
-void SettingItem::write_setting(const KeyFile& f)
+void SettingItem::write_setting(KeyFile& f)
 {
     switch (type_) {
     case ST_BOOL:
@@ -70,7 +70,7 @@ void SettingItem::write_setting(const KeyFile& f)
     break;
     case ST_ENGINE_COMBO: {
         EngineMetaInfo emi;
-        const char* active_engine = get_engine_combo();
+        std::string active_engine = get_engine_combo();
         if (get_engine_meta_info(active_engine, &emi)) {
             f.set_string("engine_version", active_engine, emi.version);
         }
@@ -103,13 +103,12 @@ void SettingItem::write_setting(const KeyFile& f)
 }
 void SettingItem::write_setting_file()
 {
-    char* file = g_strjoin("/", g_get_home_dir(), ".emerald/settings.ini", NULL);
-    char* path = g_strjoin("/", g_get_home_dir(), ".emerald/", NULL);
-    g_mkdir_with_parents(path, 00755);
+    std::string homedir = g_get_home_dir();
+    std::string file = homedir + "/emerald/settings.ini";
+    std::string path = homedir + "/.emerald";
+    g_mkdir_with_parents(path.c_str(), 00755);
     Glib::ustring at = global_settings_file->to_data();
-    g_file_set_contents(file, at.c_str(), -1, NULL);
-    g_free(file);
-    g_free(path);
+    g_file_set_contents(file.c_str(), at.c_str(), -1, NULL);
 }
 
 bool SettingItem::get_bool()
@@ -131,14 +130,14 @@ int SettingItem::get_int()
     return get_float();
 }
 
-const char* SettingItem::get_float_str()
+std::string SettingItem::get_float_str()
 {
     g_ascii_dtostr(globalFloatStr, G_ASCII_DTOSTR_BUF_SIZE,
                    get_float());
     return globalFloatStr;
 }
 
-const char* SettingItem::get_color()
+std::string SettingItem::get_color()
 {
     if (globalStr) {
         g_free(globalStr);
@@ -159,7 +158,7 @@ std::string SettingItem::get_string()
     return ((Gtk::Entry*) widget_)->get_text();
 }
 
-void SettingItem::check_file(const char* f)
+void SettingItem::check_file(const std::string& f)
 {
     try { //FIXME: bad idea
         auto p = Gdk::Pixbuf::create_from_file(f); // throws on error
@@ -171,10 +170,11 @@ void SettingItem::check_file(const char* f)
     }
 }
 
-const char* SettingItem::get_img_file()
+std::string SettingItem::get_img_file()
 {
     return fvalue_.c_str();
 }
+
 std::string SettingItem::get_string_combo()
 {
     auto *w = ((Gtk::Bin*) widget_)->get_child();
@@ -185,12 +185,12 @@ std::string SettingItem::get_string_combo()
     return s;
 }
 
-void SettingItem::set_engine_combo(const char* val)
+void SettingItem::set_engine_combo(const std::string& val)
 {
     int i = 0;
     bool found = false;
     for (auto& item : g_engine_list) {
-        if (strcmp(item.canname, val) == 0) {
+        if (item.canname == val) {
             ((Gtk::ComboBox*) widget_)->set_active(i);
             found = true;
             break;
@@ -211,7 +211,8 @@ void SettingItem::set_engine_combo(const char* val)
         do_engine("legacy");
     }
 }
-const char* SettingItem::get_engine_combo()
+
+std::string SettingItem::get_engine_combo()
 {
     static std::string s;
     GtkTreeIter i;
@@ -233,7 +234,7 @@ int SettingItem::get_sf_int_combo()
     return ((Gtk::ComboBox*) widget_)->get_active_row_number();
 }
 
-void SettingItem::set_img_file(const char* f)
+void SettingItem::set_img_file(const std::string& f)
 {
     fvalue_ = f;
     ((Gtk::FileChooser*) widget_)->select_filename(f);
@@ -259,12 +260,12 @@ void SettingItem::set_int(int i)
     set_float(i);
 }
 
-void SettingItem::set_float_str(const char* s)
+void SettingItem::set_float_str(const std::string& s)
 {
-    set_float(g_ascii_strtod(s, NULL));
+    set_float(g_ascii_strtod(s.c_str(), NULL));
 }
 
-void SettingItem::set_color(const char* s)
+void SettingItem::set_color(const std::string& s)
 {
     Gdk::Color color;
     if (color.parse(s)) {
@@ -272,17 +273,17 @@ void SettingItem::set_color(const char* s)
     }
 }
 
-void SettingItem::set_font(const char* f)
+void SettingItem::set_font(const std::string& f)
 {
     ((Gtk::FontButton*) widget_)->set_font_name(f);
 }
 
-void SettingItem::set_string(const char* s)
+void SettingItem::set_string(const std::string& s)
 {
     ((Gtk::Entry*) widget_)->set_text(s);
 }
 
-void SettingItem::set_string_combo(const char* s)
+void SettingItem::set_string_combo(const std::string& s)
 {
     auto child = ((Gtk::Bin*) widget_)->get_child();
     ((Gtk::Entry*) child)->set_text(s);
@@ -355,9 +356,9 @@ void SettingItem::read_setting(const KeyFile& f)
             set_img_file(item,s);
             g_free(s);
         }*/
-        s = g_strdup_printf("%s/.emerald/theme/%s.%s.png", g_get_home_dir(), section_, key_);
+        std::string file = std::string{g_get_home_dir()} + "/.emerald/theme/"
+                + section_ + "." + key_ + ".png";
         set_img_file(s);
-        g_free(s);
         break;
     }
     case ST_ENGINE_COMBO: {
@@ -400,8 +401,8 @@ void SettingItem::read_setting(const KeyFile& f)
     }
 }
 
-SettingItem* SettingItem::register_img_file_setting(Gtk::FileChooserButton& widget, const char* section,
-                                                    const char* key, Gtk::Image* image)
+SettingItem* SettingItem::register_img_file_setting(Gtk::FileChooserButton& widget, const std::string& section,
+                                                    const std::string& key, Gtk::Image* image)
 {
     SettingItem* item = create_impl(widget, ST_IMG_FILE, section, key);
     widget.signal_selection_changed().connect(sigc::bind(&cb_apply_setting, item));
@@ -414,7 +415,7 @@ SettingItem* SettingItem::register_img_file_setting(Gtk::FileChooserButton& widg
 }
 
 SettingItem* SettingItem::create_global(Gtk::ComboBoxText& widget,
-                                        const char* section, const char* key)
+                                        const std::string& section, const std::string& key)
 {
     auto item = SettingItem::create_impl(widget, ST_SFILE_INT_COMBO, section, key);
     widget.signal_changed().connect(sigc::bind(&cb_apply_setting, item));
@@ -422,7 +423,7 @@ SettingItem* SettingItem::create_global(Gtk::ComboBoxText& widget,
 }
 
 SettingItem* SettingItem::create(Gtk::ComboBoxEntryText& widget,
-                                 const char* section, const char* key)
+                                 const std::string& section, const std::string& key)
 {
     auto item = SettingItem::create_impl(widget, ST_STRING_COMBO, section, key);
     widget.signal_changed().connect(sigc::bind(&cb_apply_setting, item));
@@ -430,7 +431,7 @@ SettingItem* SettingItem::create(Gtk::ComboBoxEntryText& widget,
 }
 
 SettingItem* SettingItem::create_engine(Gtk::ComboBox& widget,
-                                        const char* section, const char* key)
+                                        const std::string& section, const std::string& key)
 {
     auto item = SettingItem::create_impl(widget, ST_ENGINE_COMBO, section, key);
     widget.signal_changed().connect(sigc::bind(&cb_apply_setting, item));
@@ -438,14 +439,14 @@ SettingItem* SettingItem::create_engine(Gtk::ComboBox& widget,
 }
 
 SettingItem* SettingItem::create(Gtk::Entry& widget,
-                                 const char* section, const char* key)
+                                 const std::string& section, const std::string& key)
 {
     auto item = SettingItem::create_impl(widget, ST_META_STRING, section, key);
     return item;
 }
 
 SettingItem* SettingItem::create(Gtk::FontButton& widget,
-                                 const char* section, const char* key)
+                                 const std::string& section, const std::string& key)
 {
     auto item = SettingItem::create_impl(widget, ST_COLOR, section, key);
     widget.signal_font_set().connect(sigc::bind(&cb_apply_setting, item));
@@ -453,7 +454,7 @@ SettingItem* SettingItem::create(Gtk::FontButton& widget,
 }
 
 SettingItem* SettingItem::create(Gtk::ColorButton& widget,
-                                 const char* section, const char* key)
+                                 const std::string& section, const std::string& key)
 {
     auto item = SettingItem::create_impl(widget, ST_COLOR, section, key);
     widget.signal_color_set().connect(sigc::bind(&cb_apply_setting, item));
@@ -461,7 +462,7 @@ SettingItem* SettingItem::create(Gtk::ColorButton& widget,
 }
 
 SettingItem* SettingItem::create(Gtk::SpinButton& widget,
-                                 const char* section, const char* key)
+                                 const std::string& section, const std::string& key)
 {
     auto item = SettingItem::create_impl(widget, ST_FLOAT, section, key);
     item->is_spin_button_ = true;
@@ -470,7 +471,7 @@ SettingItem* SettingItem::create(Gtk::SpinButton& widget,
 }
 
 SettingItem* SettingItem::create(Gtk::Range& widget,
-                                 const char* section, const char* key)
+                                 const std::string& section, const std::string& key)
 {
     auto item = SettingItem::create_impl(widget, ST_FLOAT, section, key);
     item->is_spin_button_ = false;
@@ -479,7 +480,7 @@ SettingItem* SettingItem::create(Gtk::Range& widget,
 }
 
 SettingItem* SettingItem::create_global(Gtk::Range& widget,
-                                        const char* section, const char* key)
+                                        const std::string& section, const std::string& key)
 {
     auto item = SettingItem::create_impl(widget, ST_SFILE_INT, section, key);
     widget.signal_value_changed().connect(sigc::bind(&cb_apply_setting, item));
@@ -487,7 +488,7 @@ SettingItem* SettingItem::create_global(Gtk::Range& widget,
 }
 
 SettingItem* SettingItem::create(Gtk::ToggleButton& widget,
-                                 const char* section, const char* key)
+                                 const std::string& section, const std::string& key)
 {
     auto item = SettingItem::create_impl(widget, ST_BOOL, section, key);
     widget.signal_toggled().connect(sigc::bind(&cb_apply_setting, item));
@@ -495,7 +496,7 @@ SettingItem* SettingItem::create(Gtk::ToggleButton& widget,
 }
 
 SettingItem* SettingItem::create_global(Gtk::ToggleButton& widget,
-                                        const char* section, const char* key)
+                                        const std::string& section, const std::string& key)
 {
     auto item = SettingItem::create_impl(widget, ST_SFILE_BOOL, section, key);
     widget.signal_toggled().connect(sigc::bind(&cb_apply_setting, item));
@@ -504,15 +505,15 @@ SettingItem* SettingItem::create_global(Gtk::ToggleButton& widget,
 
 
 SettingItem* SettingItem::create_impl(Gtk::Widget& widget, SettingType type,
-                                      const char* section, const char* key)
+                                      const std::string& section, const std::string& key)
 {
     g_setting_list.push_front(SettingItem());
     SettingItem* item = &g_setting_list.front();
     item->type_ = type;
-    item->key_ = g_strdup(key);
-    item->section_ = g_strdup(section);
+    item->key_ = key;
+    item->section_ = section;
     item->widget_ = &widget;
-    item->fvalue_ = g_strdup("");
+    item->fvalue_ = "";
     return item;
 }
 

@@ -19,6 +19,7 @@
 
 #include <engine.h>
 #include <signal.h>
+#include <boost/algorithm/string.hpp>
 #include <list>
 #include <cstring>
 #include <memory>
@@ -38,23 +39,16 @@ std::shared_ptr<KeyFile> global_settings_file;
 #ifdef USE_DBUS
 DBusConnection* dbcon;
 #endif
-char* active_engine = NULL;
+std::string active_engine;
 
-static char* display_part(const char* p)
+static std::string display_part(std::string name)
 {
-    char* name = g_strdup(p);
-    char* tmp;
-
-    if ((tmp = g_strrstr(name, ":"))) {
-        *tmp++ = 0;
-        tmp = g_strdup(tmp);
-        g_free(name);
-        name = tmp;
+    unsigned colon_pos = name.find_last_of(':');
+    if (colon_pos != std::string::npos) {
+        name = name.substr(colon_pos+1);
     }
-
-    if ((tmp = g_strrstr(name, "."))) {
-        *tmp = 0;
-    }
+    unsigned dot_pos = name.find_first_of('.');
+    name = name.substr(0, dot_pos);
 
     return name;
 }
@@ -73,14 +67,13 @@ Gtk::Scale* scaler_new(double low, double high, double prec)
     return w;
 }
 
-void add_color_alpha_value(const char* caption, const char* basekey,
-                           const char* sect, bool active)
+void add_color_alpha_value(const std::string& caption, const std::string& basekey,
+                           const std::string& sect, bool active)
 {
-    char* colorkey;
-    char* alphakey;
-    colorkey = g_strdup_printf(active ? "active_%s" : "inactive_%s", basekey);
-    alphakey = g_strdup_printf(active ? "active_%s_alpha" : "inactive_%s_alpha",
-                               basekey);
+    std::string colorkey = active ? "active_" : "inactive_";
+    colorkey += basekey;
+    std::string alphakey = active ? "active_" : "inactive_";
+    alphakey += basekey + "_alpha";
 
     table_append(*Gtk::manage(new Gtk::Label(caption)), false);
 
@@ -94,14 +87,14 @@ void add_color_alpha_value(const char* caption, const char* basekey,
     //we don't g_free because they are registered with SettingItem::create
 }
 
-void make_labels(const char* header)
+void make_labels(const std::string& header)
 {
     table_append(*Gtk::manage(new Gtk::Label(header)), false);
     table_append(*Gtk::manage(new Gtk::Label("Color")), false);
     table_append(*Gtk::manage(new Gtk::Label("Opacity")), false);
 }
 
-Gtk::Box* build_frame(Gtk::Box& vbox, const char* title, bool is_hbox)
+Gtk::Box* build_frame(Gtk::Box& vbox, const std::string& title, bool is_hbox)
 {
     Gtk::Frame* frame = Gtk::manage(new Gtk::Frame(title));
     vbox.pack_start(*frame, Gtk::PACK_EXPAND_WIDGET);
@@ -176,14 +169,10 @@ void send_reload_signal()
     Atom wmAtom = 0;
     Display* dpy = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
 
-    char buffer[128];
-    char* part = display_part(getenv("DISPLAY"));
-
-    sprintf(buffer, "_COMPIZ_DM_S%s", part);
-    free(part);
+    std::string atom_name = std::string{"_COMPIZ_DM_S"} + display_part(getenv("DISPLAY"));
 
     if (dpy) {
-        wmAtom = XInternAtom(dpy, buffer, 0);
+        wmAtom = XInternAtom(dpy, atom_name.c_str(), 0);
     }
 
     if (wmAtom) {
@@ -208,7 +197,7 @@ void send_reload_signal()
     } else {
         /* The old way */
         const char* args[] =
-        {"killall", "-u", (char*)g_get_user_name(), "-SIGUSR1", "emerald", NULL};
+        {"killall", "-u", g_get_user_name(), "-SIGUSR1", "emerald", NULL};
         const char* ret = NULL;
         if (!g_spawn_sync(NULL, args, NULL, G_SPAWN_STDERR_TO_DEV_NULL | G_SPAWN_SEARCH_PATH,
                           NULL, NULL, &ret, NULL, NULL, NULL) || !ret) {
@@ -217,21 +206,24 @@ void send_reload_signal()
     }
 #endif
 }
+
 void apply_settings()
 {
-    char* file = g_strjoin("/", g_get_home_dir(), ".emerald/theme/theme.ini", NULL);
-    char* path = g_strjoin("/", g_get_home_dir(), ".emerald/theme/", NULL);
+    std::string homedir = g_get_home_dir();
+    std::string file = homedir + "/.emerald/theme/theme.ini";
+    std::string path = homedir + "/.emerald/theme/";
+
     for (auto& item : g_setting_list) {
         item.write_setting(*global_theme_file);
     }
+
     global_theme_file->set_string("theme", "version", VERSION);
-    g_mkdir_with_parents(path, 00755);
+    g_mkdir_with_parents(path.c_str(), 00755);
     std::string at = global_theme_file->to_data();
-    g_file_set_contents(file, at.c_str(), -1, NULL);
-    g_free(file);
-    g_free(path);
+    g_file_set_contents(file.c_str(), at.c_str(), -1, NULL);
     send_reload_signal();
 }
+
 void cb_apply_setting(SettingItem* item)
 {
     if (item->type_ == ST_IMG_FILE) {
@@ -260,30 +252,28 @@ void setup_dbus()
 }
 #endif
 
-void do_engine(const char* nam)
+void do_engine(const std::string& name)
 {
     GtkWidget* w;
-    if (active_engine && !strcmp(active_engine, nam)) {
+    if (active_engine != name) {
         return;
     }
-    if (active_engine) {
-        g_free(active_engine);
-    }
-    active_engine = g_strdup(nam);
+
+    active_engine = name;
     engine_container_->remove();
+
     for (auto& item : g_engine_list) {
-        if (strcmp(nam, item.canname) == 0) {
+        if (name == item.canname) {
             engine_container_->add(*(item.vbox));
             engine_container_->show_all();
         }
     }
-
 }
 
-bool get_engine_meta_info(const char* engine, EngineMetaInfo* inf)
+bool get_engine_meta_info(const std::string& engine, EngineMetaInfo* inf)
 {
     for (auto& item : g_engine_list) {
-        if (!strcmp(item.canname, engine) == 0) {
+        if (!std::strcmp(item.canname, engine.c_str()) == 0) {
             *inf = item.meta;
             return true;
         }
@@ -307,14 +297,17 @@ void update_preview_cb(Gtk::FileChooser* chooser, Gtk::Image* img)
 
 void init_settings()
 {
-    char* file = g_strjoin("/", g_get_home_dir(), ".emerald/theme/theme.ini", NULL);
+    std::string homedir = g_get_home_dir();
+    std::string file;
+
+    file = homedir + "/.emerald/theme/theme.ini";
     global_theme_file.reset(new KeyFile);
     global_theme_file->load_from_file(file, Glib::KEY_FILE_KEEP_COMMENTS);
-    g_free(file);
-    file = g_strjoin("/", g_get_home_dir(), ".emerald/settings.ini", NULL);
+
+    file = homedir + "/.emerald/settings.ini";
     global_settings_file.reset(new KeyFile);
     global_settings_file->load_from_file(file, Glib::KEY_FILE_KEEP_COMMENTS);
-    g_free(file);
+
     for (auto& item : g_setting_list) {
         item.read_setting(*global_theme_file);
     }
@@ -358,37 +351,35 @@ void layout_engine_list(Gtk::Box& vbox)
     vbox.pack_start(*engine_container_, Gtk::PACK_EXPAND_WIDGET);
 }
 
-static char* canonize_name(char* dlname)
+static std::string canonize_name(const std::string& dlname)
 {
-    char* end;
-    char* begin = g_strrstr(dlname, "/lib");
-    if (!begin) {
-        return g_strdup("");
+    auto res = boost::algorithm::find_last(dlname, "/lib");
+    if (res.begin() == res.end()) {
+        return "";
     }
-    begin += 4;
-    begin = g_strdup(begin);
-    end = g_strrstr(begin, ".so");
-    end[0] = '\0';
-    return begin;
+    auto res2 = boost::algorithm::find_last(dlname, ".so");
+    if (res2.end() == dlname.end()) {
+        return std::string{res.end(), res2.begin()};
+    } else {
+        return std::string{res.end(), dlname.end()};
+    }
 }
 
-static bool engine_is_unique(const char* canname)
+static bool engine_is_unique(const std::string& canname)
 {
     for (auto& item : g_engine_list) {
-        if (strcmp(item.canname, canname) == 0) {
+        if (strcmp(item.canname, canname.c_str()) == 0) {
             return false;
         }
     }
     return true;
 }
 
-static void append_engine(const char* dlname)
+static void append_engine(const std::string& dlname)
 {
-    char* can;
-    char* err;
     (void) dlerror();
-    void* hand = dlopen(dlname, RTLD_NOW);
-    err = dlerror();
+    void* hand = dlopen(dlname.c_str(), RTLD_NOW);
+    const char* err = dlerror();
     if (!hand || err) {
         g_warning("%s", err);
         if (hand) {
@@ -396,7 +387,7 @@ static void append_engine(const char* dlname)
         }
         return;
     }
-    can = canonize_name(dlname);
+    std::string can = canonize_name(dlname);
     if (engine_is_unique(can)) {
         layout_settings_proc lay = dlsym(hand, "layout_engine_settings");
         if ((err = dlerror())) {
@@ -423,11 +414,11 @@ static void append_engine(const char* dlname)
             if (meta) {
                 meta(&(d->meta));
             } else {
-                g_warning("Engine %s has no meta info, please update it, using defaults.", dlname);
+                g_warning("Engine %s has no meta info, please update it, using defaults.", dlname.c_str());
             }
 
-            d->dlname = dlname;
-            d->canname = can;
+            d->dlname = g_strdup(dlname.c_str());
+            d->canname = g_strdup(can.c_str());
             d->vbox = Gtk::manage(new Gtk::VBox{false, 2});
             lay(*(d->vbox));
 
@@ -445,17 +436,16 @@ static void append_engine(const char* dlname)
     dlclose(hand);
 }
 
-static void engine_scan_dir(const char* dir)
+static void engine_scan_dir(const std::string& dir)
 {
     GDir* d;
-    d = g_dir_open(dir, 0, NULL);
+    d = g_dir_open(dir.c_str(), 0, NULL);
     if (d) {
-        char* n;
-        GPatternSpec* ps;
-        ps = g_pattern_spec_new("lib*.so");
-        while ((n = (char*) g_dir_read_name(d))) {
+        GPatternSpec* ps = g_pattern_spec_new("lib*.so");
+        const char* n;
+        while ((n = g_dir_read_name(d))) {
             if (g_pattern_match_string(ps, n)) {
-                char* dln = g_strjoin("/", dir, n, NULL);
+                std::string dln = dir + "/" + n;
                 append_engine(dln);
             }
         }
@@ -485,7 +475,7 @@ void init_engine_list()
     SettingItem::create_engine(*engine_combo_, "engine", "engine");
 }
 
-Gtk::Box* build_notebook_page(const char* title, Gtk::Notebook& notebook)
+Gtk::Box* build_notebook_page(const std::string& title, Gtk::Notebook& notebook)
 {
     auto* vbox = Gtk::manage(new Gtk::VBox(false, 2));
     vbox->set_border_width(8);

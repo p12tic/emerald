@@ -29,14 +29,12 @@ fini_engine_proc e_fini = NULL;
 load_settings_proc e_load = NULL;
 draw_frame_proc e_draw = NULL;
 
-bool load_engine(char* engine_name, window_settings* ws)
+bool load_engine(const std::string& engine_name, window_settings* ws)
 {
     void* newengine;
-    char* path;
-    char* engine_ldname;
     ws->stretch_sides = true;
 
-    engine_ldname = g_strdup_printf("lib%s.so", engine_name);
+    std::string engine_ldname = std::string{"lib"} + engine_name + ".so";
     if (engine) {
         if (e_fini) {
             e_fini(ws);
@@ -45,18 +43,16 @@ bool load_engine(char* engine_name, window_settings* ws)
         engine = NULL;
     }
     dlerror(); // clear errors
-    path = g_strjoin("/", LOCAL_ENGINE_DIR, engine_ldname, NULL);
-    newengine = dlopen(path, RTLD_NOW);
+    std::string path = std::string{LOCAL_ENGINE_DIR} + "/" + engine_ldname;
+    newengine = dlopen(path.c_str(), RTLD_NOW);
     if (!newengine) {
-        g_free(path);
-        path = g_strjoin("/", ENGINE_DIR, engine_ldname, NULL);
-        newengine = dlopen(path, RTLD_NOW);
+        std::string path = std::string{ENGINE_DIR} + "/" + engine_ldname;
+        newengine = dlopen(path.c_str(), RTLD_NOW);
         if (!newengine) {
             g_warning("%s", dlerror());
             //here's where we should bail out somehow
         }
     }
-    g_free(path);
     engine = newengine;
     if (engine) {
         //lookup our procs
@@ -73,9 +69,9 @@ bool load_engine(char* engine_name, window_settings* ws)
     if (e_init) {
         e_init(ws);
     }
-    g_free(engine_ldname);
     return engine ? true : false;
 }
+
 void load_engine_settings(const KeyFile& f, window_settings* ws)
 {
     if (e_load && engine) {

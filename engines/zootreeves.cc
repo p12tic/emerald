@@ -1165,9 +1165,9 @@ void load_engine_settings(const KeyFile& f, window_settings* ws)
     load_bool_setting(f, &pws->pixmaps.titlebar_repeat_enabled, "pixmaps_titlebar_repeat_enabled", SECT);
     load_bool_setting(f, &pws->pixmaps.titlebar_enabled, "pixmaps_titlebar_enabled", SECT);
 
-    pws->pixmaps.titlebar_surface = cairo_image_surface_create_from_png(make_filename("pixmaps", "titlebarpart", "png"));
-    pws->pixmaps.titlebar_surface_buttons = cairo_image_surface_create_from_png(make_filename("pixmaps", "buttonpart", "png"));
-    pws->pixmaps.titlebar_surface_large = cairo_image_surface_create_from_png(make_filename("pixmaps", "titlebar", "png"));
+    pws->pixmaps.titlebar_surface = cairo_image_surface_create_from_png(make_filename("pixmaps", "titlebarpart", "png").c_str());
+    pws->pixmaps.titlebar_surface_buttons = cairo_image_surface_create_from_png(make_filename("pixmaps", "buttonpart", "png").c_str());
+    pws->pixmaps.titlebar_surface_large = cairo_image_surface_create_from_png(make_filename("pixmaps", "titlebar", "png").c_str());
 
     load_bool_setting(f, &((private_fs*)ws->fs_act->engine_fs)->gradient_repeat_enabled, "active_gradient_repeat_enabled" , SECT);
     load_bool_setting(f, &((private_fs*)ws->fs_inact->engine_fs)->gradient_repeat_enabled, "inactive_gradient_repeat_enabled" , SECT);

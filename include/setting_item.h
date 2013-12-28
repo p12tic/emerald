@@ -40,70 +40,70 @@ enum SettingType {
 class SettingItem {
 public:
 
-    void write_setting(const KeyFile& f);
+    void write_setting(KeyFile& f);
     static void write_setting_file();
     bool get_bool();
     double get_float();
     int get_int();
-    const char* get_float_str();
-    const char* get_color();
+    std::string get_float_str();
+    std::string get_color();
     std::string get_font();
     std::string get_string();
-    void check_file(const char* f);
-    const char* get_file();
+    void check_file(const std::string& f);
+    std::string get_file();
     std::string get_string_combo();
     int get_sf_int_combo();
-    void set_file(const char* f);
+    void set_file(const std::string& f);
     void set_bool(bool b);
     void set_float(double f);
     void set_int(int i);
-    void set_float_str(const char* s);
-    void set_color(const char* s);
-    void set_font(const char* f);
-    void set_string(const char* s);
-    void set_string_combo(const char* s);
+    void set_float_str(const std::string& s);
+    void set_color(const std::string& s);
+    void set_font(const std::string& f);
+    void set_string(const std::string& s);
+    void set_string_combo(const std::string& s);
     void set_sf_int_combo(int i);
     void read_setting(const KeyFile& f);
-    const char* get_engine_combo();
+    std::string get_engine_combo();
 
-    static SettingItem* register_img_file_setting(Gtk::FileChooserButton& widget, const char* section,
-                                                  const char* key, Gtk::Image* image);
+    static SettingItem* register_img_file_setting(Gtk::FileChooserButton& widget, const std::string& section,
+                                                  const std::string& key, Gtk::Image* image);
 
     static SettingItem* create_global(Gtk::ComboBoxText& widget,
-                                      const char* section, const char* key);
+                                      const std::string& section, const std::string& key);
     static SettingItem* create_engine(Gtk::ComboBox& widget,
-                                      const char* section, const char* key);
+                                      const std::string& section, const std::string& key);
     static SettingItem* create(Gtk::Entry& widget,
-                               const char* section, const char* key);
+                               const std::string& section, const std::string& key);
     static SettingItem* create(Gtk::ComboBoxEntryText& widget,
-                               const char* section, const char* key);
+                               const std::string& section, const std::string& key);
     static SettingItem* create(Gtk::FontButton& widget,
-                               const char* section, const char* key);
+                               const std::string& section, const std::string& key);
     static SettingItem* create(Gtk::ColorButton& widget,
-                               const char* section, const char* key);
+                               const std::string& section, const std::string& key);
     static SettingItem* create(Gtk::SpinButton& widget,
-                               const char* section, const char* key);
+                               const std::string& section, const std::string& key);
     static SettingItem* create(Gtk::Range& widget,
-                               const char* section, const char* key);
+                               const std::string& section, const std::string& key);
     static SettingItem* create_global(Gtk::Range& widget,
-                                      const char* section, const char* key);
+                                      const std::string& section, const std::string& key);
     static SettingItem* create(Gtk::ToggleButton& widget,
-                               const char* section, const char* key);
+                               const std::string& section, const std::string& key);
     static SettingItem* create_global(Gtk::ToggleButton& widget,
-                                      const char* section, const char* key);
+                                      const std::string& section, const std::string& key);
 
 private:
     static SettingItem* create_impl(Gtk::Widget& widget, SettingType type,
-                                    const char* section, const char* key);
+                                    const std::string& section, const std::string& key);
 
-    const char* get_img_file();
-    void set_engine_combo(const char* val);
-    void set_img_file(const char* f);
+    std::string get_img_file();
+    void set_engine_combo(const std::string& val);
+    void set_img_file(const std::string& f);
 
 public:
     SettingType type_;
-    const char* key_;
-    const char* section_;
+    std::string key_;
+    std::string section_;
     Gtk::Widget* widget_;
 
     std::string fvalue_;
