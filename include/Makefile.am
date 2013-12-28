@@ -3,6 +3,7 @@ emeraldinclude_HEADERS = \
 	emerald.h   \
 	engine.h    \
 	keyfile.h   \
+    filesystem.h    \
 	libengine.h     \
 	titlebar.h  \
 	setting_item.h
