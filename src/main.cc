@@ -5153,10 +5153,10 @@ static void load_settings(window_settings* ws)
         engine = "legacy";
         load_engine(engine, ws);
     }
-    LFACSS(text, titlebar);
-    LFACSS(text_halo, titlebar);
-    LFACSS(button, buttons);
-    LFACSS(button_halo, buttons);
+    LFACSS(f, ws, text, titlebar);
+    LFACSS(f, ws, text_halo, titlebar);
+    LFACSS(f, ws, button, buttons);
+    LFACSS(f, ws, button_halo, buttons);
     load_engine_settings(f, ws);
     load_font_setting(f, &ws->font_desc, "titlebar_font", "titlebar");
     load_bool_setting(f, &ws->use_pixmap_buttons, "use_pixmap_buttons",
@@ -5305,19 +5305,19 @@ int main(int argc, char* argv[])
     pfs = malloc(sizeof(frame_settings));
     bzero(pfs, sizeof(frame_settings));
     pfs->ws = ws;
-    ACOLOR(text, 1.0, 1.0, 1.0, 1.0);
-    ACOLOR(text_halo, 0.0, 0.0, 0.0, 0.2);
-    ACOLOR(button, 1.0, 1.0, 1.0, 0.8);
-    ACOLOR(button_halo, 0.0, 0.0, 0.0, 0.2);
+    ACOLOR(pfs, text, 1.0, 1.0, 1.0, 1.0);
+    ACOLOR(pfs, text_halo, 0.0, 0.0, 0.0, 0.2);
+    ACOLOR(pfs, button, 1.0, 1.0, 1.0, 0.8);
+    ACOLOR(pfs, button_halo, 0.0, 0.0, 0.0, 0.2);
     ws->fs_act = pfs;
 
     pfs = malloc(sizeof(frame_settings));
     bzero(pfs, sizeof(frame_settings));
     pfs->ws = ws;
-    ACOLOR(text, 0.8, 0.8, 0.8, 0.8);
-    ACOLOR(text_halo, 0.0, 0.0, 0.0, 0.2);
-    ACOLOR(button, 0.8, 0.8, 0.8, 0.8);
-    ACOLOR(button_halo, 0.0, 0.0, 0.0, 0.2);
+    ACOLOR(pfs, text, 0.8, 0.8, 0.8, 0.8);
+    ACOLOR(pfs, text_halo, 0.0, 0.0, 0.0, 0.2);
+    ACOLOR(pfs, button, 0.8, 0.8, 0.8, 0.8);
+    ACOLOR(pfs, button_halo, 0.0, 0.0, 0.0, 0.2);
     ws->fs_inact = pfs;
 
     ws->round_top_left = true;

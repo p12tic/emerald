@@ -351,16 +351,16 @@ void load_engine_settings(const KeyFile& f, window_settings* ws)
     private_ws* pws = ws->engine_ws;
 
     // parse color settings
-    PFACS(base);
-    PFACS(glow);
-    PFACS(sides);
-    PFACS(window_halo);
-    PFACS(window_highlight);
-    PFACS(window_shadow);
-    PFACS(separator_line);
-    PFACS(contents_shadow);
-    PFACS(contents_highlight);
-    PFACS(contents_halo);
+    PFACS(f, ws, base, SECT);
+    PFACS(f, ws, glow, SECT);
+    PFACS(f, ws, sides, SECT);
+    PFACS(f, ws, window_halo, SECT);
+    PFACS(f, ws, window_highlight, SECT);
+    PFACS(f, ws, window_shadow, SECT);
+    PFACS(f, ws, separator_line, SECT);
+    PFACS(f, ws, contents_shadow, SECT);
+    PFACS(f, ws, contents_highlight, SECT);
+    PFACS(f, ws, contents_halo, SECT);
 
     // parse border settings
     load_bool_setting(f, &pws->round_top_left, "round_top_left", SECT);
@@ -389,30 +389,30 @@ void init_engine(window_settings* ws)
     // private frame settings for active frames
     pfs = new private_fs;
     ws->fs_act->engine_fs = pfs;
-    ACOLOR(base, 0.8, 0.8, 0.8, 0.5);
-    ACOLOR(glow, 0.8, 0.8, 0.8, 0.5);
-    ACOLOR(sides, 0.8, 0.8, 0.8, 0.5);
-    ACOLOR(window_highlight, 1.0, 1.0, 1.0, 0.8);
-    ACOLOR(window_shadow, 0.6, 0.6, 0.6, 0.8);
-    ACOLOR(window_halo, 0.8, 0.8, 0.8, 0.8);
-    ACOLOR(separator_line, 0.0, 0.0, 0.0, 0.0);
-    ACOLOR(contents_highlight, 1.0, 1.0, 1.0, 0.8);
-    ACOLOR(contents_shadow, 0.6, 0.6, 0.6, 0.8);
-    ACOLOR(contents_halo, 0.8, 0.8, 0.8, 0.8);
+    ACOLOR(pfs, base, 0.8, 0.8, 0.8, 0.5);
+    ACOLOR(pfs, glow, 0.8, 0.8, 0.8, 0.5);
+    ACOLOR(pfs, sides, 0.8, 0.8, 0.8, 0.5);
+    ACOLOR(pfs, window_highlight, 1.0, 1.0, 1.0, 0.8);
+    ACOLOR(pfs, window_shadow, 0.6, 0.6, 0.6, 0.8);
+    ACOLOR(pfs, window_halo, 0.8, 0.8, 0.8, 0.8);
+    ACOLOR(pfs, separator_line, 0.0, 0.0, 0.0, 0.0);
+    ACOLOR(pfs, contents_highlight, 1.0, 1.0, 1.0, 0.8);
+    ACOLOR(pfs, contents_shadow, 0.6, 0.6, 0.6, 0.8);
+    ACOLOR(pfs, contents_halo, 0.8, 0.8, 0.8, 0.8);
 
     // private frame settings for inactive frames
     pfs = new private_fs;
     ws->fs_inact->engine_fs = pfs;
-    ACOLOR(base, 0.8, 0.8, 0.8, 0.3);
-    ACOLOR(glow, 0.8, 0.8, 0.8, 0.3);
-    ACOLOR(sides, 0.8, 0.8, 0.8, 0.3);
-    ACOLOR(window_highlight, 1.0, 1.0, 1.0, 0.7);
-    ACOLOR(window_shadow, 0.6, 0.6, 0.6, 0.7);
-    ACOLOR(window_halo, 0.8, 0.8, 0.8, 0.7);
-    ACOLOR(separator_line, 0.0, 0.0, 0.0, 0.0);
-    ACOLOR(contents_highlight, 1.0, 1.0, 1.0, 0.8);
-    ACOLOR(contents_shadow, 0.6, 0.6, 0.6, 0.8);
-    ACOLOR(contents_halo, 0.8, 0.8, 0.8, 0.8);
+    ACOLOR(pfs, base, 0.8, 0.8, 0.8, 0.3);
+    ACOLOR(pfs, glow, 0.8, 0.8, 0.8, 0.3);
+    ACOLOR(pfs, sides, 0.8, 0.8, 0.8, 0.3);
+    ACOLOR(pfs, window_highlight, 1.0, 1.0, 1.0, 0.7);
+    ACOLOR(pfs, window_shadow, 0.6, 0.6, 0.6, 0.7);
+    ACOLOR(pfs, window_halo, 0.8, 0.8, 0.8, 0.7);
+    ACOLOR(pfs, separator_line, 0.0, 0.0, 0.0, 0.0);
+    ACOLOR(pfs, contents_highlight, 1.0, 1.0, 1.0, 0.8);
+    ACOLOR(pfs, contents_shadow, 0.6, 0.6, 0.6, 0.8);
+    ACOLOR(pfs, contents_halo, 0.8, 0.8, 0.8, 0.8);
 }
 
 extern "C"

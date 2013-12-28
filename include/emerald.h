@@ -127,17 +127,17 @@ struct decor_color_t {
 
 typedef void (*event_callback)(WnckWindow* win, XEvent* event);
 
-#define ACOLOR(idn,zr,zg,zb,za) \
-    pfs->idn.color.r = (zr);\
-    pfs->idn.color.g = (zg);\
-    pfs->idn.color.b = (zb);\
-    pfs->idn.alpha   = (za);
+#define ACOLOR(pfs,idn,zr,zg,zb,za) \
+    (pfs)->idn.color.r = (zr);\
+    (pfs)->idn.color.g = (zg);\
+    (pfs)->idn.color.b = (zb);\
+    (pfs)->idn.alpha   = (za);
 
-#define CCOLOR(idn,zc) \
-    pfs->idn.color.r = (pfs->color_contrast * pfs->zc.color.r);\
-    pfs->idn.color.g = (pfs->color_contrast * pfs->zc.color.g);\
-    pfs->idn.color.b = (pfs->color_contrast * pfs->zc.color.b);\
-    pfs->idn.alpha   = (pfs->alpha_contrast * pfs->zc.alpha);
+#define CCOLOR(pfs,idn,zc) \
+    (pfs)->idn.color.r = ((pfs)->color_contrast * pfs->zc.color.r);\
+    (pfs)->idn.color.g = ((pfs)->color_contrast * pfs->zc.color.g);\
+    (pfs)->idn.color.b = ((pfs)->color_contrast * pfs->zc.color.b);\
+    (pfs)->idn.alpha   = ((pfs)->alpha_contrast * pfs->zc.alpha);
 
 struct alpha_color {
     decor_color_t color;
@@ -332,7 +332,7 @@ struct decor_t {
     bool only_change_active;
 };
 
-#define LFACSS(zc,sec) \
+#define LFACSS(f,ws,zc,sec) \
     load_color_setting(f,&ws->fs_act->zc.color,"active_" #zc , #sec);\
     load_color_setting(f,&ws->fs_inact->zc.color,"inactive_" #zc , #sec);\
     load_float_setting(f,&ws->fs_act->zc.alpha,"active_" #zc "_alpha", #sec);\

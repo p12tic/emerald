@@ -1120,17 +1120,17 @@ void load_engine_settings(const KeyFile& f, window_settings* ws)
 {
     private_ws* pws = ws->engine_ws;
 
-    PFACS(outer);
-    PFACS(inner);
-    PFACS(title_outer);
-    PFACS(title_inner);
-    PFACS(window_frame_halo);
-    PFACS(window_highlight);
-    PFACS(window_shadow);
-    PFACS(separator_line);
-    PFACS(contents_shadow);
-    PFACS(contents_highlight);
-    PFACS(contents_halo);
+    PFACS(f, ws, outer, SECT);
+    PFACS(f, ws, inner, SECT);
+    PFACS(f, ws, title_outer, SECT);
+    PFACS(f, ws, title_inner, SECT);
+    PFACS(f, ws, window_frame_halo, SECT);
+    PFACS(f, ws, window_highlight, SECT);
+    PFACS(f, ws, window_shadow, SECT);
+    PFACS(f, ws, separator_line, SECT);
+    PFACS(f, ws, contents_shadow, SECT);
+    PFACS(f, ws, contents_highlight, SECT);
+    PFACS(f, ws, contents_halo, SECT);
     load_color_setting(f, &pws->outer_maximised_color, "outer_maximised_color", SECT);
     load_color_setting(f, &pws->inner_maximised_color, "inner_maximised_color", SECT);
     load_bool_setting(f, &pws->enable_maximised_colors, "enable_maximised_colors", SECT);
@@ -1232,32 +1232,32 @@ void init_engine(window_settings* ws)
 
     pfs = new private_fs;
     ws->fs_act->engine_fs = pfs;
-    ACOLOR(inner, 0.8, 0.8, 0.8, 0.5);
-    ACOLOR(outer, 0.8, 0.8, 0.8, 0.5);
-    ACOLOR(title_inner, 0.8, 0.8, 0.8, 0.8);
-    ACOLOR(title_outer, 0.8, 0.8, 0.8, 0.8);
-    ACOLOR(window_highlight, 1.0, 1.0, 1.0, 0.8);
-    ACOLOR(window_shadow, 0.6, 0.6, 0.6, 0.8);
-    ACOLOR(window_frame_halo, 1.0, 1.0, 1.0, 1.0);
-    ACOLOR(separator_line, 0.0, 0.0, 0.0, 0.0);
-    ACOLOR(contents_highlight, 1.0, 1.0, 1.0, 0.8);
-    ACOLOR(contents_shadow, 0.6, 0.6, 0.6, 0.8);
-    ACOLOR(contents_halo, 0.8, 0.8, 0.8, 0.8);
+    ACOLOR(pfs, inner, 0.8, 0.8, 0.8, 0.5);
+    ACOLOR(pfs, outer, 0.8, 0.8, 0.8, 0.5);
+    ACOLOR(pfs, title_inner, 0.8, 0.8, 0.8, 0.8);
+    ACOLOR(pfs, title_outer, 0.8, 0.8, 0.8, 0.8);
+    ACOLOR(pfs, window_highlight, 1.0, 1.0, 1.0, 0.8);
+    ACOLOR(pfs, window_shadow, 0.6, 0.6, 0.6, 0.8);
+    ACOLOR(pfs, window_frame_halo, 1.0, 1.0, 1.0, 1.0);
+    ACOLOR(pfs, separator_line, 0.0, 0.0, 0.0, 0.0);
+    ACOLOR(pfs, contents_highlight, 1.0, 1.0, 1.0, 0.8);
+    ACOLOR(pfs, contents_shadow, 0.6, 0.6, 0.6, 0.8);
+    ACOLOR(pfs, contents_halo, 0.8, 0.8, 0.8, 0.8);
 
     pfs = new private_fs;
     ws->fs_inact->engine_fs = pfs;
 
-    ACOLOR(inner, 0.8, 0.8, 0.8, 0.3);
-    ACOLOR(outer, 0.8, 0.8, 0.8, 0.3);
-    ACOLOR(title_inner, 0.8, 0.8, 0.8, 0.6);
-    ACOLOR(title_outer, 0.8, 0.8, 0.8, 0.6);
-    ACOLOR(window_highlight, 1.0, 1.0, 1.0, 0.7);
-    ACOLOR(window_shadow, 0.6, 0.6, 0.6, 0.7);
-    ACOLOR(window_frame_halo, 1.0, 1.0, 1.0, 1.0);
-    ACOLOR(separator_line, 0.0, 0.0, 0.0, 0.0);
-    ACOLOR(contents_highlight, 1.0, 1.0, 1.0, 0.8);
-    ACOLOR(contents_shadow, 0.6, 0.6, 0.6, 0.8);
-    ACOLOR(contents_halo, 0.8, 0.8, 0.8, 0.8);
+    ACOLOR(pfs, inner, 0.8, 0.8, 0.8, 0.3);
+    ACOLOR(pfs, outer, 0.8, 0.8, 0.8, 0.3);
+    ACOLOR(pfs, title_inner, 0.8, 0.8, 0.8, 0.6);
+    ACOLOR(pfs, title_outer, 0.8, 0.8, 0.8, 0.6);
+    ACOLOR(pfs, window_highlight, 1.0, 1.0, 1.0, 0.7);
+    ACOLOR(pfs, window_shadow, 0.6, 0.6, 0.6, 0.7);
+    ACOLOR(pfs, window_frame_halo, 1.0, 1.0, 1.0, 1.0);
+    ACOLOR(pfs, separator_line, 0.0, 0.0, 0.0, 0.0);
+    ACOLOR(pfs, contents_highlight, 1.0, 1.0, 1.0, 0.8);
+    ACOLOR(pfs, contents_shadow, 0.6, 0.6, 0.6, 0.8);
+    ACOLOR(pfs, contents_halo, 0.8, 0.8, 0.8, 0.8);
 }
 
 extern "C"

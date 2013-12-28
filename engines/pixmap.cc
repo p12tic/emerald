@@ -441,10 +441,10 @@ void load_engine_settings(const KeyFile& f, window_settings* ws)
 {
     private_ws* pws = ws->engine_ws;
     std::string pre = "active";
-    PFACS(outer);
-    PFACS(inner);
-    PFACS(title_outer);
-    PFACS(title_inner);
+    PFACS(f, ws, outer, SECT);
+    PFACS(f, ws, inner, SECT);
+    PFACS(f, ws, title_outer, SECT);
+    PFACS(f, ws, title_inner, SECT);
     load_bool_setting(f, &pws->round_top_left, "round_top_left", SECT);
     load_bool_setting(f, &pws->round_top_right, "round_top_right", SECT);
     load_bool_setting(f, &pws->round_bottom_left, "round_bottom_left", SECT);
@@ -504,19 +504,19 @@ void init_engine(window_settings* ws)
     pfs = new private_fs;
     ws->fs_act->engine_fs = pfs;
     bzero(pfs, sizeof(private_fs));
-    ACOLOR(inner, 0.8, 0.8, 0.8, 0.5);
-    ACOLOR(outer, 0.8, 0.8, 0.8, 0.5);
-    ACOLOR(title_inner, 0.8, 0.8, 0.8, 0.8);
-    ACOLOR(title_outer, 0.8, 0.8, 0.8, 0.8);
+    ACOLOR(pfs, inner, 0.8, 0.8, 0.8, 0.5);
+    ACOLOR(pfs, outer, 0.8, 0.8, 0.8, 0.5);
+    ACOLOR(pfs, title_inner, 0.8, 0.8, 0.8, 0.8);
+    ACOLOR(pfs, title_outer, 0.8, 0.8, 0.8, 0.8);
 
     // private frame settings for inactive frames
     pfs = new private_fs;
     bzero(pfs, sizeof(private_fs));
     ws->fs_inact->engine_fs = pfs;
-    ACOLOR(inner, 0.8, 0.8, 0.8, 0.3);
-    ACOLOR(outer, 0.8, 0.8, 0.8, 0.3);
-    ACOLOR(title_inner, 0.8, 0.8, 0.8, 0.6);
-    ACOLOR(title_outer, 0.8, 0.8, 0.8, 0.6);
+    ACOLOR(pfs, inner, 0.8, 0.8, 0.8, 0.3);
+    ACOLOR(pfs, outer, 0.8, 0.8, 0.8, 0.3);
+    ACOLOR(pfs, title_inner, 0.8, 0.8, 0.8, 0.6);
+    ACOLOR(pfs, title_outer, 0.8, 0.8, 0.8, 0.6);
 }
 
 extern "C"

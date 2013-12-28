@@ -136,7 +136,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
     top = ws->win_extents.top + ws->titlebar_height;
 
     double m1 = MIN(ws->win_extents.left, ws->win_extents.right);
-    double m2 = MIN(ws->win_extents.top,  ws->win_extents.bottom);
+    double m2 = MIN(ws->win_extents.top, ws->win_extents.bottom);
 
     double border_width = MIN(m1, m2);
     double border_offset = border_width / 2.0;
@@ -186,8 +186,8 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
 extern "C"
 void load_engine_settings(const KeyFile& f, window_settings* ws)
 {
-    PFACS(border);
-    PFACS(title_bar);
+    PFACS(f, ws, border, SECT);
+    PFACS(f, ws, title_bar, SECT);
 }
 
 extern "C"
@@ -201,13 +201,13 @@ void init_engine(window_settings* ws)
 
     pfs = new private_fs;
     ws->fs_act->engine_fs = pfs;
-    ACOLOR(border, 0.0, 0.0, 0.0, 1.0);
-    ACOLOR(title_bar, 0.0, 0.0, 0.0, 0.3);
+    ACOLOR(pfs, border, 0.0, 0.0, 0.0, 1.0);
+    ACOLOR(pfs, title_bar, 0.0, 0.0, 0.0, 0.3);
 
     pfs = new private_fs;
     ws->fs_inact->engine_fs = pfs;
-    ACOLOR(border, 0.0, 0.0, 0.0, 1.0);
-    ACOLOR(title_bar, 0.0, 0.0, 0.0, 0.0);
+    ACOLOR(pfs, border, 0.0, 0.0, 0.0, 1.0);
+    ACOLOR(pfs, title_bar, 0.0, 0.0, 0.0, 0.0);
 }
 
 extern "C"

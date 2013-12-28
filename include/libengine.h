@@ -21,11 +21,11 @@ void load_font_setting(const KeyFile& f, PangoFontDescription** fd,
 void load_string_setting(const KeyFile& f, std::string& s, const std::string& key,
                          const std::string& sect);
 void cairo_set_source_alpha_color(cairo_t* cr, alpha_color* c);
-#define PFACS(zc) \
-    load_color_setting(f,&((private_fs *)ws->fs_act->engine_fs)->zc.color,"active_" #zc ,SECT);\
-    load_color_setting(f,&((private_fs *)ws->fs_inact->engine_fs)->zc.color,"inactive_" #zc ,SECT);\
-    load_float_setting(f,&((private_fs *)ws->fs_act->engine_fs)->zc.alpha,"active_" #zc "_alpha",SECT);\
-    load_float_setting(f,&((private_fs *)ws->fs_inact->engine_fs)->zc.alpha,"inactive_" #zc "_alpha",SECT);
+#define PFACS(f,ws,zc,SECT) \
+    load_color_setting((f),&((private_fs *)(ws)->fs_act->engine_fs)->zc.color,"active_" #zc ,SECT);\
+    load_color_setting((f),&((private_fs *)(ws)->fs_inact->engine_fs)->zc.color,"inactive_" #zc ,SECT);\
+    load_float_setting((f),&((private_fs *)(ws)->fs_act->engine_fs)->zc.alpha,"active_" #zc "_alpha",SECT);\
+    load_float_setting((f),&((private_fs *)(ws)->fs_inact->engine_fs)->zc.alpha,"inactive_" #zc "_alpha",SECT);
 
 void
 fill_rounded_rectangle(cairo_t*       cr,
