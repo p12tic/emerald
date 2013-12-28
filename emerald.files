@@ -65,6 +65,7 @@ libengine/emeraldengine.pc.in
 libengine/keyfile.cc
 libengine/setting_item.cc
 libengine/themer.cc
+m4/boost.m4
 misc/Makefile.am
 misc/application-x-emerald-theme.png
 misc/emerald-theme-manager.desktop

@@ -74,6 +74,7 @@ AC_ARG_ENABLE(mime-update,
 esac],[mime_update=false])
 AM_CONDITIONAL(MIMEUPDATE, test x$mime_update = xtrue)
 
+BOOST_REQUIRE([1.54.0])
 AC_PATH_PROG(UPDATE_MIME_DATABASE, update-mime-database)
 AC_PATH_PROG(UPDATE_DESKTOP_DATABASE, update-desktop-database)
 AC_PATH_PROG(UPDATE_ICON_CACHE, gtk-update-icon-cache)

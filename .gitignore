@@ -9,5 +9,6 @@ depcomp
 install-sh
 ltmain.sh
 m4/*
+!m4/boost.m4
 missing
 aclocal.m4
