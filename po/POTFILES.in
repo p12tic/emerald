@@ -1,4 +1,10 @@
 src/main.cc
+src/cairo_utils.cc
+src/decor.cc
+src/engine_loader.cc
+src/quads.cc
+src/utils.cc
+src/window.cc
 themer/main.cc
 libengine/themer.cc
 engines/legacy.cc

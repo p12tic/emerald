@@ -120,7 +120,17 @@ po/zh_CN.po
 po/zh_HK.po
 po/zh_TW.po
 src/Makefile.am
+src/cairo_utils.cc
+src/cairo_utils.h
+src/quads.cc
+src/quads.h
+src/decor.cc
+src/decor.h
 src/engine_loader.cc
 src/main.cc
+src/utils.cc
+src/utils.h
+src/window.cc
+src/window.h
 themer/Makefile.am
 themer/main.cc

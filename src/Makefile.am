@@ -10,8 +10,22 @@ emerald_LDFLAGS =                       \
     $(BOOST_FILESYSTEM_LDFLAGS)         \
     $(BOOST_SYSTEM_LDFLAGS)
 
-emerald_SOURCES = main.cc \
-               engine_loader.cc
+emerald_SOURCES =   \
+    main.cc             \
+    engine_loader.cc    \
+    cairo_utils.cc      \
+    decor.cc            \
+    quads.cc            \
+    window.cc           \
+    utils.cc
+
+noinst_HEADERS =   \
+    cairo_utils.h   \
+    decor.h     \
+    window.h    \
+    quads.h     \
+    utils.h
+
 emerald_program = emerald
 
 AM_CPPFLAGS = @EMERALD_CFLAGS@ -I$(top_srcdir)/include \
