@@ -41,6 +41,9 @@
 #define DECOR_INTERFACE_VERSION 0
 #endif
 
+#include <algorithm>
+#include <vector>
+
 #if defined (HAVE_LIBWNCK_2_19_4)
 #define wnck_window_get_geometry wnck_window_get_client_window_geometry
 #endif
@@ -137,7 +140,7 @@ static Gtk::Label* tip_label;
 static GTimeVal tooltip_last_popdown = { -1, -1 };
 static int tooltip_timer_tag = 0;
 
-static GSList* draw_list = NULL;
+static std::vector<decor_t*> g_draw_list;
 static unsigned draw_idle_id = 0;
 
 static bool enable_tooltips = true;
@@ -2215,25 +2218,20 @@ static void draw_switcher_decoration(decor_t* d)
 
 static bool draw_decor_list(void* data)
 {
-    GSList* list;
-    decor_t* d;
-
     draw_idle_id = 0;
 
-    for (list = draw_list; list; list = list->next) {
-        d = (decor_t*) list->data;
+    for (decor_t* d : g_draw_list) {
         (*d->draw)(d);
     }
 
-    g_slist_free(draw_list);
-    draw_list = NULL;
-
+    g_draw_list.clear();
     return false;
 }
 
 static void queue_decor_draw_for_buttons(decor_t* d, bool for_buttons)
 {
-    if (g_slist_find(draw_list, d)) {
+    auto it = std::find(g_draw_list.begin(), g_draw_list.end(), d);
+    if (it != g_draw_list.end()) {
         // handle possible previously queued drawing
         if (d->draw_only_buttons_region) {
             // the old drawing request is only for buttons, so override it
@@ -2244,7 +2242,7 @@ static void queue_decor_draw_for_buttons(decor_t* d, bool for_buttons)
 
     d->draw_only_buttons_region = for_buttons;
 
-    draw_list = g_slist_append(draw_list, d);
+    g_draw_list.push_back(d);
 
     if (!draw_idle_id) {
         draw_idle_id = g_idle_add(draw_decor_list, NULL);
@@ -3320,7 +3318,10 @@ static void remove_frame_window(WnckWindow* win)
     d->state = 0;
     d->actions = 0;
 
-    draw_list = g_slist_remove(draw_list, d);
+    auto it = std::find(g_draw_list.begin(), g_draw_list.end(), d);
+    if (it != g_draw_list.end()) {
+        g_draw_list.erase(it);
+    }
 }
 
 static void window_name_changed(WnckWindow* win)
@@ -3417,7 +3418,8 @@ static void active_window_changed(WnckScreen* screen)
         if (d && d->pixmap && d->decorated) {
             d->active = wnck_window_is_active(win);
             d->fs = (d->active ? d->fs->ws->fs_act : d->fs->ws->fs_inact);
-            if (!g_slist_find(draw_list, d)) {
+            if (std::find(g_draw_list.begin(), g_draw_list.end(), d) ==
+                    g_draw_list.end()) {
                 d->only_change_active = true;
             }
             d->prop_xid = wnck_window_get_xid(win);
@@ -3432,7 +3434,8 @@ static void active_window_changed(WnckScreen* screen)
         if (d && d->pixmap && d->decorated) {
             d->active = wnck_window_is_active(win);
             d->fs = (d->active ? d->fs->ws->fs_act : d->fs->ws->fs_inact);
-            if (!g_slist_find(draw_list, d)) {
+            if (std::find(g_draw_list.begin(), g_draw_list.end(), d) ==
+                    g_draw_list.end()) {
                 d->only_change_active = true;
             }
             d->prop_xid = wnck_window_get_xid(win);
