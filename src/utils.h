@@ -20,7 +20,7 @@
 #ifndef EMERALD_UTILS_H
 #define EMERALD_UTILS_H
 
-#include <emerald.h>
+#include <libengine/emerald.h>
 
 int get_b_offset(int b);
 int get_b_t_offset(int b_t);

@@ -20,7 +20,7 @@
 #include "window.h"
 #include "utils.h"
 #include "decor.h"
-#include <titlebar.h>
+#include <libengine/titlebar.h>
 #include <X11/Xatom.h>
 
 GdkPixmap* create_pixmap(int w, int h)

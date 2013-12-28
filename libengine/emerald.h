@@ -1,5 +1,5 @@
-#ifndef EMERALD_H
-#define EMERALD_H
+#ifndef EMERALD_LIBENGINE_EMERALD_H
+#define EMERALD_LIBENGINE_EMERALD_H
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -49,7 +49,7 @@
 #include <pango/pango-context.h>
 #include <pango/pangocairo.h>
 
-#include "keyfile.h"
+#include <libengine/keyfile.h>
 
 #include <dlfcn.h>
 #include <glib.h>
@@ -124,7 +124,7 @@ struct decor_color_t {
 };
 
 
-#include <titlebar.h>
+#include <libengine/titlebar.h>
 
 typedef void (*event_callback)(Wnck::Window* win, XEvent* event);
 

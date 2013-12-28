@@ -22,8 +22,8 @@
  *
  */
 
-#include <emerald.h>
-#include <engine.h>
+#include <libengine/emerald.h>
+#include <libengine/engine.h>
 
 #include <legacy_icon.h>
 

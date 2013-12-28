@@ -17,9 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <emerald.h>
-#include <libengine.h>
-#include <titlebar.h>
+#include <libengine/emerald.h>
+#include <libengine/libengine.h>
+#include <libengine/titlebar.h>
 #include "cairo_utils.h"
 #include "utils.h"
 

@@ -17,9 +17,9 @@
  *
  */
 
-#include <engine.h>
+#include <libengine/engine.h>
+#include <libengine/filesystem.h>
 #include <signal.h>
-#include "filesystem.h"
 #include <boost/algorithm/string.hpp>
 #include <list>
 #include <cstring>

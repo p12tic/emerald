@@ -20,8 +20,8 @@
 #ifndef EMERALD_QUADS_H
 #define EMERALD_QUADS_H
 
-#include <emerald.h>
-#include <libengine.h>
+#include <libengine/emerald.h>
+#include <libengine/libengine.h>
 
 void update_window_extents(window_settings* ws);
 int my_add_quad_row(decor_quad_t* q,

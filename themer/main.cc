@@ -1,10 +1,10 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <emerald.h>
-#include <engine.h>
-#include <keyfile.h>
-#include <filesystem.h>
+#include <libengine/emerald.h>
+#include <libengine/engine.h>
+#include <libengine/keyfile.h>
+#include <libengine/filesystem.h>
 #include <gtkmm.h>
 #include <boost/algorithm/string.hpp>
 #include <functional>

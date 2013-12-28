@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <keyfile.h>
+#include <libengine/keyfile.h>
 
 boost::optional<Glib::ustring> char_to_opt(char* r)
 {

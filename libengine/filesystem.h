@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef EMERALD_FILESYSTEM_H
-#define EMERALD_FILESYSTEM_H
+#ifndef EMERALD_LIBENGINE_FILESYSTEM_H
+#define EMERALD_LIBENGINE_FILESYSTEM_H
 
 // Ubuntu compiles the boost libraries in C++03 mode, thus we must not use
 // some C++11 features to avoid linker errors

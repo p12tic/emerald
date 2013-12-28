@@ -2,11 +2,10 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
-AM_CPPFLAGS = -I$(top_srcdir)/include $(BOOST_CPPFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir) $(BOOST_CPPFLAGS)
 SUBDIRS = \
 		  libengine \
 		  src \
-		  include \
 		  engines \
 		  themer \
 		  pixmaps \

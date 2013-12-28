@@ -17,9 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "setting_item.h"
-#include "libengine.h"
-#include "filesystem.h"
+#include <libengine/setting_item.h>
+#include <libengine/libengine.h>
+#include <libengine/filesystem.h>
 #include <list>
 #include <cstdlib>
 #include <memory>

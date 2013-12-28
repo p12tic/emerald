@@ -22,8 +22,8 @@
  */
 
 //vrunner engine
-#include <emerald.h>
-#include <engine.h>
+#include <libengine/emerald.h>
+#include <libengine/engine.h>
 #include <vrunner_icon.h>
 
 #define SECT "vrunner_settings"

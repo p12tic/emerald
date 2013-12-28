@@ -1,8 +1,8 @@
-#ifndef EMERALD_LIBENGINE_H
-#define EMERALD_LIBENGINE_H
+#ifndef EMERALD_LIBENGINE_LIBENGINE_H
+#define EMERALD_LIBENGINE_LIBENGINE_H
 
-#include <emerald.h>
-#include "setting_item.h"
+#include <libengine/emerald.h>
+#include <libengine/setting_item.h>
 #include <list>
 
 void copy_from_defaults_if_needed();
@@ -52,7 +52,7 @@ rounded_rectangle(cairo_t* cr,
 //////////////////////////////////////////////////////
 //themer stuff
 
-#include <titlebar.h>
+#include <libengine/titlebar.h>
 
 bool get_engine_meta_info(const std::string& engine, EngineMetaInfo* inf);   // returns false if couldn't find engine
 

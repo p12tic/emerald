@@ -20,7 +20,7 @@
 #ifndef EMERALD_WINDOW_UTILS_H
 #define EMERALD_WINDOW_UTILS_H
 
-#include <emerald.h>
+#include <libengine/emerald.h>
 
 GdkPixmap* create_pixmap(int w, int h);
 GdkPixmap* pixmap_new_from_pixbuf(GdkPixbuf* pixbuf);

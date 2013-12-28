@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-AM_CPPFLAGS = @EMERALD_CFLAGS@ -I$(top_srcdir)/include\
+AM_CPPFLAGS = @EMERALD_CFLAGS@ -I$(top_srcdir) \
 		   -DENGINE_DIR=\"$(enginesdir)\" \
 		   -DDEFTHEMEDIR='"@datadir@/emerald/theme/"' \
 		   -DDEFSETTINGSFILE='"@datadir@/emerald/settings.ini"'
@@ -22,3 +22,13 @@ lib_LTLIBRARIES = libemeraldengine.la
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = emeraldengine.pc
+
+emeraldinclude_HEADERS = \
+	emerald.h   \
+	engine.h    \
+	keyfile.h   \
+    filesystem.h    \
+	libengine.h     \
+	titlebar.h  \
+	setting_item.h
+emeraldincludedir = $(includedir)/emerald/libengine

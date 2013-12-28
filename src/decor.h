@@ -20,7 +20,7 @@
 #ifndef EMERALD_DECOR_H
 #define EMERALD_DECOR_H
 
-#include <emerald.h>
+#include <libengine/emerald.h>
 #include <vector>
 
 void reset_buttons_bg_and_fade(decor_t* d);

@@ -20,7 +20,7 @@
 #ifndef EMERALD_CAIRO_UTILS_H
 #define EMERALD_CAIRO_UTILS_H
 
-#include "emerald.h"
+#include <libengine/emerald.h>
 
 void gdk_cairo_set_source_color_alpha(cairo_t* cr, GdkColor* color, double alpha);
 void draw_shadow_background(decor_t* d, cairo_t* cr);

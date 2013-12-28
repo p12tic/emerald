@@ -17,8 +17,8 @@
  *
  */
 
-#include <engine.h>
-#include <filesystem.h>
+#include <libengine/engine.h>
+#include <libengine/filesystem.h>
 
 void copy_from_defaults_if_needed()
 {

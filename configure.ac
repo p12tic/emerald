@@ -70,7 +70,6 @@ AC_OUTPUT([
 libengine/emeraldengine.pc
 Makefile
 src/Makefile
-include/Makefile
 engines/Makefile
 themer/Makefile
 pixmaps/Makefile

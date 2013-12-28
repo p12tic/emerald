@@ -16,8 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef EMERALD_KEYFILE_H
-#define EMERALD_KEYFILE_H
+#ifndef EMERALD_LIBENGINE_KEYFILE_H
+#define EMERALD_LIBENGINE_KEYFILE_H
 
 #include <glibmm/keyfile.h>
 #include <boost/optional.hpp>

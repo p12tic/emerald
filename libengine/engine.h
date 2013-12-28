@@ -1,8 +1,8 @@
-#ifndef EMERALD_ENGINE_H
-#define EMERALD_ENGINE_H
+#ifndef EMERALD_LIBENGINE_ENGINE_H
+#define EMERALD_LIBENGINE_ENGINE_H
 
-#include <emerald.h>
-#include <libengine.h>
+#include <libengine/emerald.h>
+#include <libengine/libengine.h>
 
 typedef void (*init_engine_proc)(window_settings*);         // init_engine
 typedef void (*load_settings_proc)(const KeyFile& f, window_settings* ws);             // load_engine_settings

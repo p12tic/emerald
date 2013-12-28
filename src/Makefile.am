@@ -28,7 +28,7 @@ noinst_HEADERS =   \
 
 emerald_program = emerald
 
-AM_CPPFLAGS = @EMERALD_CFLAGS@ -I$(top_srcdir)/include \
+AM_CPPFLAGS = @EMERALD_CFLAGS@ -I$(top_srcdir) \
 		   -DLOCALEDIR="\"@datadir@/locale"\"\
 		   -DENGINE_DIR=\"$(enginesdir)\"
 

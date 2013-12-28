@@ -18,4 +18,4 @@ AM_CPPFLAGS = @EMERALD_CFLAGS@ \
 		   -DPIXMAPS_DIR=\""$(datadir)/pixmaps"\"\
 		   -DDATA_DIR=\""$(datadir)"\"\
 		   -DLOCALEDIR="\"@datadir@/locale"\"\
-		   -I$(top_srcdir)/include
+           -I$(top_srcdir)

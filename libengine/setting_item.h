@@ -16,10 +16,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef EMERALD_SETTING_ITEM_H
-#define EMERALD_SETTING_ITEM_H
+#ifndef EMERALD_LIBENGINE_SETTING_ITEM_H
+#define EMERALD_LIBENGINE_SETTING_ITEM_H
 
-#include "emerald.h"
+#include <libengine/emerald.h>
 
 enum SettingType {
     ST_BOOL,

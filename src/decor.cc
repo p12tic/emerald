@@ -27,8 +27,8 @@
 #include <X11/Xatom.h>
 #include <X11/Xregion.h>
 
-#include <emerald.h>
-#include <libengine.h>
+#include <libengine/emerald.h>
+#include <libengine/libengine.h>
 
 static unsigned draw_idle_id = 0;
 

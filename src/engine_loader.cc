@@ -18,9 +18,9 @@
  */
 
 //engine loader
-#include <emerald.h>
-#include <engine.h>
-#include <filesystem.h>
+#include <libengine/emerald.h>
+#include <libengine/engine.h>
+#include <libengine/filesystem.h>
 
 #define LOCAL_ENGINE_DIR ".emerald/engines"
 

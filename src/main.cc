@@ -20,8 +20,8 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <emerald.h>
-#include <engine.h>
+#include <libengine/emerald.h>
+#include <libengine/engine.h>
 #include "cairo_utils.h"
 #include "window.h"
 #include "utils.h"
