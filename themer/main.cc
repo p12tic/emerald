@@ -1477,9 +1477,7 @@ int main(int argc, char* argv[])
     main_window_ = new Gtk::Window();
 
     if (install_file == 1) {
-        GtkWidget* filechooserdialog1;
-        filechooserdialog1 = create_filechooserdialog1(input_file);
-        gtk_widget_show(filechooserdialog1);
+        create_filechooserdialog1(input_file);
     }
 
 #ifdef USE_DBUS
