@@ -1122,32 +1122,22 @@ void cb_clearbox(Gtk::Entry& w)
 static void cb_import()
 {
     //get a filename
-    GtkWidget* dialog = gtk_file_chooser_dialog_new(
-                            _("Import Theme..."), main_window_->gobj(),
-                            GTK_FILE_CHOOSER_ACTION_OPEN,
-                            GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                            GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-                            NULL);
-    char* pth = g_strdup_printf("%s/Desktop/", g_get_home_dir());
-    GtkFileFilter* filter = gtk_file_filter_new();
-    gtk_file_filter_set_name(filter, "Theme Packages");
-    gtk_file_filter_add_pattern(filter, "*.emerald");
-    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
-    gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog),
-                                        pth);
-    g_free(pth);
-    if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
-        char* filename;
-        char* thn;
-        filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-        thn = import_theme(filename);
-        g_free(filename);
-        refresh_theme_list(thn);
-        if (thn) {
-            g_free(thn);
-        }
+    Gtk::FileChooserDialog dialog{*main_window_, _("Import Theme..."),
+                                  Gtk::FILE_CHOOSER_ACTION_OPEN};
+
+    std::string homedir = g_get_home_dir();
+    std::string path = homedir + "/Desktop/";
+
+    Gtk::FileFilter filter;
+    filter.set_name("Theme Packages");
+    filter.add_pattern("*.emerald");
+    dialog.add_filter(filter);
+    dialog.set_current_folder(path);
+
+    if (dialog.run() == Gtk::RESPONSE_ACCEPT) {
+        std::string theme = import_theme(dialog.get_filename());
+        refresh_theme_list(theme);
     }
-    gtk_widget_destroy(dialog);
 }
 
 Gtk::Widget* build_tree_view()
@@ -1378,39 +1368,22 @@ void layout_themes_pane(Gtk::Box& vbox)
 //  layout_repo_pane(build_notebook_page(_("Repositories"),notebook));
 }
 
-GtkWidget* create_filechooserdialog1(const char* input)
+void create_filechooserdialog1(std::string input)
 {
-
     //get a filename
-    GtkWidget* dialog_startup = gtk_file_chooser_dialog_new(
-                                    _("Import Theme..."), NULL,
-                                    GTK_FILE_CHOOSER_ACTION_OPEN,
-                                    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                    GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-                                    NULL);
+    Gtk::FileChooserDialog dialog{*main_window_, _("Import Theme..."),
+                                  Gtk::FILE_CHOOSER_ACTION_OPEN};
 
-    char* pth = g_strdup_printf("%s", input);
-    GtkFileFilter* filter = gtk_file_filter_new();
-    gtk_file_filter_set_name(filter, "Theme Packages");
-    gtk_file_filter_add_pattern(filter, "*.emerald");
-    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog_startup), filter);
-    gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog_startup),
-                                  pth);
-    g_free(pth);
-    if (gtk_dialog_run(GTK_DIALOG(dialog_startup)) == GTK_RESPONSE_ACCEPT) {
-        char* filename;
-        char* thn;
-        filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog_startup));
-        thn = import_theme(filename);
-        g_free(filename);
-        refresh_theme_list(thn);
-        if (thn) {
-            g_free(thn);
-        }
+    Gtk::FileFilter filter;
+    filter.set_name("Theme Packages");
+    filter.add_pattern("*.emerald");
+    dialog.add_filter(filter);
+    dialog.set_filename(input);
+
+    if (dialog.run() == Gtk::RESPONSE_ACCEPT) {
+        std::string theme = import_theme(dialog.get_filename());
+        refresh_theme_list(theme);
     }
-
-    gtk_widget_destroy(dialog_startup);
-    return dialog_startup;
 }
 
 void layout_main_window()
