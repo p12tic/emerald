@@ -7,11 +7,14 @@
 #include <emerald.h>
 #include <engine.h>
 #include <keyfile.h>
+#include <filesystem.h>
 #include <gtkmm.h>
 #include <boost/algorithm/string.hpp>
 #include <functional>
 
 #define LAST_COMPAT_VER "0.1.0"
+
+namespace fs = boost::filesystem;
 
 struct FetcherInfo {
     Gtk::Dialog* dialog;
@@ -183,20 +186,17 @@ static void theme_list_append(const std::string& value, const std::string& dir,
 
 static void theme_scan_dir(const std::string& dir, bool writable)
 {
-    GDir* d = g_dir_open(dir.c_str(), 0, NULL);
-    if (!d) {
+    if (!fs::exists(dir)) {
         return;
     }
-    const char* name;
-    while ((name = g_dir_read_name(d))) {
-        auto fn = dir + "/" + name + "/theme.ini";
-        if (g_file_test(fn.c_str(), G_FILE_TEST_IS_REGULAR)) {
-            //actually add it here
+    for (auto& entry : fs::directory_iterator{dir}) {
+        fs::path fn = entry.path() / "theme.ini";
+        std::string name = entry.path().filename().native();
+        if (fs::is_regular_file(fn)) {
             std::string th_name = writable ? name : std::string{"* "} + name;
             theme_list_append(th_name, dir, name);
         }
     }
-    g_dir_close(d);
 }
 
 static void scroll_to_theme(const std::string& theme)
@@ -274,15 +274,10 @@ static void cb_load()
         return;
     }
     delete_button_->set_sensitive(!dist);
+
     std::string xt = std::string{g_get_home_dir()} + "/.emerald/theme/";
-    GDir* dr = g_dir_open(xt.c_str(), 0, NULL);
-    const char* gt;
-    while (dr && (gt = g_dir_read_name(dr))) {
-        auto ft = xt + "/" + gt;
-        g_unlink(ft.c_str());
-    }
-    if (dr) {
-        g_dir_close(dr);
+    for (auto& entry : fs::directory_iterator{xt}) {
+        fs::remove(entry.path());
     }
 
     std::string fn;
@@ -294,19 +289,9 @@ static void cb_load()
         at = std::string{g_get_home_dir()} + "/.emerald/themes/" + mt + "/";
     }
 
-    dr = g_dir_open(at.c_str(), 0, NULL);
-    while (dr && (gt = g_dir_read_name(dr))) {
-        char* nt;
-        gsize len;
-        std::string ft = at + "/" + gt;
-        if (g_file_get_contents(ft.c_str(), &nt, &len, NULL)) {
-            fn = xt + "/" + gt;
-            g_file_set_contents(ft.c_str(), nt, len, NULL);
-            g_free(nt);
-        }
-    }
-    if (dr) {
-        g_dir_close(dr);
+    for (auto& entry : fs::directory_iterator{at}) {
+        fs::path dest = fs::path{xt} / entry.path().filename();
+        fs::copy_file(entry.path(), dest);
     }
 
     KeyFile f;
@@ -332,33 +317,22 @@ static void cb_load()
     send_reload_signal();
 }
 
-static std::string import_theme(const std::string& file)
+static std::string import_theme(const std::string& file_s)
 {
-    //first make sure we have our location
-    std::string ext = ".emerald";
-    if (!boost::algorithm::ends_with(file, ext)) {
+    fs::path homedir = g_get_home_dir();
+    fs::path file = file_s;
+
+    if (file.extension() != ".emerald") {
         error_dialog(_("Invalid theme file.  Does not end in .emerald"));
         return NULL;
     }
 
-    // extract the file component
-    std::string name;
-    unsigned slash_pos = file.find_last_of('/');
-    if (slash_pos != std::string::npos) {
-        name = file.substr(slash_pos);
-    } else {
-        name = file;
-    }
-    // remove the extension
-    boost::algorithm::erase_tail(name, ext.length());
+    std::string name = file.stem().native();
+    fs::path theme_dir = homedir / ".emerald/themes" / name;
+    fs::create_directories(theme_dir);
 
-    // ---
-    std::string theme_dir = std::string{g_get_home_dir()} + "/.emerald/themes/"
-            + name + "/";
-    g_mkdir_with_parents(theme_dir.c_str(), 00755);
-
-    std::string quoted_dir = Glib::shell_quote(theme_dir);
-    std::string quoted_name = Glib::shell_quote(file);
+    std::string quoted_dir = Glib::shell_quote(theme_dir.native());
+    std::string quoted_name = Glib::shell_quote(file.native());
 
     std::string command = std::string{"tar -xzf "} + quoted_name + " -C " + quoted_dir;
     int ex;
@@ -371,8 +345,10 @@ static std::string import_theme(const std::string& file)
     return name;
 }
 
-static void export_theme(const std::string& file)
+static void export_theme(const std::string& file_s)
 {
+    fs::path homedir = g_get_home_dir();
+
     std::string themename = entry_box_->get_text();
     if (themename.empty() || themename[0] == '*'
             || themename.find_first_of('/') != std::string::npos) {
@@ -381,14 +357,16 @@ static void export_theme(const std::string& file)
         return;
     }
 
-    if (!boost::algorithm::ends_with(file, ".emerald")) {
+    fs::path file = file_s;
+    if (file.extension() != ".emerald") {
         error_dialog(_("Invalid File Name\nMust End in .emerald"));
         return;
     }
-    std::string theme_dir = std::string{g_get_home_dir()} + "/.emerald/theme/";
-    std::string quoted_dir = Glib::shell_quote(theme_dir);
 
-    std::string quoted_file = Glib::shell_quote(file);
+    fs::path theme_dir = homedir / ".emerald/theme";
+
+    std::string quoted_dir = Glib::shell_quote(theme_dir.native());
+    std::string quoted_file = Glib::shell_quote(file.native());
 
     std::string command = std::string{"tar -czf "} + quoted_file + " -C "
             + quoted_dir + " ./ --exclude=*~";
@@ -418,19 +396,18 @@ static void cb_save()
         return;
     }
 
-    std::string homedir = g_get_home_dir();
-    std::string fn = homedir + "/.emerald/themes/"  + at;
-    g_mkdir_with_parents(fn.c_str(), 00755);
-
-    fn += "/theme.ini";
+    fs::path homedir = g_get_home_dir();
+    fs::path theme_dir = homedir / ".emerald/themes" / at;
+    fs::create_directories(theme_dir);
+    fs::path fn = theme_dir / "theme.ini";
 
     KeyFile f;
-    f.load_from_file(fn);
+    f.load_from_file(fn.native());
     for (auto& item : get_setting_list()) {
         item.write_setting(f);
     }
     f.set_string("theme", "version", VERSION);
-    if (g_file_test(fn.c_str(), G_FILE_TEST_EXISTS)) {
+    if (fs::is_regular_file(fn)) {
         if (!confirm_dialog(_("Overwrite Theme %s?"), at)) {
             return;
         }
@@ -440,35 +417,26 @@ static void cb_save()
     std::string dt = f.to_data();
     //little fix since we're now copying from ~/.emerald/theme/*
 
-    fn = homedir + "/.emerald/theme/theme.ini";
-    if (!g_file_set_contents(fn.c_str(), dt.c_str(), -1, NULL)) {
+    fs::path def_fn = homedir / ".emerald/theme/theme.ini";
+
+    bool success = false;
+    try {
+        Glib::file_set_contents(def_fn.native(), dt);
+        success = true;
+    } catch (...) { // TODO: handle elsewhere
         error_dialog(_("Couldn't Write Theme"));
-    } else {
-        std::string xt = homedir + "/.emerald/themes/" + mt + "/";
-        GDir* dr = g_dir_open(xt.c_str(), 0, NULL);
-        const char* gt;
-        while (dr && (gt = g_dir_read_name(dr))) {
-            auto ft = xt + "/" + gt;
-            g_unlink(ft.c_str());
-        }
-        if (dr) {
-            g_dir_close(dr);
+    };
+    if (success) {
+        fs::path xt = homedir / ".emerald/themes" / mt;
+
+        for (auto& entry : fs::directory_iterator{xt}) {
+            fs::remove(entry.path());
         }
 
-        at = homedir + "/.emerald/theme/";
-        dr = g_dir_open(at.c_str(), 0, NULL);
-        while (dr && (gt = g_dir_read_name(dr))) {
-            char* nt;
-            gsize len;
-            auto ft = at + "/" + gt;
-            if (g_file_get_contents(ft.c_str(), &nt, &len, NULL)) {
-                ft = xt + "/" + gt;
-                g_file_set_contents(ft.c_str(), nt, len, NULL);
-                g_free(nt);
-            }
-        }
-        if (dr) {
-            g_dir_close(dr);
+        fs::path at = homedir / ".emerald/theme";
+        for (auto& entry : fs::directory_iterator{at}) {
+            fs::path dest = fs::path{xt} / entry.path().filename();
+            fs::copy_file(entry.path(), dest);
         }
         info_dialog(_("Theme Saved"));
     }
@@ -494,23 +462,13 @@ static void cb_delete(Gtk::Widget* w)
         return;
     }
 
-    std::string homedir = g_get_home_dir();
-    std::string fn = homedir + "/.emerald/themes/" + at  + "/theme.ini";
-    if (g_file_test(fn.c_str(), G_FILE_TEST_EXISTS)) {
+    fs::path homedir = g_get_home_dir();
+    fs::path fn = homedir / ".emerald/themes" / at / "theme.ini";
+    if (fs::is_regular_file(fn)) {
         if (!confirm_dialog(_("Are you sure you want to delete %s?"), at)) {
             return;
         } else {
-            auto pt = homedir + "/.emerald/themes/" + at + "/";
-            GDir* dir = g_dir_open(pt.c_str(), 0, NULL);
-            const char* ot;
-            while (dir && (ot = g_dir_read_name(dir))) {
-                auto mt = pt + "/" + ot;
-                g_unlink(mt.c_str());
-            }
-            if (dir) {
-                g_dir_close(dir);
-                g_rmdir(pt.c_str());
-            }
+            fs::remove_all(homedir / ".emerald/themes" / at);
         }
         info_dialog(_("Theme deleted"));
         w->set_sensitive(false);
@@ -1198,20 +1156,12 @@ Gtk::Widget* build_tree_view()
 
 void import_cache(Gtk::ProgressBar& progbar)
 {
-    GDir* d = g_dir_open(themecache.c_str(), 0, NULL);
-    if (!d) {
-        return;
-    }
-    const char* n;
-    while ((n = g_dir_read_name(d))) {
-        if (g_str_has_suffix(n, ".emerald")) {
-            std::string fn = themecache + "/" + n;
-            import_theme(fn);
+    for (auto& entry : fs::directory_iterator{themecache}) {
+        if (entry.path().extension() == ".emerald") {
+            import_theme(entry.path().native());
             progbar.pulse();
         }
-        g_free(n);
     }
-    g_dir_close(d);
 }
 
 bool watcher_func(FetcherInfo* fe)
@@ -1402,8 +1352,9 @@ int main(int argc, char* argv[])
     dbus_g_thread_init();
 #endif
 
-    g_mkdir_with_parents(g_strdup_printf("%s/.emerald/theme/", g_get_home_dir()), 00755);
-    g_mkdir_with_parents(g_strdup_printf("%s/.emerald/themes/", g_get_home_dir()), 00755);
+    fs::path homedir = g_get_home_dir();
+    fs::create_directories(homedir / ".emerald/theme");
+    fs::create_directories(homedir / ".emerald/themes");
 
     init_key_files();
 

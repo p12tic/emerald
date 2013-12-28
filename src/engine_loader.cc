@@ -20,8 +20,9 @@
 //engine loader
 #include <emerald.h>
 #include <engine.h>
+#include <filesystem.h>
 
-#define LOCAL_ENGINE_DIR g_get_home_dir(),".emerald/engines"
+#define LOCAL_ENGINE_DIR ".emerald/engines"
 
 static void* engine = NULL;
 init_engine_proc e_init = NULL;
@@ -43,11 +44,14 @@ bool load_engine(const std::string& engine_name, window_settings* ws)
         engine = NULL;
     }
     dlerror(); // clear errors
-    std::string path = std::string{LOCAL_ENGINE_DIR} + "/" + engine_ldname;
-    newengine = dlopen(path.c_str(), RTLD_NOW);
+
+    fs::path homedir = g_get_home_dir();
+    fs::path local_path = homedir / LOCAL_ENGINE_DIR / engine_ldname;
+    fs::path global_path = fs::path{ENGINE_DIR} / engine_ldname;
+
+    newengine = dlopen(local_path.native().c_str(), RTLD_NOW);
     if (!newengine) {
-        std::string path = std::string{ENGINE_DIR} + "/" + engine_ldname;
-        newengine = dlopen(path.c_str(), RTLD_NOW);
+        newengine = dlopen(global_path.native().c_str(), RTLD_NOW);
         if (!newengine) {
             g_warning("%s", dlerror());
             //here's where we should bail out somehow

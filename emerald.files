@@ -55,6 +55,7 @@ engines/zootreeves_icon.h
 include/Makefile.am
 include/emerald.h
 include/engine.h
+include/filesystem.h
 include/keyfile.h
 include/libengine.h
 include/setting_item.h

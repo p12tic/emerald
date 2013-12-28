@@ -19,9 +19,12 @@
 
 #include "setting_item.h"
 #include "libengine.h"
+#include "filesystem.h"
 #include <list>
 #include <cstdlib>
 #include <memory>
+
+namespace fs = boost::filesystem;
 
 extern std::shared_ptr<KeyFile> global_theme_file;
 extern std::shared_ptr<KeyFile> global_settings_file;
@@ -101,14 +104,15 @@ void SettingItem::write_setting(KeyFile& f)
         //unhandled types
     }
 }
+
+
 void SettingItem::write_setting_file()
 {
-    std::string homedir = g_get_home_dir();
-    std::string file = homedir + "/emerald/settings.ini";
-    std::string path = homedir + "/.emerald";
-    g_mkdir_with_parents(path.c_str(), 00755);
-    Glib::ustring at = global_settings_file->to_data();
-    g_file_set_contents(file.c_str(), at.c_str(), -1, NULL);
+    fs::path homedir = g_get_home_dir();
+    fs::create_directories(homedir / ".emerald");
+
+    fs::path file = homedir / ".emerald/settings.ini";
+    Glib::file_set_contents(file.native(), global_settings_file->to_data());
 }
 
 bool SettingItem::get_bool()

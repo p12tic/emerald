@@ -17,41 +17,30 @@
  *
  */
 
-///////////////////////////////////////////////////
-//emerald stuff
 #include <engine.h>
+#include <filesystem.h>
 
 void copy_from_defaults_if_needed()
 {
-    std::string homedir = g_get_home_dir();
-    std::string opath;
-    opath = homedir + "/.emerald/theme";
-    char* fcont;
-    gsize len = 0;
-    g_mkdir_with_parents(opath.c_str(), 0755);
+    fs::path homedir{g_get_home_dir()};
 
-    opath = homedir + "/.emerald/settings.ini";
-    if (!g_file_test(opath.c_str(), G_FILE_TEST_EXISTS)) {
-        if (g_file_get_contents(DEFSETTINGSFILE, &fcont, &len, NULL)) {
-            g_file_set_contents(opath.c_str(), fcont, len, NULL);
-            g_free(fcont);
-        }
+    fs::path cur_themes = homedir / ".emerald/theme";
+    fs::create_directories(cur_themes);
+
+    // copy the default settings.ini
+    fs::path opath = homedir / ".emerald/settings.ini";
+    fs::path orig_settings = DEFSETTINGSFILE;
+    if (!fs::is_regular_file(opath)) {
+        fs::copy_file(orig_settings, opath, fs::copy_option::overwrite_if_exists);
     }
 
-    opath = homedir + "/.emerald/theme/theme.ini";
-    if (!g_file_test(opath.c_str(), G_FILE_TEST_EXISTS)) {
-        GDir* d = g_dir_open(DEFTHEMEDIR, 0, NULL);
-        if (d) {
-            const char* n;
-            while ((n = g_dir_read_name(d))) {
-                std::string ipath = std::string{DEFTHEMEDIR} + n;
-                std::string npath = homedir + "/.emerald/theme/" + n;
-                if (g_file_get_contents(ipath.c_str(), &fcont, &len, NULL)) {
-                    g_file_set_contents(npath.c_str(), fcont, len, NULL);
-                    g_free(fcont);
-                }
-            }
-            g_dir_close(d);
+    // copy the default themes
+    opath = homedir / ".emerald/theme/theme.ini";
+    if (!fs::is_regular_file(opath)) {
+        fs::path def_themes = DEFTHEMEDIR;
+        for (auto& entry : fs::directory_iterator{def_themes}) {
+            fs::path dest = cur_themes / entry.path().filename();
+            fs::copy_file(entry.path(), dest);
         }
     }
 }

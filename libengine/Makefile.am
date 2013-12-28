@@ -4,7 +4,15 @@ AM_CPPFLAGS = @EMERALD_CFLAGS@ -I$(top_srcdir)/include\
 		   -DDEFTHEMEDIR='"@datadir@/emerald/theme/"' \
 		   -DDEFSETTINGSFILE='"@datadir@/emerald/settings.ini"'
 AM_CXXFLAGS = -fpermissive -std=c++11
-libemeraldengine_la_LIBADD = @EMERALD_LIBS@
+libemeraldengine_la_LIBADD =    \
+    @EMERALD_LIBS@              \
+    $(BOOST_FILESYSTEM_LIBS)    \
+    $(BOOST_SYSTEM_LIBS)
+
+libemeraldengine_la_LDFLAGS =   \
+    $(BOOST_FILESYSTEM_LDFLAGS) \
+    $(BOOST_SYSTEM_LDFLAGS)
+
 libemeraldengine_la_SOURCES =	\
 	emerald.cc 	\
 	keyfile.cc	\

@@ -19,10 +19,13 @@
 
 #include <engine.h>
 #include <signal.h>
+#include "filesystem.h"
 #include <boost/algorithm/string.hpp>
 #include <list>
 #include <cstring>
 #include <memory>
+
+namespace fs = boost::filesystem;
 
 EngineColumns g_engine_columns;
 std::list<SettingItem> g_setting_list;
@@ -209,18 +212,17 @@ void send_reload_signal()
 
 void apply_settings()
 {
-    std::string homedir = g_get_home_dir();
-    std::string file = homedir + "/.emerald/theme/theme.ini";
-    std::string path = homedir + "/.emerald/theme/";
+    fs::path homedir = g_get_home_dir();
+    fs::path path = homedir / ".emerald/theme";
+    fs::path file = path / "theme.ini";
 
     for (auto& item : g_setting_list) {
         item.write_setting(*global_theme_file);
     }
 
     global_theme_file->set_string("theme", "version", VERSION);
-    g_mkdir_with_parents(path.c_str(), 00755);
-    std::string at = global_theme_file->to_data();
-    g_file_set_contents(file.c_str(), at.c_str(), -1, NULL);
+    fs::create_directories(path);
+    Glib::file_set_contents(file.native(), global_theme_file->to_data());
     send_reload_signal();
 }
 
@@ -438,21 +440,20 @@ static void append_engine(const std::string& dlname)
 
 static void engine_scan_dir(const std::string& dir)
 {
-    GDir* d;
-    d = g_dir_open(dir.c_str(), 0, NULL);
-    if (d) {
-        GPatternSpec* ps = g_pattern_spec_new("lib*.so");
-        const char* n;
-        while ((n = g_dir_read_name(d))) {
-            if (g_pattern_match_string(ps, n)) {
-                std::string dln = dir + "/" + n;
-                append_engine(dln);
-            }
-        }
+    GPatternSpec* ps = g_pattern_spec_new("lib*.so");
+    if (!fs::is_directory(dir)) {
         g_pattern_spec_free(ps);
-        g_dir_close(d);
+        return;
     }
+
+    for (auto& entry : fs::directory_iterator(dir)) {
+        if (g_pattern_match_string(ps, entry.path().filename().c_str())) {
+            append_engine(entry.path().native());
+        }
+    }
+    g_pattern_spec_free(ps);
 }
+
 void init_engine_list()
 {
     //presumes the container & combo are created

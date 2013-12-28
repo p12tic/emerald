@@ -1,6 +1,8 @@
 ## Process this file with automake to produce Makefile.in
-AM_CPPFLAGS = -I$(top_srcdir)/include
+
 ACLOCAL_AMFLAGS = -I m4
+
+AM_CPPFLAGS = -I$(top_srcdir)/include $(BOOST_CPPFLAGS)
 SUBDIRS = \
 		  libengine \
 		  src \
