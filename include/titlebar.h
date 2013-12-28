@@ -38,7 +38,6 @@ enum btypes {
     B_T_STICKY,
     B_T_COUNT
 };
-#ifdef NEED_BUTTON_BISTATES
 static const bool btbistate[B_T_COUNT] = {
     false,
     true,
@@ -49,8 +48,6 @@ static const bool btbistate[B_T_COUNT] = {
     true,
     true,
 };
-#endif
-#ifdef NEED_BUTTON_STATE_FLAGS
 static const int btstateflag[B_T_COUNT] = {
     0,
     WNCK_WINDOW_STATE_MAXIMIZED_HORIZONTALLY | WNCK_WINDOW_STATE_MAXIMIZED_VERTICALLY,
@@ -61,7 +58,7 @@ static const int btstateflag[B_T_COUNT] = {
     WNCK_WINDOW_STATE_ABOVE,
     WNCK_WINDOW_STATE_STICKY,
 };
-#endif
+
 enum tbtypes {
     TBT_CLOSE = B_T_CLOSE,
     TBT_MAXIMIZE = B_T_MAXIMIZE,
@@ -77,7 +74,6 @@ enum tbtypes {
     TBT_COUNT,
 };
 #define BX_COUNT B_COUNT+2
-#ifdef NEED_BUTTON_ACTIONS
 static unsigned button_actions[B_T_COUNT] = {
     WNCK_WINDOW_ACTION_CLOSE,
     WNCK_WINDOW_ACTION_MAXIMIZE,
@@ -88,8 +84,6 @@ static unsigned button_actions[B_T_COUNT] = {
     0xFFFFFFFF,//WNCK_WINDOW_ACTION_ABOVE,
     WNCK_WINDOW_ACTION_STICK,
 };
-#endif
-#ifdef NEED_BUTTON_FILE_NAMES
 static const char* b_types[] = {
     "close",
     "max",
@@ -106,8 +100,6 @@ static const char* b_types[] = {
     "glow",
     "inactive_glow"
 };
-#endif
-#ifdef NEED_BUTTON_NAMES
 static const char* b_names[] = {
     "Close",
     "Maximize",
@@ -124,20 +116,16 @@ static const char* b_names[] = {
     "Glow(Halo)",
     "Inactive Glow"
 };
-#endif
 enum {
     DOUBLE_CLICK_SHADE = 0,
     DOUBLE_CLICK_MAXIMIZE,
     DOUBLE_CLICK_MINIMIZE,
     TITLEBAR_ACTION_COUNT
 };
-#ifdef NEED_TITLEBAR_ACTION_NAMES
 static const char* titlebar_action_name[TITLEBAR_ACTION_COUNT] = {
     "Shade",
     "Maximize/Restore",
     "Minimize",
 };
-#endif
-
 
 #endif

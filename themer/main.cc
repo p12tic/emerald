@@ -1,9 +1,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#define NEED_BUTTON_FILE_NAMES
-#define NEED_BUTTON_NAMES
-#define NEED_TITLEBAR_ACTION_NAMES
 #include <emerald.h>
 #include <engine.h>
 #include <keyfile.h>

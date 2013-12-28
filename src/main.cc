@@ -20,10 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#define NEED_BUTTON_BISTATES
-#define NEED_BUTTON_STATE_FLAGS
-#define NEED_BUTTON_ACTIONS
-#define NEED_BUTTON_FILE_NAMES
 #include <emerald.h>
 #include <engine.h>
 
