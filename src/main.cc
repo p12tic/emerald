@@ -45,10 +45,6 @@
 #include <algorithm>
 #include <vector>
 
-#if defined (HAVE_LIBWNCK_2_19_4)
-#define wnck_window_get_geometry wnck_window_get_client_window_geometry
-#endif
-
 void reload_all_settings(int sig);
 
 GdkPixmap* pdeb;
@@ -437,9 +433,6 @@ static void action_menu_map(WnckWindow* win, long button, Time time)
         return;
     case WNCK_WINDOW_NORMAL:
     case WNCK_WINDOW_DIALOG:
-#ifndef HAVE_LIBWNCK_2_19_3
-    case WNCK_WINDOW_MODAL_DIALOG:
-#endif
     case WNCK_WINDOW_TOOLBAR:
     case WNCK_WINDOW_MENU:
     case WNCK_WINDOW_UTILITY:
