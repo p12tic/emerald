@@ -24,24 +24,21 @@
 
 #define LOCAL_ENGINE_DIR ".emerald/engines"
 
-static void* engine = NULL;
-init_engine_proc e_init = NULL;
-fini_engine_proc e_fini = NULL;
-load_settings_proc e_load = NULL;
-draw_frame_proc e_draw = NULL;
+static EnginePlugin g_engine_plugin;
 
 bool load_engine(const std::string& engine_name, window_settings* ws)
 {
+    EnginePlugin& plugin = g_engine_plugin;
+
     void* newengine;
     ws->stretch_sides = true;
 
     std::string engine_ldname = std::string{"lib"} + engine_name + ".so";
-    if (engine) {
-        if (e_fini) {
-            e_fini(ws);
+    if (plugin.enginedl) {
+        if (plugin.fun_fini_engine) {
+            plugin.fun_fini_engine(ws);
         }
-        dlclose(engine);
-        engine = NULL;
+        dlclose(plugin.enginedl);
     }
     dlerror(); // clear errors
 
@@ -54,39 +51,35 @@ bool load_engine(const std::string& engine_name, window_settings* ws)
         newengine = dlopen(global_path.native().c_str(), RTLD_NOW);
         if (!newengine) {
             g_warning("%s", dlerror());
-            engine = nullptr;
+            plugin.clear();
             return false;
         }
     }
-    engine = newengine;
-    if (engine) {
+    plugin.clear();
+    plugin.enginedl = newengine;
+    if (plugin.enginedl) {
         //lookup our procs
-        e_init = dlsym(engine, "init_engine");
-        e_fini = dlsym(engine, "fini_engine");
-        e_load = dlsym(engine, "load_engine_settings");
-        e_draw = dlsym(engine, "engine_draw_frame");
-    } else {
-        e_init = NULL;
-        e_fini = NULL;
-        e_load = NULL;
-        e_draw = NULL;
+        plugin.fun_init_engine = reinterpret_cast<init_engine_proc>(dlsym(plugin.enginedl, "init_engine"));
+        plugin.fun_fini_engine = reinterpret_cast<fini_engine_proc>(dlsym(plugin.enginedl, "fini_engine"));
+        plugin.fun_load_settings = reinterpret_cast<load_settings_proc>(dlsym(plugin.enginedl, "load_engine_settings"));
+        plugin.fun_draw_frame = reinterpret_cast<draw_frame_proc>(dlsym(plugin.enginedl, "engine_draw_frame"));
     }
-    if (e_init) {
-        e_init(ws);
+    if (plugin.fun_init_engine) {
+        plugin.fun_init_engine(ws);
     }
-    return engine ? true : false;
+    return plugin.enginedl ? true : false;
 }
 
 void load_engine_settings(const KeyFile& f, window_settings* ws)
 {
-    if (e_load && engine) {
-        e_load(f, ws);
+    if (g_engine_plugin.enginedl && g_engine_plugin.fun_load_settings) {
+        g_engine_plugin.fun_load_settings(f, ws);
     }
 }
 void engine_draw_frame(decor_t* d, cairo_t* cr)
 {
-    if (e_draw && engine) {
-        e_draw(d, cr);
+    if (g_engine_plugin.enginedl && g_engine_plugin.fun_draw_frame) {
+        g_engine_plugin.fun_draw_frame(d, cr);
     }
 }
 
