@@ -54,7 +54,8 @@ bool load_engine(const std::string& engine_name, window_settings* ws)
         newengine = dlopen(global_path.native().c_str(), RTLD_NOW);
         if (!newengine) {
             g_warning("%s", dlerror());
-            //here's where we should bail out somehow
+            engine = nullptr;
+            return false;
         }
     }
     engine = newengine;
