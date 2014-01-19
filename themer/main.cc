@@ -1376,7 +1376,7 @@ int main(int argc, char* argv[])
     layout_main_window();
     main_window_->show_all();
 
-    refresh_theme_list(NULL);
+    refresh_theme_list("");
     copy_from_defaults_if_needed();
     init_settings();
     set_changed(false);
