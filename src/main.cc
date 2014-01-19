@@ -479,7 +479,7 @@ static int generic_button_event(Wnck::Window* win, XEvent* xevent,
         _("UnStick Window"),
     };
 
-    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+    decor_t* d = get_decor(win);
     unsigned state = d->button_states[button];
     int ret = 0;
 
@@ -684,7 +684,7 @@ static void title_event(Wnck::Window* win, XEvent* xevent)
     static unsigned int last_button_num = 0;
     static Window last_button_xwindow = None;
     static Time last_button_time = 0;
-    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+    decor_t* d = get_decor(win);
     window_settings* ws = d->fs->ws;
 
     if (xevent->type != ButtonPress) {
@@ -787,7 +787,7 @@ static void force_quit_dialog_realize(GtkWidget* dialog, void* data)
 static char* get_client_machine(Window xwindow)
 {
     Atom atom, type;
-    gulong nitems, bytes_after;
+    unsigned long nitems, bytes_after;
     char* str = NULL;
     unsigned char* sstr = NULL;
     int format, result;
@@ -855,7 +855,7 @@ static void
 force_quit_dialog_response(GtkWidget* dialog, int response, void* data)
 {
     Wnck::Window* win = data;
-    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+    decor_t* d = get_decor(win);
 
     if (response == GTK_RESPONSE_ACCEPT) {
         kill_window(win);
@@ -869,7 +869,7 @@ force_quit_dialog_response(GtkWidget* dialog, int response, void* data)
 
 static void show_force_quit_dialog(Wnck::Window* win, Time timestamp)
 {
-    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+    decor_t* d = get_decor(win);
     GtkWidget* dialog;
     char* tmp;
 
@@ -924,7 +924,7 @@ static void show_force_quit_dialog(Wnck::Window* win, Time timestamp)
 
 static void hide_force_quit_dialog(Wnck::Window* win)
 {
-    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+    decor_t* d = get_decor(win);
 
     if (d->force_quit_dialog) {
         gtk_widget_destroy(d->force_quit_dialog);
@@ -985,7 +985,7 @@ event_filter_func(GdkXEvent* gdkxevent, GdkEvent* event, void* data)
 
             win = Wnck::Window::get_for_xid(xid);
             if (win) {
-                decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+                decor_t* d = get_decor(win);
                 bool decorated = false;
 
                 if (get_mwm_prop(xid) & (MWM_DECOR_ALL | MWM_DECOR_TITLE)) {
@@ -1079,7 +1079,7 @@ event_filter_func(GdkXEvent* gdkxevent, GdkEvent* event, void* data)
                 above_button_event,
                 sticky_button_event,
             };
-            decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+            decor_t* d = get_decor(win);
 
             if (d->decorated) {
                 int i, j;
@@ -1816,7 +1816,7 @@ static void update_settings(window_settings* ws)
     update_default_decorations(gdkscreen, ws->fs_act, ws->fs_inact);
 
     for (auto* win : screen->get_windows()) {
-        decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+        decor_t* d = get_decor(win);
 
         if (d->decorated) {
             d->width = d->height = 0;

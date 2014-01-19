@@ -78,7 +78,7 @@ GdkPixmap* pixmap_new_from_pixbuf(GdkPixbuf* pixbuf)
 void position_title_object(char obj, Wnck::Window* win, window_settings* ws,
                            int x, int s)
 {
-    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+    decor_t* d = get_decor(win);
     int i = get_title_object_type(obj);
 
     if (i < 0) {
@@ -113,7 +113,7 @@ void position_title_object(char obj, Wnck::Window* win, window_settings* ws,
 
 void layout_title_objects(Wnck::Window* win)
 {
-    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+    decor_t* d = get_decor(win);
     window_settings* ws = d->fs->ws;
     unsigned i;
     int state = 0;
@@ -189,7 +189,7 @@ void layout_title_objects(Wnck::Window* win)
 void update_event_windows(Wnck::Window* win)
 {
     Display* xdisplay;
-    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+    decor_t* d = get_decor(win);
     int x, y, w, h;
     int i, j, k, l;
     window_settings* ws = d->fs->ws;
@@ -257,7 +257,7 @@ void update_event_windows(Wnck::Window* win)
 
 int max_window_name_width(Wnck::Window* win)
 {
-    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+    decor_t* d = get_decor(win);
     int w;
     window_settings* ws = d->fs->ws;
 
@@ -289,7 +289,7 @@ int max_window_name_width(Wnck::Window* win)
 
 void update_window_decoration_name(Wnck::Window* win)
 {
-    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+    decor_t* d = get_decor(win);
     glong name_length;
     PangoLayoutLine* line;
     window_settings* ws = d->fs->ws;
@@ -342,7 +342,7 @@ void update_window_decoration_name(Wnck::Window* win)
 
 void update_window_decoration_icon(Wnck::Window* win)
 {
-    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+    decor_t* d = get_decor(win);
 
     if (d->icon) {
         cairo_pattern_destroy(d->icon);
@@ -372,14 +372,14 @@ void update_window_decoration_icon(Wnck::Window* win)
 
 void update_window_decoration_state(Wnck::Window* win)
 {
-    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+    decor_t* d = get_decor(win);
 
     d->state = win->get_state();
 }
 
 void update_window_decoration_actions(Wnck::Window* win)
 {
-    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+    decor_t* d = get_decor(win);
 
     /* code to check for context help protocol */
     Atom actual;
@@ -430,7 +430,7 @@ void update_window_decoration_actions(Wnck::Window* win)
 
 bool update_window_decoration_size(Wnck::Window* win)
 {
-    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+    decor_t* d = get_decor(win);
     GdkPixmap* pixmap, *buffer_pixmap = NULL;
     GdkPixmap* ipixmap, *ibuffer_pixmap = NULL;
     int width, height;
@@ -536,8 +536,8 @@ void add_frame_window(Wnck::Window* win, Window frame)
 {
     Display* xdisplay;
     XSetWindowAttributes attr;
-    gulong xid = win->get_xid();
-    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+    unsigned long xid = win->get_xid();
+    decor_t* d = get_decor(win);
     int i, j;
 
     xdisplay = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
@@ -608,7 +608,7 @@ void add_frame_window(Wnck::Window* win, Window frame)
 
 bool update_switcher_window(Wnck::Window* win, Window selected)
 {
-    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+    decor_t* d = get_decor(win);
     GdkPixmap* pixmap, *buffer_pixmap = NULL;
     int height, width = 0;
     Wnck::Window* selected_win;
@@ -763,7 +763,7 @@ bool update_switcher_window(Wnck::Window* win, Window selected)
 
 void remove_frame_window(Wnck::Window* win)
 {
-    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+    decor_t* d = get_decor(win);
 
     if (d->p_active) {
         g_object_unref(G_OBJECT(d->p_active));
@@ -861,7 +861,7 @@ void remove_frame_window(Wnck::Window* win)
 
 void window_name_changed(Wnck::Window* win)
 {
-    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+    decor_t* d = get_decor(win);
 
     if (d->decorated && !update_window_decoration_size(win)) {
         update_button_regions(d);
@@ -871,7 +871,7 @@ void window_name_changed(Wnck::Window* win)
 
 void window_geometry_changed(Wnck::Window* win)
 {
-    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+    decor_t* d = get_decor(win);
 
     if (d->decorated) {
         auto r = win->get_geometry();
@@ -887,7 +887,7 @@ void window_geometry_changed(Wnck::Window* win)
 
 void window_icon_changed(Wnck::Window* win)
 {
-    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+    decor_t* d = get_decor(win);
 
     if (d->decorated) {
         update_window_decoration_icon(win);
@@ -898,7 +898,7 @@ void window_icon_changed(Wnck::Window* win)
 
 void window_state_changed(Wnck::WindowState, Wnck::WindowState, Wnck::Window* win)
 {
-    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+    decor_t* d = get_decor(win);
 
     if (d->decorated) {
         update_window_decoration_state(win);
@@ -915,7 +915,7 @@ void window_state_changed(Wnck::WindowState, Wnck::WindowState, Wnck::Window* wi
 void window_actions_changed(Wnck::WindowActions,
                             Wnck::WindowActions, Wnck::Window* win)
 {
-    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+    decor_t* d = get_decor(win);
 
     if (d->decorated) {
         update_window_decoration_actions(win);
@@ -943,7 +943,7 @@ void active_window_changed(Wnck::Window* previously_active_win,
     decor_t* d;
 
     if (win) {
-        d = win->get_data(Glib::QueryQuark("decor"));
+        d = get_decor(win);
         if (d && d->pixmap && d->decorated) {
             d->active = win->is_active();
             d->fs = (d->active ? d->fs->ws->fs_act : d->fs->ws->fs_inact);
@@ -959,7 +959,7 @@ void active_window_changed(Wnck::Window* previously_active_win,
 
     win = screen->get_active_window();
     if (win) {
-        d = win->get_data(Glib::QueryQuark("decor"));
+        d = get_decor(win);
         if (d && d->pixmap && d->decorated) {
             d->active = win->is_active();
             d->fs = (d->active ? d->fs->ws->fs_act : d->fs->ws->fs_inact);
@@ -978,7 +978,7 @@ void window_opened(Wnck::Window* win)
 {
     decor_t* d;
     Window window;
-    gulong xid;
+    unsigned long xid;
 
     d = g_malloc(sizeof(decor_t));
     if (!d) {
@@ -997,7 +997,7 @@ void window_opened(Wnck::Window* win)
 
     reset_buttons_bg_and_fade(d);
 
-    win->set_data(Glib::Quark("decor"), d);
+    set_decor(win, d);
 
     connect_window(win);
 
@@ -1014,7 +1014,7 @@ void window_opened(Wnck::Window* win)
 void window_closed(Wnck::Window* win)
 {
     Display* xdisplay = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
-    decor_t* d = win->get_data(Glib::QueryQuark("decor"));
+    decor_t* d = get_decor(win);
     Window window;
 
     gdk_error_trap_push();
@@ -1026,7 +1026,7 @@ void window_closed(Wnck::Window* win)
         remove_frame_window(win);
     }
 
-    win->set_data(Glib::Quark("decor"), nullptr);
+    set_decor(win, nullptr);
 
     g_free(d);
 }

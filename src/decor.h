@@ -23,6 +23,9 @@
 #include <libengine/emerald.h>
 #include <vector>
 
+decor_t* get_decor(Wnck::Window* win);
+void set_decor(Wnck::Window* win, decor_t* decor);
+
 void reset_buttons_bg_and_fade(decor_t* d);
 void stop_button_fade(decor_t* d);
 void draw_button_backgrounds(decor_t* d, int* necessary_update_type);

@@ -32,6 +32,16 @@
 
 static unsigned draw_idle_id = 0;
 
+decor_t* get_decor(Wnck::Window* win)
+{
+    return reinterpret_cast<decor_t*>(win->get_data(Glib::QueryQuark("decor")));
+}
+
+void set_decor(Wnck::Window* win, decor_t* decor)
+{
+    win->set_data(Glib::Quark("decor"), decor);
+}
+
 void reset_buttons_bg_and_fade(decor_t* d)
 {
     d->draw_only_buttons_region = false;
