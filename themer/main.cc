@@ -156,8 +156,9 @@ void theme_list_append(const std::string& value, const std::string& dir,
               "<b>Created By</b> %s\n"
               "<b>Use With</b> %s\n"
               "</small>");
+        std::string rvalue = value;
         if (value[0] == '*') {
-            value = value.substr(2);
+            rvalue = value.substr(2);
             format =
                 _("<b><big>%s</big></b> (System Theme)\n"
                   "<i>%s</i>\n"
@@ -168,7 +169,7 @@ void theme_list_append(const std::string& value, const std::string& dir,
                   "</small>");
         }
 
-        char* val = g_markup_printf_escaped(format, value.c_str(), s_desc.c_str(),
+        char* val = g_markup_printf_escaped(format, rvalue.c_str(), s_desc.c_str(),
                                             s_th_version.c_str(), s_creator.c_str(),
                                             s_sugg.c_str());
         row[theme_columns_.markup] = val ? val : "";
