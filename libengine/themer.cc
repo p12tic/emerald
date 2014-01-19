@@ -198,12 +198,12 @@ void send_reload_signal()
                                    &clientEvent);
         XSync(dpy, False);
     } else {
-        /* The old way */
-        const char* args[] =
-        {"killall", "-u", g_get_user_name(), "-SIGUSR1", "emerald", NULL};
-        const char* ret = NULL;
-        if (!g_spawn_sync(NULL, args, NULL, G_SPAWN_STDERR_TO_DEV_NULL | G_SPAWN_SEARCH_PATH,
-                          NULL, NULL, &ret, NULL, NULL, NULL) || !ret) {
+        std::vector<std::string> args =
+            {"killall", "-u", g_get_user_name(), "-SIGUSR1", "emerald", NULL};
+        int ret;
+        Glib::spawn_sync(".", args, Glib::SPAWN_STDERR_TO_DEV_NULL | Glib::SPAWN_SEARCH_PATH,
+                         sigc::slot<void>{}, nullptr, nullptr, &ret);
+        if (ret != 0) {
             g_warning("Couldn't find running emerald, no reload signal sent.");
         }
     }

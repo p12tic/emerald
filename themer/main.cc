@@ -332,11 +332,11 @@ static std::string import_theme(const std::string& file_s)
     std::string quoted_name = Glib::shell_quote(file.native());
 
     std::string command = std::string{"tar -xzf "} + quoted_name + " -C " + quoted_dir;
-    int ex;
-    if (!g_spawn_command_line_sync(command.c_str(), NULL, NULL, &ex, NULL) ||
-            (WIFEXITED(ex) && WEXITSTATUS(ex))) {
+    int ret;
+    Glib::spawn_command_line_sync(command, nullptr, nullptr, &ret);
+    if (WIFEXITED(ret) && WEXITSTATUS(ret)) {
         error_dialog("Error calling tar.");
-        return NULL;
+        return nullptr;
     }
 //   info_dialog(_("Theme Imported"));
     return name;
@@ -368,9 +368,9 @@ static void export_theme(const std::string& file_s)
     std::string command = std::string{"tar -czf "} + quoted_file + " -C "
             + quoted_dir + " ./ --exclude=*~";
 
-    int ex;
-    if (!g_spawn_command_line_sync(command.c_str(), NULL, NULL, &ex, NULL) ||
-            (WIFEXITED(ex) && WEXITSTATUS(ex))) {
+    int ret;
+    Glib::spawn_command_line_sync(command, nullptr, nullptr, &ret);
+    if (WIFEXITED(ret) && WEXITSTATUS(ret)) {
         error_dialog(_("Error calling tar."));
         return;
     }
@@ -1176,8 +1176,8 @@ bool watcher_func(FetcherInfo* fe)
 
 void fetch_svn()
 {
-    char* themefetcher[] = {g_strdup("svn"), g_strdup("co"), g_strdup(svnpath.c_str()), g_strdup(themecache.c_str()), NULL };
-    GPid pd;
+    std::vector<std::string> command = {"svn", "co", svnpath, themecache};
+    Glib::Pid pd;
     FetcherInfo* fe = new FetcherInfo();
     Gtk::Dialog& dialog = *Gtk::manage(new Gtk::Dialog(_("Fetching Themes"),
                                                        *main_window_,
@@ -1189,10 +1189,8 @@ void fetch_svn()
     auto& progbar = *Gtk::manage(new Gtk::ProgressBar());
     dialog.get_action_area()->pack_start(progbar, true, true);
     dialog.show_all();
-    g_spawn_async(NULL, themefetcher, NULL,
-                  G_SPAWN_SEARCH_PATH | G_SPAWN_DO_NOT_REAP_CHILD,
-                  NULL, NULL, &pd, NULL);
-    g_free(themefetcher[4]);
+    Glib::spawn_async(".", command, Glib::SPAWN_SEARCH_PATH | Glib::SPAWN_DO_NOT_REAP_CHILD,
+                      sigc::slot<void>{}, &pd);
     fe->dialog = &dialog;
     fe->progbar = &progbar;
     fe->pd = pd;
