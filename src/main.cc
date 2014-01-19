@@ -255,7 +255,7 @@ static void show_tooltip(const char* text)
         get_pointer is buggy. It takes a reference when it should not.
     */
     GdkScreen* screen;
-    gdk_display_get_pointer(gdkdisplay->gobj(), &screen, x, y, nullptr);
+    gdk_display_get_pointer(gdkdisplay->gobj(), &screen, &x, &y, nullptr);
 
     x -= (w / 2 + 4);
 
