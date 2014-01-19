@@ -192,10 +192,7 @@ void send_reload_signal()
         clientEvent.xclient.data.l[2]    = 0;
         clientEvent.xclient.data.l[3]    = 0;
         clientEvent.xclient.data.l[4]    = 0;
-        Status missed = XSendEvent(dpy, w,
-                                   False,
-                                   NoEventMask,
-                                   &clientEvent);
+        XSendEvent(dpy, w, False, NoEventMask, &clientEvent);
         XSync(dpy, False);
     } else {
         std::vector<std::string> args =
@@ -256,7 +253,6 @@ void setup_dbus()
 
 void do_engine(const std::string& name)
 {
-    GtkWidget* w;
     if (active_engine != name) {
         return;
     }
@@ -399,7 +395,6 @@ void append_engine(const std::string& dlname)
             get_meta_info_proc meta;
             g_engine_list.push_back(EngineData());
             EngineData* d = &g_engine_list.back();
-            GtkTreeIter i;
             const char* format =
                 "<b>%s</b> (%s)\n"
                 "<i><small>%s</small></i>";

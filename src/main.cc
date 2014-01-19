@@ -242,7 +242,7 @@ void show_tooltip(const std::string& text)
 
     tip_label->set_text(text);
 
-    Gtk::Requisition req;
+    Gtk::Requisition req{};
     tip_window->set_size_request(req.width, req.height);
 
     w = req.width;
@@ -927,6 +927,8 @@ void hide_force_quit_dialog(Wnck::Window* win)
 GdkFilterReturn
 event_filter_func(GdkXEvent* gdkxevent, GdkEvent* event, void* data)
 {
+    (void) event;
+    (void) data;
     Display* xdisplay;
     GdkDisplay* gdkdisplay;
     XEvent* xevent = reinterpret_cast<XEvent*>(gdkxevent);
@@ -1096,6 +1098,8 @@ event_filter_func(GdkXEvent* gdkxevent, GdkEvent* event, void* data)
 GdkFilterReturn selection_event_filter_func(GdkXEvent* gdkxevent,
                                             GdkEvent* event, void* data)
 {
+    (void) event;
+    (void) data;
     Display* xdisplay;
     GdkDisplay* gdkdisplay;
     XEvent* xevent = reinterpret_cast<XEvent*>(gdkxevent);
@@ -1524,7 +1528,7 @@ void load_buttons_glow_images(window_settings* ws)
             g_object_unref(ws->ButtonGlowArray);
         }
         std::string file1 = make_filename("buttons", "glow", "png");
-        if (ws->ButtonGlowArray = gdk_pixbuf_new_from_file(file1.c_str(), NULL)) {
+        if ((ws->ButtonGlowArray = gdk_pixbuf_new_from_file(file1.c_str(), NULL))) {
             success1 = true;
         }
     }
@@ -1533,8 +1537,8 @@ void load_buttons_glow_images(window_settings* ws)
             g_object_unref(ws->ButtonInactiveGlowArray);
         }
         std::string file2 = make_filename("buttons", "inactive_glow", "png");
-        if (ws->ButtonInactiveGlowArray =
-                     gdk_pixbuf_new_from_file(file2.c_str(), NULL)) {
+        if ((ws->ButtonInactiveGlowArray =
+                     gdk_pixbuf_new_from_file(file2.c_str(), NULL))) {
             success2 = true;
         }
     }
@@ -1741,7 +1745,6 @@ void update_settings(window_settings* ws)
     // Display    *xdisplay;
     GdkScreen* gdkscreen;
     Wnck::Screen* screen = Wnck::Screen::get_default();
-    GList* windows;
 
     load_settings(ws);
 
@@ -1796,6 +1799,7 @@ void reload_all_settings(int sig)
 #endif
 bool reload_if_needed(void* p)
 {
+    (void) p;
     if (do_reload) {
         do_reload = false;
         puts("Reloading...");

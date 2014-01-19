@@ -488,7 +488,7 @@ bool cb_main_destroy(GdkEventAny*)
 
 void layout_button_box(Gtk::Box& vbox, int b_t)
 {
-
+    (void) vbox;
     table_append(*Gtk::manage(new Gtk::Label(b_names[b_t])), false);
     std::string bt_nm = std::string(b_names[b_t]) + " Button Pixmap";
     auto& filesel = *Gtk::manage(new Gtk::FileChooserButton(bt_nm,
@@ -578,6 +578,7 @@ void layout_window_frame(Gtk::Box& vbox, bool active)
 
 void add_row(Gtk::Box& vbox, Gtk::Widget& item, const std::string& title)
 {
+    (void) vbox;
     //vbox.pack_start(*Gtk::manage(new Gtk::Label(title)),false,false);
     //vbox.pack_end(item,true,true,0);
     table_append(*Gtk::manage(new Gtk::Label(title)), false);
@@ -839,7 +840,6 @@ void layout_global_pane(Gtk::Box& vbox)
 
 void layout_screenshot_frame(Gtk::Box& vbox)
 {
-    GtkFileFilter* imgfilter;
     SettingItem* item;
 
     auto& image = *Gtk::manage(new Gtk::Image());

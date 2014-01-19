@@ -260,6 +260,7 @@ rounded_rectangle(cairo_t* cr,
                   window_settings* ws,
                   double  radius)
 {
+    (void) ws;
     if (radius == 0) {
         corner = 0;
     }

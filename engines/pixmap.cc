@@ -525,8 +525,6 @@ void fini_engine(window_settings* ws)
 
 void layout_corners_frame(Gtk::Box& vbox)
 {
-    GtkWidget* junk;
-
     Gtk::CheckButton* btn;
     btn = Gtk::manage(new Gtk::CheckButton(_("Round Top Left Corner")));
     vbox.pack_start(*btn, false, false);
@@ -599,6 +597,7 @@ void layout_engine_colors(Gtk::Box& vbox)
 
 void layout_pixmap_box(Gtk::Box& vbox, int b_t, bool active)
 {
+    (void) vbox;
     std::string pre = active ? "active" : "inactive";
     std::string key = pre + "_" + p_types[b_t];
 

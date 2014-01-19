@@ -950,6 +950,7 @@ void queue_decor_draw(decor_t* d)
 
 bool draw_decor_list(void* data)
 {
+    (void) data;
     draw_idle_id = 0;
 
     for (decor_t* d : g_draw_list) {
@@ -963,6 +964,7 @@ bool draw_decor_list(void* data)
 
 void draw_buttons_with_fade(decor_t* d, cairo_t* cr, double y1)
 {
+    (void) cr;
     window_settings* ws = d->fs->ws;
     int b_t;
 

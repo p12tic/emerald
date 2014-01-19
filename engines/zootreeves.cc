@@ -130,7 +130,7 @@ rounded_rectangle_independent(cairo_t* cr,
                               double  left_bar_dip_offset
                              )
 {
-
+    (void) ws;
     int left_top_radius_on = 1;
     int right_top_radius_on = 1;
     int left_bottom_radius_on = 1;
@@ -334,7 +334,7 @@ rounded_square(cairo_t* cr,
                double left_bar_dip_offset
               )
 {
-
+    (void) ws;
     // always_allow 1 = radius_top_left
     // always_allow 2 = radius_top_right
     // always_allow 3 = radius_bottom_left
@@ -1267,9 +1267,6 @@ void fini_engine(window_settings* ws)
 
 void layout_layout_frame(Gtk::Box& vbox)
 {
-    GtkWidget* hbox;
-    GtkWidget* junk;
-
     {
     auto& hbox = *Gtk::manage(new Gtk::HBox(false, 2));
     vbox.pack_start(hbox, false, false);

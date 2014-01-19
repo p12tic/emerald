@@ -305,6 +305,7 @@ void draw_button_with_glow_alpha_bstate(int b_t, decor_t* d, cairo_t* cr,
                                         int y1, double button_alpha,
                                         double glow_alpha, int b_state)
 {
+    (void) y1;
     int b = b_t;
     double x, y;
     double x2, y2;
