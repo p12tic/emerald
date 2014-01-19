@@ -186,7 +186,7 @@ bool get_window_prop(Window xwindow, Atom atom, Window* val)
                                 atom,
                                 0, G_MAXLONG,
                                 False, XA_WINDOW, &type, &format, &nitems,
-                                &bytes_after, (void*)&w);
+                                &bytes_after, reinterpret_cast<unsigned char**>(&w));
     err = gdk_error_trap_pop();
     if (err != Success || result != Success) {
         return false;

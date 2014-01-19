@@ -637,9 +637,9 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
     alpha_color outer_title_color;
 
     frame_settings* fs = d->fs;
-    private_fs* pfs = fs->engine_fs;
+    private_fs* pfs = reinterpret_cast<private_fs*>(fs->engine_fs);
     window_settings* ws = fs->ws;
-    private_ws* pws = ws->engine_ws;
+    private_ws* pws = reinterpret_cast<private_ws*>(ws->engine_ws);
 
     //printf("Higher - Red: %i, Green %i, Blue %i \n",
     //pfs->window_frame_halo.color.r, pfs->window_frame_halo.color.g,
@@ -1116,7 +1116,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
 extern "C"
 void load_engine_settings(const KeyFile& f, window_settings* ws)
 {
-    private_ws* pws = ws->engine_ws;
+    private_ws* pws = reinterpret_cast<private_ws*>(ws->engine_ws);
 
     PFACS(f, ws, outer, SECT);
     PFACS(f, ws, inner, SECT);

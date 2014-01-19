@@ -123,7 +123,7 @@ extern "C"
 void engine_draw_frame(decor_t* d, cairo_t* cr)
 {
     frame_settings* fs = d->fs;
-    private_fs* pfs = fs->engine_fs;
+    private_fs* pfs = reinterpret_cast<private_fs*>(fs->engine_fs);
     window_settings* ws = fs->ws;
 
     double x1, y1, x2, y2;

@@ -68,9 +68,9 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
     double        x1, y1, x2, y2, h;
     int       top;
     frame_settings* fs = d->fs;
-    private_fs* pfs = fs->engine_fs;
+    private_fs* pfs = reinterpret_cast<private_fs*>(fs->engine_fs);
     window_settings* ws = fs->ws;
-    private_ws* pws = ws->engine_ws;
+    private_ws* pws = reinterpret_cast<private_ws*>(ws->engine_ws);
     double pleft;
     double ptop;
     double pwidth;
@@ -276,7 +276,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
 extern "C"
 void load_engine_settings(const KeyFile& f, window_settings* ws)
 {
-    private_ws* pws = ws->engine_ws;
+    private_ws* pws = reinterpret_cast<private_ws*>(ws->engine_ws);
 
     // parse color settings
     PFACS(f, ws, outer, SECT);

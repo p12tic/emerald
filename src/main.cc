@@ -163,8 +163,8 @@ update_default_decorations(GdkScreen* screen, frame_settings* fs_act,
     d.buffer_pixmap = NULL;
     d.layout = NULL;
     d.icon = NULL;
-    d.state = 0;
-    d.actions = 0;
+    d.state = static_cast<Wnck::WindowState>(0);
+    d.actions = static_cast<Wnck::WindowActions>(0);
     d.prop_xid = 0;
     d.draw = draw_window_decoration;
     d.only_change_active = false;
@@ -772,7 +772,7 @@ void bottom_right_event(Wnck::Window* win, XEvent* xevent)
 
 void force_quit_dialog_realize(GtkWidget* dialog, void* data)
 {
-    Wnck::Window* win = data;
+    Wnck::Window* win = reinterpret_cast<Wnck::Window*>(data);
 
     gdk_error_trap_push();
     XSetTransientForHint(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()),
@@ -846,7 +846,7 @@ void kill_window(Wnck::Window* win)
 
 void force_quit_dialog_response(GtkWidget* dialog, int response, void* data)
 {
-    Wnck::Window* win = data;
+    Wnck::Window* win = reinterpret_cast<Wnck::Window*>(data);
     decor_t* d = get_decor(win);
 
     if (response == GTK_RESPONSE_ACCEPT) {
@@ -874,7 +874,7 @@ void show_force_quit_dialog(Wnck::Window* win, Time timestamp)
     tmp = g_markup_escape_text(name.c_str(), -1);
     std::string str = format(_("The window \"%s\" is not responding."), tmp);
 
-    dialog = gtk_message_dialog_new(NULL, 0,
+    dialog = gtk_message_dialog_new(NULL, static_cast<GtkDialogFlags>(0),
                                     GTK_MESSAGE_WARNING,
                                     GTK_BUTTONS_NONE,
                                     "<b>%s</b>\n\n%s",
@@ -929,7 +929,7 @@ event_filter_func(GdkXEvent* gdkxevent, GdkEvent* event, void* data)
 {
     Display* xdisplay;
     GdkDisplay* gdkdisplay;
-    XEvent* xevent = gdkxevent;
+    XEvent* xevent = reinterpret_cast<XEvent*>(gdkxevent);
     unsigned long xid = 0;
 
     gdkdisplay = gdk_display_get_default();
@@ -1098,7 +1098,7 @@ GdkFilterReturn selection_event_filter_func(GdkXEvent* gdkxevent,
 {
     Display* xdisplay;
     GdkDisplay* gdkdisplay;
-    XEvent* xevent = gdkxevent;
+    XEvent* xevent = reinterpret_cast<XEvent*>(gdkxevent);
     int status;
 
     gdkdisplay = gdk_display_get_default();
@@ -1305,8 +1305,8 @@ int update_shadow(frame_settings* fs)
     d.buffer_pixmap = NULL;
     d.layout = NULL;
     d.icon = NULL;
-    d.state = 0;
-    d.actions = 0;
+    d.state = static_cast<Wnck::WindowState>(0);
+    d.actions = static_cast<Wnck::WindowActions>(0);
     d.prop_xid = 0;
     d.draw = draw_shadow_window;
     d.active = true;
@@ -2052,7 +2052,7 @@ int main(int argc, char* argv[])
 
     update_settings(ws);
 
-    g_timeout_add(500, reload_if_needed, NULL);
+    g_timeout_add(500, reinterpret_cast<GSourceFunc>(reload_if_needed), NULL);
 
     kit.run();
     gdk_error_trap_pop();

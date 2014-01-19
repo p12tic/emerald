@@ -141,7 +141,7 @@ void create_glow(decor_t* d, cairo_t* cr,
     double hp = p;
     //cairo_rectangle(cr, x1, y1, w, h);
     frame_settings* fs = d->fs;
-    // private_fs * pfs = fs->engine_fs;
+    // private_fs * pfs = reinterpret_cast<private_fs*>(fs->engine_fs);
     window_settings* ws = fs->ws;
     if (wp * 2 > w) {
         wp = w / 2;
@@ -221,9 +221,9 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
     int           top, title_width = 0, title_height = 0, title_pos;
     // double        curve_offset;
     frame_settings* fs = d->fs;
-    private_fs* pfs = fs->engine_fs;
+    private_fs* pfs = reinterpret_cast<private_fs*>(fs->engine_fs);
     window_settings* ws = fs->ws;
-    private_ws* pws = ws->engine_ws;
+    private_ws* pws = reinterpret_cast<private_ws*>(ws->engine_ws);
     double pleft;
     double ptop;
     double pwidth;
@@ -452,7 +452,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
 extern "C"
 void load_engine_settings(const KeyFile& f, window_settings* ws)
 {
-    private_ws* pws = ws->engine_ws;
+    private_ws* pws = reinterpret_cast<private_ws*>(ws->engine_ws);
 
     // color settings
     PFACS(f, ws, title_left, SECT);
@@ -472,13 +472,13 @@ void load_engine_settings(const KeyFile& f, window_settings* ws)
     FLTS(curve_offset);
     FLTS(title_notch_position);
 
-    private_fs* pfs = ws->fs_act->engine_fs;
+    private_fs* pfs = reinterpret_cast<private_fs*>(ws->fs_act->engine_fs);
     CCOLOR(pfs, title_left_lower, title_left);
     CCOLOR(pfs, title_middle_lower, title_middle);
     CCOLOR(pfs, title_right_lower, title_right);
     load_bool_setting(f, &pfs->use_glow, "active_use_glow", SECT);
 
-    pfs = ws->fs_inact->engine_fs;
+    pfs = reinterpret_cast<private_fs*>(ws->fs_inact->engine_fs);
     CCOLOR(pfs, title_left_lower, title_left);
     CCOLOR(pfs, title_middle_lower, title_middle);
     CCOLOR(pfs, title_right_lower, title_right);

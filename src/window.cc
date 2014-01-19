@@ -411,7 +411,7 @@ void update_window_decoration_actions(Wnck::Window* win)
             memcpy(&a, data, sizeof(Atom));
             XFree((void*)data);
             if (a == net_wm_context_help_atom) {
-                d->actions |= FAKE_WINDOW_ACTION_HELP;
+                d->actions |= static_cast<Wnck::WindowActions>(FAKE_WINDOW_ACTION_HELP);
             }
             data = NULL;
         } else if (result != Success) {
@@ -837,8 +837,8 @@ void remove_frame_window(Wnck::Window* win)
 
     d->decorated = false;
 
-    d->state = 0;
-    d->actions = 0;
+    d->state = static_cast<Wnck::WindowState>(0);
+    d->actions = static_cast<Wnck::WindowActions>(0);
 
     auto it = std::find(g_draw_list.begin(), g_draw_list.end(), d);
     if (it != g_draw_list.end()) {

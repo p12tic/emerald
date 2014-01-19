@@ -198,9 +198,9 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
     int           top, title_width, title_pos;
     int           title_left_width, title_right_width;
     frame_settings* fs = d->fs;
-    private_fs* pfs = fs->engine_fs;
+    private_fs* pfs = reinterpret_cast<private_fs*>(fs->engine_fs);
     window_settings* ws = fs->ws;
-    private_ws* pws = ws->engine_ws;
+    private_ws* pws = reinterpret_cast<private_ws*>(ws->engine_ws);
 
     top = ws->win_extents.top + ws->titlebar_height;
     x1 = ws->left_space - ws->win_extents.left;
@@ -439,7 +439,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
 extern "C"
 void load_engine_settings(const KeyFile& f, window_settings* ws)
 {
-    private_ws* pws = ws->engine_ws;
+    private_ws* pws = reinterpret_cast<private_ws*>(ws->engine_ws);
     std::string pre = "active";
     PFACS(f, ws, outer, SECT);
     PFACS(f, ws, inner, SECT);
@@ -454,7 +454,7 @@ void load_engine_settings(const KeyFile& f, window_settings* ws)
     load_float_setting(f, &pws->bottom_corner_radius, "bottom_radius", SECT);
 
     // Active window
-    private_fs* pfs = ws->fs_act->engine_fs;
+    private_fs* pfs = reinterpret_cast<private_fs*>(ws->fs_act->engine_fs);
     for (int i = 0; i < 11; i++) {
         std::string key = pre + "_" + p_types[i];
         TEXTURE_FROM_PNG(pfs->pixmaps[i].surface, make_filename("pixmaps", key, "png").c_str());
@@ -467,7 +467,7 @@ void load_engine_settings(const KeyFile& f, window_settings* ws)
     }
 
     // Inactive window
-    pfs = ws->fs_inact->engine_fs;
+    pfs = reinterpret_cast<private_fs*>(ws->fs_inact->engine_fs);
     if (!pws->inactive_use_active_pixmaps) {
         pre = "inactive";
     }

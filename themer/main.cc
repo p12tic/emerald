@@ -1197,7 +1197,7 @@ void fetch_svn()
     fe->dialog = &dialog;
     fe->progbar = &progbar;
     fe->pd = pd;
-    g_timeout_add(100, watcher_func, fe);
+    g_timeout_add(100, reinterpret_cast<GSourceFunc>(watcher_func), fe);
 }
 
 void fetch_gpl_svn()

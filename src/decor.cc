@@ -938,7 +938,7 @@ void queue_decor_draw_for_buttons(decor_t* d, bool for_buttons)
     g_draw_list.push_back(d);
 
     if (!draw_idle_id) {
-        draw_idle_id = g_idle_add(draw_decor_list, NULL);
+        draw_idle_id = g_idle_add(reinterpret_cast<GSourceFunc>(draw_decor_list), NULL);
     }
 }
 
@@ -1014,7 +1014,7 @@ void draw_buttons_with_fade(decor_t* d, cairo_t* cr, double y1)
         // this function is called twice, first with S_(IN)ACTIVE, then with S_(IN)ACTIVE_PRESS
         // where it should have been only once with S_(IN)ACTIVE_PRESS
     {
-        fade_info->d = (void*) d;
+        fade_info->d = reinterpret_cast<void**>(d);
         fade_info->y1 = y1;
         if (draw_buttons_timer_func((void*) fade_info) == true) {      // call once now
             // and start a new timer for the next step

@@ -391,7 +391,7 @@ void append_engine(const std::string& dlname)
     }
     std::string can = canonize_name(dlname);
     if (engine_is_unique(can)) {
-        layout_settings_proc lay = dlsym(hand, "layout_engine_settings");
+        layout_settings_proc lay = reinterpret_cast<layout_settings_proc>(dlsym(hand, "layout_engine_settings"));
         if ((err = dlerror())) {
             g_warning("%s", err);
         }
@@ -403,7 +403,7 @@ void append_engine(const std::string& dlname)
             const char* format =
                 "<b>%s</b> (%s)\n"
                 "<i><small>%s</small></i>";
-            meta = dlsym(hand, "get_meta_info");
+            meta = reinterpret_cast<get_meta_info_proc>(dlsym(hand, "get_meta_info"));
             if ((err = dlerror())) {
                 g_warning("%s", err);
             }
