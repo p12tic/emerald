@@ -59,6 +59,8 @@ libengine/emerald.h
 libengine/emeraldengine.pc.in
 libengine/engine.h
 libengine/filesystem.h
+libengine/format.cc
+libengine/format.h
 libengine/keyfile.cc
 libengine/keyfile.h
 libengine/libengine.h

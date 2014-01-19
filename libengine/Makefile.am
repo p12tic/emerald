@@ -17,6 +17,7 @@ libemeraldengine_la_LDFLAGS =   \
 
 libemeraldengine_la_SOURCES =	\
 	emerald.cc 	\
+	format.cc 	\
 	keyfile.cc	\
 	themer.cc 	\
 	setting_item.cc
@@ -28,8 +29,9 @@ pkgconfig_DATA = emeraldengine.pc
 emeraldinclude_HEADERS = \
 	emerald.h   \
 	engine.h    \
+	format.h   \
 	keyfile.h   \
-    filesystem.h    \
+	filesystem.h    \
 	libengine.h     \
 	titlebar.h  \
 	setting_item.h
