@@ -43,7 +43,7 @@ struct _cursor {
     unsigned int shape;
 };
 
-void engine_draw_frame(decor_t* d, cairo_t* cr);
+void engine_draw_frame(decor_t* d, Cairo::RefPtr<Cairo::Context>& cr);
 bool load_engine(const std::string& engine_name, window_settings* ws);
 void load_engine_settings(const KeyFile& f, window_settings* ws);
 

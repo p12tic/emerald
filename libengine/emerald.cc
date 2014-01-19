@@ -171,9 +171,9 @@ std::string make_filename(const std::string& sect, const std::string& key,
     return std::string{g_get_home_dir()} + "/.emerald/theme/" + sect + '.' + key + '.' + ext;
 }
 
-void cairo_set_source_alpha_color(cairo_t* cr, alpha_color* c)
+void cairo_set_source_alpha_color(Cairo::RefPtr<Cairo::Context>& cr, alpha_color* c)
 {
-    cairo_set_source_rgba(cr, c->color.r, c->color.g, c->color.b, c->alpha);
+    cr->set_source_rgba(c->color.r, c->color.g, c->color.b, c->alpha);
 }
 
 void load_color_setting(const KeyFile& f, decor_color_t* color,
@@ -251,7 +251,7 @@ void load_string_setting(const KeyFile& f, std::string& s, const std::string& ke
 }
 
 void
-rounded_rectangle(cairo_t* cr,
+rounded_rectangle(Cairo::RefPtr<Cairo::Context>& cr,
                   double  x,
                   double  y,
                   double  w,
@@ -266,41 +266,38 @@ rounded_rectangle(cairo_t* cr,
     }
 
     if (corner & CORNER_TOPLEFT) {
-        cairo_move_to(cr, x + radius, y);
+        cr->move_to(x + radius, y);
     } else {
-        cairo_move_to(cr, x, y);
+        cr->move_to(x, y);
     }
 
     if (corner & CORNER_TOPRIGHT)
-        cairo_arc(cr, x + w - radius, y + radius, radius,
-                  M_PI * 1.5, M_PI * 2.0);
+        cr->arc(x + w - radius, y + radius, radius, M_PI * 1.5, M_PI * 2.0);
     else {
-        cairo_line_to(cr, x + w, y);
+        cr->line_to(x + w, y);
     }
 
     if (corner & CORNER_BOTTOMRIGHT)
-        cairo_arc(cr, x + w - radius, y + h - radius, radius,
-                  0.0, M_PI * 0.5);
+        cr->arc(x + w - radius, y + h - radius, radius, 0.0, M_PI * 0.5);
     else {
-        cairo_line_to(cr, x + w, y + h);
+        cr->line_to(x + w, y + h);
     }
 
     if (corner & CORNER_BOTTOMLEFT)
-        cairo_arc(cr, x + radius, y + h - radius, radius,
-                  M_PI * 0.5, M_PI);
+        cr->arc(x + radius, y + h - radius, radius, M_PI * 0.5, M_PI);
     else {
-        cairo_line_to(cr, x, y + h);
+        cr->line_to(x, y + h);
     }
 
     if (corner & CORNER_TOPLEFT) {
-        cairo_arc(cr, x + radius, y + radius, radius, M_PI, M_PI * 1.5);
+        cr->arc(x + radius, y + radius, radius, M_PI, M_PI * 1.5);
     } else {
-        cairo_line_to(cr, x, y);
+        cr->line_to(x, y);
     }
 }
 
 void
-fill_rounded_rectangle(cairo_t*       cr,
+fill_rounded_rectangle(Cairo::RefPtr<Cairo::Context>& cr,
                        double        x,
                        double        y,
                        double        w,
@@ -312,7 +309,6 @@ fill_rounded_rectangle(cairo_t*       cr,
                        window_settings* ws,
                        double    radius)
 {
-    cairo_pattern_t* pattern;
 
     rounded_rectangle(cr, x, y, w, h, corner, ws, radius);
 
@@ -330,30 +326,22 @@ fill_rounded_rectangle(cairo_t*       cr,
         y = h = 0;
     }
 
+    Cairo::RefPtr<Cairo::Gradient> pat;
     if (w && h) {
-        cairo_matrix_t matrix;
+        pat = Cairo::RadialGradient::create(0.0, 0.0, 0.0, 0.0, 0.0, w);
 
-        pattern = cairo_pattern_create_radial(0.0, 0.0, 0.0, 0.0, 0.0, w);
-
-        cairo_matrix_init_scale(&matrix, 1.0, w / h);
-        cairo_matrix_translate(&matrix, -(x + w), -(y + h));
-
-        cairo_pattern_set_matrix(pattern, &matrix);
+        auto mat = Cairo::scaling_matrix(1.0, w/h);
+        mat.translate(-(x + w), -(y + h));
+        pat->set_matrix(mat);
     } else {
-        pattern = cairo_pattern_create_linear(x + w, y + h, x, y);
+        pat = Cairo::LinearGradient::create(x + w, y + h, x, y);
     }
 
-    cairo_pattern_add_color_stop_rgba(pattern, 0.0, c0->color.r, c0->color.g,
-                                      c0->color.b, c0->alpha);
+    pat->add_color_stop_rgba(0.0, c0->color.r, c0->color.g, c0->color.b, c0->alpha);
+    pat->add_color_stop_rgba(1.0, c1->color.r, c1->color.g, c1->color.b, c1->alpha);
 
-    cairo_pattern_add_color_stop_rgba(pattern, 1.0, c1->color.r, c1->color.g,
-                                      c1->color.b, c1->alpha);
-
-    cairo_pattern_set_extend(pattern, CAIRO_EXTEND_PAD);
-
-    cairo_set_source(cr, pattern);
-    cairo_fill(cr);
-    cairo_pattern_destroy(pattern);
+    cr->set_source(pat);
+    cr->fill();
 }
 
 

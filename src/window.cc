@@ -56,7 +56,6 @@ GdkPixmap* pixmap_new_from_pixbuf(GdkPixbuf* pixbuf)
 {
     GdkPixmap* pixmap;
     unsigned width, height;
-    cairo_t* cr;
 
     width = gdk_pixbuf_get_width(pixbuf);
     height = gdk_pixbuf_get_height(pixbuf);
@@ -66,11 +65,11 @@ GdkPixmap* pixmap_new_from_pixbuf(GdkPixbuf* pixbuf)
         return NULL;
     }
 
-    cr = (cairo_t*) gdk_cairo_create(GDK_DRAWABLE(pixmap));
-    gdk_cairo_set_source_pixbuf(cr, pixbuf, 0, 0);
-    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-    cairo_paint(cr);
-    cairo_destroy(cr);
+    auto* g_cr = gdk_cairo_create(GDK_DRAWABLE(pixmap));
+    Cairo::RefPtr<Cairo::Context> cr{new Cairo::Context(g_cr, true)};
+    gdk_cairo_set_source_pixbuf(cr->cobj(), pixbuf, 0, 0);
+    cr->set_operator(Cairo::OPERATOR_SOURCE);
+    cr->paint();
 
     return pixmap;
 }
@@ -339,10 +338,7 @@ void update_window_decoration_icon(Wnck::Window* win)
 {
     decor_t* d = get_decor(win);
 
-    if (d->icon) {
-        cairo_pattern_destroy(d->icon);
-        d->icon = NULL;
-    }
+    d->icon.clear();
 
     if (d->icon_pixmap) {
         g_object_unref(G_OBJECT(d->icon_pixmap));
@@ -354,14 +350,13 @@ void update_window_decoration_icon(Wnck::Window* win)
 
     d->icon_pixbuf = wnck_window_get_mini_icon(win->gobj());
     if (d->icon_pixbuf) {
-        cairo_t* cr;
 
         g_object_ref(G_OBJECT(d->icon_pixbuf));
 
         d->icon_pixmap = pixmap_new_from_pixbuf(d->icon_pixbuf);
-        cr = gdk_cairo_create(GDK_DRAWABLE(d->icon_pixmap));
-        d->icon = cairo_pattern_create_for_surface(cairo_get_target(cr));
-        cairo_destroy(cr);
+        auto* g_cr = gdk_cairo_create(GDK_DRAWABLE(d->icon_pixmap));
+        Cairo::RefPtr<Cairo::Context> cr {new Cairo::Context(g_cr, true)};
+        d->icon = Cairo::SurfacePattern::create(cr->get_target());
     }
 }
 
@@ -792,10 +787,7 @@ void remove_frame_window(Wnck::Window* win)
             d->button_region_inact[b_t].bg_pixmap = NULL;
         }
     }
-    if (d->button_fade_info.cr) {
-        cairo_destroy(d->button_fade_info.cr);
-        d->button_fade_info.cr = NULL;
-    }
+    d->button_fade_info.cr.clear();
 
     if (d->button_fade_info.timer >= 0) {
         g_source_remove(d->button_fade_info.timer);
@@ -809,10 +801,7 @@ void remove_frame_window(Wnck::Window* win)
         d->layout = NULL;
     }
 
-    if (d->icon) {
-        cairo_pattern_destroy(d->icon);
-        d->icon = NULL;
-    }
+    d->icon.clear();
 
     if (d->icon_pixmap) {
         g_object_unref(G_OBJECT(d->icon_pixmap));

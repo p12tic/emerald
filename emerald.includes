@@ -7,5 +7,6 @@ include/
 /usr/include/compiz
 /usr/include/sigc++-2.0
 /usr/include/pangomm-1.4/
+/usr/include/cairomm-1.0/
 /usr/include/libwnck-1.0
 /usr/include/wnckmm-1.0

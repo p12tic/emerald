@@ -76,7 +76,7 @@ void load_engine_settings(const KeyFile& f, window_settings* ws)
         g_engine_plugin.fun_load_settings(f, ws);
     }
 }
-void engine_draw_frame(decor_t* d, cairo_t* cr)
+void engine_draw_frame(decor_t* d, Cairo::RefPtr<Cairo::Context>& cr)
 {
     if (g_engine_plugin.enginedl && g_engine_plugin.fun_draw_frame) {
         g_engine_plugin.fun_draw_frame(d, cr);

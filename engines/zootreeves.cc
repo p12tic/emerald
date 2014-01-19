@@ -33,10 +33,10 @@
 
 #define DIP_ROUND_TRI  (1 << 4)
 
-struct pixmaps {
-    cairo_surface_t* titlebar_surface;
-    cairo_surface_t* titlebar_surface_large;
-    cairo_surface_t* titlebar_surface_buttons;
+struct Pixmaps {
+    Cairo::RefPtr<Cairo::Surface> titlebar_surface;
+    Cairo::RefPtr<Cairo::Surface> titlebar_surface_large;
+    Cairo::RefPtr<Cairo::Surface> titlebar_surface_buttons;
     bool    buttonpart_enabled;
     bool    buttonpart_repeat_enabled;
     bool    titlebarpart_repeat_enabled;
@@ -92,8 +92,7 @@ struct private_ws {
     int     title_bar_dip_radius;
     int     title_bar_dip_button_width;
     int     left_bar_dip_radius;
-    struct pixmaps     pixmaps;
-
+    Pixmaps     pixmaps;
 };
 
 extern "C"
@@ -106,7 +105,7 @@ void get_meta_info(EngineMetaInfo* emi)
 }
 
 void
-rounded_rectangle_independent(cairo_t* cr,
+rounded_rectangle_independent(Cairo::RefPtr<Cairo::Context>& cr,
                               double  x,
                               double  y,
                               double  w,
@@ -164,9 +163,9 @@ rounded_rectangle_independent(cairo_t* cr,
 
     if (left_top_radius_on == 1) {
         if ((corner & CORNER_TOPLEFT)) {
-            cairo_move_to(cr, x + left_top_radius, y);
+            cr->move_to(x + left_top_radius, y);
         } else {
-            cairo_move_to(cr, x, y);
+            cr->move_to(x, y);
         }
     }
 
@@ -185,21 +184,22 @@ rounded_rectangle_independent(cairo_t* cr,
 
         radius2 = title_bar_height - radius_tri;
 
-        cairo_arc(cr, x + pane_1_width, y  + radius_tri, radius_tri, M_PI * 1.5, M_PI * curve);
-        cairo_get_current_point(cr, &cx, &cy);
-        cairo_arc_negative(cr, x + pane_1_width + (title_bar_height), cy, radius2, M_PI * (curve - 1), M_PI * 2.5);
+        cr->arc(x + pane_1_width, y  + radius_tri, radius_tri, M_PI * 1.5, M_PI * curve);
+        cr->get_current_point(cx, cy);
+
+        cr->arc_negative(x + pane_1_width + (title_bar_height), cy, radius2, M_PI * (curve - 1), M_PI * 2.5);
 
 
         radius2 = title_bar_height - radius_tri;
 
         if (enable_button_part == true) {
             //Can use h to offset x because it is a square - would be radius - radius2
-            cairo_arc_negative(cr, x + pane_1_width + dip_gap - radius_tri - radius2, y + radius_tri, radius2, M_PI * 2.5, M_PI * 2.0);
-            cairo_get_current_point(cr, &cx, &cy);
-            cairo_arc(cr, cx + radius_tri, cy, radius_tri, M_PI * 1.0, M_PI * 1.5);
+            cr->arc_negative(x + pane_1_width + dip_gap - radius_tri - radius2, y + radius_tri, radius2, M_PI * 2.5, M_PI * 2.0);
+            cr->get_current_point(cx, cy);
+            cr->arc(cx + radius_tri, cy, radius_tri, M_PI * 1.0, M_PI * 1.5);
         } else {
-            cairo_get_current_point(cr, &cx, &cy);
-            cairo_line_to(cr, x + w, cy);
+            cr->get_current_point(cx, cy);
+            cr->line_to(x + w, cy);
         }
 
     }
@@ -211,22 +211,22 @@ rounded_rectangle_independent(cairo_t* cr,
 
         radius2 = title_bar_height - radius_tri;
 
-        cairo_arc(cr, x + pane_1_width - radius_tri, y  + radius_tri, radius_tri, M_PI * 1.5, M_PI * curve);
-        cairo_get_current_point(cr, &cx, &cy);
-        cairo_line_to(cr, cx, cy + radius2);
-        cairo_line_to(cr, cx + dip_gap, cy + radius2);
+        cr->arc(x + pane_1_width - radius_tri, y  + radius_tri, radius_tri, M_PI * 1.5, M_PI * curve);
+        cr->get_current_point(cx, cy);
+        cr->line_to(cx, cy + radius2);
+        cr->line_to(cx + dip_gap, cy + radius2);
         //cairo_arc_negative (cr, x +pane_1_width + (title_bar_height), cy, radius2, M_PI* (curve - 1), M_PI * 2.5);
 
 
         if (enable_button_part == true) {
-            cairo_get_current_point(cr, &cx, &cy);
-            cairo_line_to(cr, cx, cy - radius2);
-            cairo_get_current_point(cr, &cx, &cy);
-            cairo_arc(cr, cx + radius_tri, cy, radius_tri, M_PI, M_PI * 1.5);
+            cr->get_current_point(cx, cy);
+            cr->line_to(cx, cy - radius2);
+            cr->get_current_point(cx, cy);
+            cr->arc(cx + radius_tri, cy, radius_tri, M_PI, M_PI * 1.5);
             //cairo_arc (cr, cx + radius_tri, cy, radius_tri, M_PI * 1.0, M_PI * 1.5);
         } else {
-            cairo_get_current_point(cr, &cx, &cy);
-            cairo_line_to(cr, x + w, cy);
+            cr->get_current_point(cx, cy);
+            cr->line_to(x + w, cy);
         }
 
     }
@@ -235,40 +235,40 @@ rounded_rectangle_independent(cairo_t* cr,
     if (enable_button_part == true) {
         if (right_top_radius_on == 1) {
             if ((corner & CORNER_TOPRIGHT)) {
-                cairo_arc(cr, x + w - right_top_radius, y + right_top_radius, right_top_radius,
+                cr->arc(x + w - right_top_radius, y + right_top_radius, right_top_radius,
                           M_PI * 1.5, M_PI * 2.0);
             } else {
-                cairo_line_to(cr, x + w, y);
+                cr->line_to(x + w, y);
             }
         }
     }
 
     if (right_bottom_radius_on == 1) {
         if ((corner & CORNER_BOTTOMRIGHT))
-            cairo_arc(cr, x + w - right_bottom_radius, y + h - right_bottom_radius, right_bottom_radius,
+            cr->arc(x + w - right_bottom_radius, y + h - right_bottom_radius, right_bottom_radius,
                       0.0, M_PI * 0.5);
         else {
-            cairo_line_to(cr, x + w, y + h);
+            cr->line_to(x + w, y + h);
         }
     }
 
     if (left_bottom_radius_on == 1 && (corner & CORNER_BOTTOMLEFT))
-        cairo_arc(cr, x + left_bottom_radius, y + h - left_bottom_radius, left_bottom_radius,
+        cr->arc(x + left_bottom_radius, y + h - left_bottom_radius, left_bottom_radius,
                   M_PI * 0.5, M_PI);
     else
 
         if (enable_left_bar_dip_lower_part == false && left_bar_dip == true) {
-            cairo_line_to(cr, x + (2 * left_bar_dip_radius), y + h);
+            cr->line_to(x + (2 * left_bar_dip_radius), y + h);
         } else {
-            cairo_line_to(cr, x, y + h);
+            cr->line_to(x, y + h);
         }
 
     if (left_bar_dip == false) {
         if (left_top_radius_on == 1) {
             if ((corner & CORNER_TOPLEFT)) {
-                cairo_arc(cr, x + left_top_radius, y + left_top_radius, left_top_radius, M_PI, M_PI * 1.5);
+                cr->arc(x + left_top_radius, y + left_top_radius, left_top_radius, M_PI, M_PI * 1.5);
             } else {
-                cairo_line_to(cr, x, y);
+                cr->line_to(x, y);
             }
         }
     }
@@ -277,34 +277,35 @@ rounded_rectangle_independent(cairo_t* cr,
     if (left_bar_dip == true) {
         left_bar_dip_offset = (((h - bottom_border_width - title_bar_height + 1)  / 100) * (100 - left_bar_dip_offset));
 
-        cairo_get_current_point(cr, &cx, &cy);
-        cairo_line_to(cr, cx, cy - bottom_border_width + 2);
-        cairo_get_current_point(cr, &cx, &cy);
+        cr->get_current_point(cx, cy);
+        cr->line_to(cx, cy - bottom_border_width + 2);
 
+        cr->get_current_point(cx, cy);
         if (enable_left_bar_dip_lower_part == true) {
-            cairo_arc(cr, cx + left_bar_dip_radius, cy, left_bar_dip_radius, M_PI * 1.0, M_PI * 1.5);
+            cr->arc(cx + left_bar_dip_radius, cy, left_bar_dip_radius, M_PI * 1.0, M_PI * 1.5);
 
-            cairo_get_current_point(cr, &cx, &cy);
-            cairo_arc_negative(cr, cx, cy - left_bar_dip_radius, left_bar_dip_radius, M_PI * 0.5, M_PI * 2.0);
+            cr->get_current_point(cx, cy);
+
+            cr->arc_negative(cx, cy - left_bar_dip_radius, left_bar_dip_radius, M_PI * 0.5, M_PI * 2.0);
         } else {
-            cairo_line_to(cr, cx, cy - (2 * left_bar_dip_radius));
+            cr->line_to(cx, cy - (2 * left_bar_dip_radius));
         }
 
-        cairo_get_current_point(cr, &cx, &cy);
-        cairo_line_to(cr, cx, cy - 1 - left_bar_dip_offset + (4 * left_bar_dip_radius));
+        cr->get_current_point(cx, cy);
+        cr->line_to(cx, cy - 1 - left_bar_dip_offset + (4 * left_bar_dip_radius));
 
-        cairo_get_current_point(cr, &cx, &cy);
-        cairo_arc_negative(cr, cx - left_bar_dip_radius, cy, left_bar_dip_radius, M_PI * 0, M_PI * 3.5);
+        cr->get_current_point(cx, cy);
+        cr->arc_negative(cx - left_bar_dip_radius, cy, left_bar_dip_radius, M_PI * 0, M_PI * 3.5);
 
-        cairo_get_current_point(cr, &cx, &cy);
-        cairo_arc(cr, cx, cy - left_bar_dip_radius, left_bar_dip_radius, M_PI * 2.5, M_PI * 3.0);
+        cr->get_current_point(cx, cy);
+        cr->arc(cx, cy - left_bar_dip_radius, left_bar_dip_radius, M_PI * 2.5, M_PI * 3.0);
 
 
         if (left_top_radius_on == 1) {
             if ((corner & CORNER_TOPLEFT)) {
-                cairo_arc(cr, x + left_top_radius, y + left_top_radius, left_top_radius, M_PI, M_PI * 1.5);
+                cr->arc(x + left_top_radius, y + left_top_radius, left_top_radius, M_PI, M_PI * 1.5);
             } else {
-                cairo_line_to(cr, x, y);
+                cr->line_to(x, y);
             }
         }
 
@@ -314,7 +315,7 @@ rounded_rectangle_independent(cairo_t* cr,
 
 
 void
-rounded_square(cairo_t* cr,
+rounded_square(Cairo::RefPtr<Cairo::Context>& cr,
                double  x,
                double  y,
                double  w,
@@ -395,45 +396,56 @@ rounded_square(cairo_t* cr,
         //Fix this curve malarcy
         curve = 0.5;
 
-        cairo_move_to(cr, x, y);
+        cr->move_to(x, y);
         //cairo_line_to (cr, x + 5, y + 5);
 
-        cairo_line_to(cr, x, y + left_bar_dip_offset);
-        cairo_get_current_point(cr, &cx, &cy);
-        cairo_arc_negative(cr, cx + left_bar_dip_radius, cy, left_bar_dip_radius, M_PI * 1.0, M_PI * curve);
-        cairo_get_current_point(cr, &cx, &cy);
+        cr->line_to(x, y + left_bar_dip_offset);
+        cr->get_current_point(cx, cy);
+
+        cr->arc_negative(cx + left_bar_dip_radius, cy, left_bar_dip_radius, M_PI * 1.0, M_PI * curve);
+        cr->get_current_point(cx, cy);
+
         //x_width = radius - x_width;
         //printf("Width %f\n", a_width);
         //printf("Height %f\n", a_height);
 
 
-        cairo_arc(cr, cx, cy + left_bar_dip_radius, left_bar_dip_radius, M_PI * (curve + 1), M_PI * 2.0);
+        cr->arc(cx, cy + left_bar_dip_radius, left_bar_dip_radius, M_PI * (curve + 1), M_PI * 2.0);
 
-        cairo_get_current_point(cr, &cx, &cy);
+        cr->get_current_point(cx, cy);
+
 
 
         //cairo_arc_negative (cr, cx, cy, radius, M_PI * (curve + 2.5), M_PI * 2.5);
 
         if (enable_left_bar_dip_lower_part == true) {
-            cairo_line_to(cr, cx, cy + height - left_bar_dip_offset  - (4 * left_bar_dip_radius));
-            cairo_get_current_point(cr, &cx, &cy);
-            cairo_arc(cr, cx - left_bar_dip_radius, cy, left_bar_dip_radius, M_PI * 2.0, M_PI * (curve + 2.0));
-            cairo_get_current_point(cr, &cx, &cy);
-            cairo_arc_negative(cr, cx, cy + left_bar_dip_radius, left_bar_dip_radius, M_PI * 1.5, M_PI * (curve + 2.5));
-            cairo_get_current_point(cr, &cx, &cy);
-            cairo_line_to(cr, cx + width, cy);
-            cairo_get_current_point(cr, &cx, &cy);
-            cairo_line_to(cr, cx, cy - height);
-            cairo_get_current_point(cr, &cx, &cy);
-            cairo_line_to(cr, cx - width, cy);
+            cr->line_to(cx, cy + height - left_bar_dip_offset  - (4 * left_bar_dip_radius));
+            cr->get_current_point(cx, cy);
+
+            cr->arc(cx - left_bar_dip_radius, cy, left_bar_dip_radius, M_PI * 2.0, M_PI * (curve + 2.0));
+            cr->get_current_point(cx, cy);
+
+            cr->arc_negative(cx, cy + left_bar_dip_radius, left_bar_dip_radius, M_PI * 1.5, M_PI * (curve + 2.5));
+            cr->get_current_point(cx, cy);
+
+            cr->line_to(cx + width, cy);
+            cr->get_current_point(cx, cy);
+
+            cr->line_to(cx, cy - height);
+            cr->get_current_point(cx, cy);
+
+            cr->line_to(cx - width, cy);
         } else {
-            cairo_line_to(cr, cx, cy + height - left_bar_dip_offset - (2 * left_bar_dip_radius));
-            cairo_get_current_point(cr, &cx, &cy);
-            cairo_line_to(cr, cx + width - (2 * left_bar_dip_radius), cy);
-            cairo_get_current_point(cr, &cx, &cy);
-            cairo_line_to(cr, cx, cy - height);
-            cairo_get_current_point(cr, &cx, &cy);
-            cairo_line_to(cr, cx - width + (2 * left_bar_dip_radius), cy);
+            cr->line_to(cx, cy + height - left_bar_dip_offset - (2 * left_bar_dip_radius));
+            cr->get_current_point(cx, cy);
+
+            cr->line_to(cx + width - (2 * left_bar_dip_radius), cy);
+            cr->get_current_point(cx, cy);
+
+            cr->line_to(cx, cy - height);
+            cr->get_current_point(cx, cy);
+
+            cr->line_to(cx - width + (2 * left_bar_dip_radius), cy);
         }
 
 
@@ -453,15 +465,17 @@ rounded_square(cairo_t* cr,
 
             radius2 = h - radius_top_right_tri;
 
-            cairo_arc(cr, x + w + radius_top_right_tri - radius_top_right_tri,
+            cr->arc(x + w + radius_top_right_tri - radius_top_right_tri,
                       y  + radius_top_right_tri, radius_top_right_tri, M_PI * 1.5, M_PI * curve);
-            cairo_get_current_point(cr, &cx, &cy);
-            cairo_arc_negative(cr, x + w + radius_top_right_tri + (h - radius_top_right_tri),
+            cr->get_current_point(cx, cy);
+
+            cr->arc_negative(x + w + radius_top_right_tri + (h - radius_top_right_tri),
                                cy, radius2, M_PI * (curve - 1), M_PI * 2.5);
 
-            cairo_get_current_point(cr, &cx, &cy);
-            cairo_line_to(cr, cx - radius2 - radius_top_right_tri, cy);
-            cairo_line_to(cr, cx - radius2 - radius_top_right_tri , y);
+            cr->get_current_point(cx, cy);
+
+            cr->line_to(cx - radius2 - radius_top_right_tri, cy);
+            cr->line_to(cx - radius2 - radius_top_right_tri , y);
         }
 
         if (radius_top_left_tri_on == 0) {
@@ -475,15 +489,17 @@ rounded_square(cairo_t* cr,
             radius2 = h - radius_top_left_tri;
 
             //Can use h to offset x because it is a square - would be radius - radius2
-            cairo_arc_negative(cr, x - radius2 - radius_top_left_tri, y + radius_top_left_tri, radius2, M_PI * 2.5, M_PI * 2.0);
-            cairo_get_current_point(cr, &cx, &cy);
-            cairo_arc(cr, cx + radius_top_left_tri, cy, radius_top_left_tri, M_PI * 1.0, M_PI * 1.5);
+            cr->arc_negative(x - radius2 - radius_top_left_tri, y + radius_top_left_tri, radius2, M_PI * 2.5, M_PI * 2.0);
+            cr->get_current_point(cx, cy);
+
+            cr->arc(cx + radius_top_left_tri, cy, radius_top_left_tri, M_PI * 1.0, M_PI * 1.5);
 
 
             //cairo_get_current_point (cr, &cx, &cy);
-            cairo_get_current_point(cr, &cx, &cy);
-            cairo_line_to(cr, cx, cy + radius2 + radius_top_left_tri);
-            cairo_line_to(cr, cx - radius2 - radius_top_left_tri , cy + radius2 + radius_top_left_tri);
+            cr->get_current_point(cx, cy);
+
+            cr->line_to(cx, cy + radius2 + radius_top_left_tri);
+            cr->line_to(cx - radius2 - radius_top_left_tri , cy + radius2 + radius_top_left_tri);
 
 
 
@@ -491,43 +507,43 @@ rounded_square(cairo_t* cr,
 
 
         if (radius_top_left_on == 0) {
-            cairo_move_to(cr, x + radius_top_left, y);
+            cr->move_to(x + radius_top_left, y);
         } else {
-            cairo_move_to(cr, x, y);
+            cr->move_to(x, y);
         }
 
 
         if (radius_top_right_on == 0) {
-            cairo_arc(cr, x + w - radius_top_right, y + radius_top_right, radius_top_right, M_PI * 1.5, M_PI * 2.0);
+            cr->arc(x + w - radius_top_right, y + radius_top_right, radius_top_right, M_PI * 1.5, M_PI * 2.0);
         } else {
-            cairo_line_to(cr, x + w, y);
+            cr->line_to(x + w, y);
         }
 
         if (radius_bottom_right_on == 0) {
-            cairo_arc(cr, x + w - radius_bottom_right, y + h - radius_bottom_right, radius_bottom_right,
+            cr->arc(x + w - radius_bottom_right, y + h - radius_bottom_right, radius_bottom_right,
                       0.0, M_PI * 0.5);
         } else {
-            cairo_line_to(cr, x + w, y + h);
+            cr->line_to(x + w, y + h);
         }
 
         if (radius_bottom_left_on == 0) {
-            cairo_arc(cr, x + radius_bottom_left, y + h - radius_bottom_left, radius_bottom_left,
+            cr->arc(x + radius_bottom_left, y + h - radius_bottom_left, radius_bottom_left,
                       M_PI * 0.5, M_PI);
         } else {
-            cairo_line_to(cr, x, y + h);
+            cr->line_to(x, y + h);
         }
 
         if (radius_top_left_on == 0) {
-            cairo_arc(cr, x + radius_top_left, y + radius_top_left, radius_top_left, M_PI, M_PI * 1.5);
+            cr->arc(x + radius_top_left, y + radius_top_left, radius_top_left, M_PI, M_PI * 1.5);
         } else {
-            cairo_line_to(cr, x, y);
+            cr->line_to(x, y);
         }
 
     }
 }
 
 void
-fill_rounded_square(cairo_t*       cr,
+fill_rounded_square(Cairo::RefPtr<Cairo::Context>&       cr,
                     double        x,
                     double        y,
                     double        w,
@@ -552,12 +568,11 @@ fill_rounded_square(cairo_t*       cr,
                     int gradient_repeat_direction,
                     double common_gradient_starting_point_x,
                     double common_gradient_starting_point_y,
-                    cairo_surface_t* surface,
+                    Cairo::RefPtr<Cairo::Surface>& surface,
                     bool enable_pixmaps,
                     bool repeat_pixmap
                    )
 {
-    cairo_pattern_t* pattern;
     int gradient_offset = 0;
 
     if (corner & DIP_ROUND_TRI && (radius_top_left_tri > 0)) {
@@ -590,44 +605,47 @@ fill_rounded_square(cairo_t*       cr,
     } else if (!(gravity & SHADE_TOP)) {
         common_gradient_starting_point_y = h = 0;
     }
+    Cairo::RefPtr<Cairo::Pattern> pat;
 
     if (enable_pixmaps == false) {
+        Cairo::RefPtr<Cairo::LinearGradient> lpat;
+
         if (gradient_repeat_direction == 1 && pattern_vert == true) {
-            pattern = cairo_pattern_create_linear(common_gradient_starting_point_x, common_gradient_starting_point_y, common_gradient_starting_point_x + pattern_size, common_gradient_starting_point_y);
-            //pattern = cairo_pattern_create_linear (x + w, y + pattern_size, x, y);
+            lpat = Cairo::LinearGradient::create(common_gradient_starting_point_x, common_gradient_starting_point_y, common_gradient_starting_point_x + pattern_size, common_gradient_starting_point_y);
+            //pattern = Cairo::LinearGradient::create (x + w, y + pattern_size, x, y);
         } else if (gradient_repeat_direction == 2 && pattern_vert == true) {
-            pattern = cairo_pattern_create_linear(common_gradient_starting_point_x, common_gradient_starting_point_y, common_gradient_starting_point_x + pattern_size, common_gradient_starting_point_y + pattern_size);
+            lpat = Cairo::LinearGradient::create(common_gradient_starting_point_x, common_gradient_starting_point_y, common_gradient_starting_point_x + pattern_size, common_gradient_starting_point_y + pattern_size);
         } else  {
-            pattern = cairo_pattern_create_linear(common_gradient_starting_point_x, common_gradient_starting_point_y, common_gradient_starting_point_x, common_gradient_starting_point_y + pattern_size);
+            lpat = Cairo::LinearGradient::create(common_gradient_starting_point_x, common_gradient_starting_point_y, common_gradient_starting_point_x, common_gradient_starting_point_y + pattern_size);
         }
 
-        cairo_pattern_add_color_stop_rgba(pattern, 0.0, c0->color.r, c0->color.g,
-                                          c0->color.b, c0->alpha);
+        lpat->add_color_stop_rgba(0.0, c0->color.r, c0->color.g,
+                                      c0->color.b, c0->alpha);
 
-        cairo_pattern_add_color_stop_rgba(pattern, 1.0, c1->color.r, c1->color.g,
-                                          c1->color.b, c1->alpha);
-        cairo_pattern_set_extend(pattern, CAIRO_EXTEND_REFLECT);
+        lpat->add_color_stop_rgba(1.0, c1->color.r, c1->color.g,
+                                      c1->color.b, c1->alpha);
+        cairo_pattern_set_extend(lpat->cobj(), CAIRO_EXTEND_REFLECT);
+        pat = lpat;
 
     } else {
 
+        cr->set_operator(Cairo::OPERATOR_SOURCE);
+        cr->set_source(surface, x - gradient_offset, y);
 
-        cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-        cairo_set_source_surface(cr, surface, x - gradient_offset, y);
-        pattern = cairo_pattern_reference(cairo_get_source(cr));
+        pat = cr->get_source();
         if (repeat_pixmap == true) {
-            cairo_pattern_set_extend(pattern, CAIRO_EXTEND_REPEAT);
+            cairo_pattern_set_extend(pat->cobj(), CAIRO_EXTEND_REPEAT);
         } else {
-            cairo_pattern_set_extend(pattern, CAIRO_EXTEND_NONE);
+            cairo_pattern_set_extend(pat->cobj(), CAIRO_EXTEND_NONE);
         }
     }
 
-    cairo_set_source(cr, pattern);
-    cairo_fill(cr);
-    cairo_pattern_destroy(pattern);
+    cr->set_source(pat);
+    cr->fill();
 }
 
 extern "C"
-void engine_draw_frame(decor_t* d, cairo_t* cr)
+void engine_draw_frame(decor_t* d, Cairo::RefPtr<Cairo::Context>& cr)
 {
     double        x1, y1, x2, y2, h;
     int       top;
@@ -672,7 +690,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
     bool maximised;
     bool enable_left_bar_dip = false;
 
-    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+    cr->set_operator(Cairo::OPERATOR_SOURCE);
 
     int corners =
         ((pws->round_top_left) ? CORNER_TOPLEFT : 0) |
@@ -926,14 +944,14 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
 
     }
 
-    cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
+    cr->set_operator(Cairo::OPERATOR_OVER);
     /* =====================titlebar separator line */
 
     if (pfs->separator_line.alpha != 0) {
         cairo_set_source_alpha_color(cr, &pfs->separator_line);
-        cairo_move_to(cr, x1 + 4.5, y1 + top - 0.5);
-        cairo_rel_line_to(cr, x2 - x1 - 9, 0.0);
-        cairo_stroke(cr);
+        cr->move_to(x1 + 4.5, y1 + top - 0.5);
+        cr->rel_line_to(x2 - x1 - 9, 0.0);
+        cr->stroke();
     }
 
     //FRAME
@@ -945,9 +963,9 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                        CORNER_BOTTOMRIGHT) & corners, ws,
                       pws->frame_radius);
 
-    cairo_clip(cr);
+    cr->clip();
 
-    cairo_translate(cr, 1.0, 1.0);
+    cr->translate(1.0, 1.0);
 
     if (pfs->window_highlight.alpha != 0) {
         if (enable_dip == true) {
@@ -985,13 +1003,13 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
 
         //HIGHLIGHT HERE
         cairo_set_source_alpha_color(cr, &pfs->window_highlight);
-        cairo_stroke(cr);
+        cr->stroke();
     }
 
     if (pfs->window_shadow.alpha != 0) {
 
-        cairo_reset_clip(cr);
-        cairo_translate(cr, -2.0, -2.0);
+        cr->reset_clip();
+        cr->translate(-2.0, -2.0);
 
         if (enable_dip == true) {
             rounded_rectangle_independent(cr,
@@ -1027,14 +1045,14 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
 
         //SHADOW HERE
         cairo_set_source_alpha_color(cr, &pfs->window_shadow);
-        cairo_stroke(cr);
+        cr->stroke();
     }
 
 
     if (pfs->window_frame_halo.alpha != 0) {
         printf("ok\n");
-        cairo_reset_clip(cr);
-        cairo_translate(cr, 1.0, 1.0);
+        cr->reset_clip();
+        cr->translate(1.0, 1.0);
 
         if (enable_dip == true) {
             rounded_rectangle_independent(cr,
@@ -1074,7 +1092,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
         }
 
         cairo_set_source_alpha_color(cr, &pfs->window_frame_halo);
-        cairo_stroke(cr);
+        cr->stroke();
 
     }
 
@@ -1085,31 +1103,31 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
     //TODO - make this a bit more pixel-perfect...but it works for now
 
     if (pfs->contents_shadow.alpha != 0) {
-        cairo_set_line_width(cr, 1.0);
+        cr->set_line_width(1.0);
 
-        cairo_move_to(cr, pleft + pwidth + 1.5, ptop - 1);
-        cairo_rel_line_to(cr, -pwidth - 2.5, 0);
-        cairo_rel_line_to(cr, 0, pheight + 2.5);
+        cr->move_to(pleft + pwidth + 1.5, ptop - 1);
+        cr->rel_line_to(-pwidth - 2.5, 0);
+        cr->rel_line_to(0, pheight + 2.5);
         cairo_set_source_alpha_color(cr, &pfs->contents_shadow);
-        cairo_stroke(cr);
+        cr->stroke();
     }
 
     if (pfs->contents_highlight.alpha != 0) {
-        cairo_move_to(cr, pleft + pwidth + 1, ptop - 1.5);
-        cairo_rel_line_to(cr, 0, pheight + 2.5);
-        cairo_rel_line_to(cr, -pwidth - 2.5, 0);
+        cr->move_to(pleft + pwidth + 1, ptop - 1.5);
+        cr->rel_line_to(0, pheight + 2.5);
+        cr->rel_line_to(-pwidth - 2.5, 0);
         cairo_set_source_alpha_color(cr, &pfs->contents_highlight);
-        cairo_stroke(cr);
+        cr->stroke();
     }
 
     if (pfs->contents_halo.alpha != 0) {
-        cairo_move_to(cr, pleft, ptop);
-        cairo_rel_line_to(cr, pwidth, 0);
-        cairo_rel_line_to(cr, 0, pheight);
-        cairo_rel_line_to(cr, -pwidth, 0);
-        cairo_rel_line_to(cr, 0, -pheight);
+        cr->move_to(pleft, ptop);
+        cr->rel_line_to(pwidth, 0);
+        cr->rel_line_to(0, pheight);
+        cr->rel_line_to(-pwidth, 0);
+        cr->rel_line_to(0, -pheight);
         cairo_set_source_alpha_color(cr, &pfs->contents_halo);
-        cairo_stroke(cr);
+        cr->stroke();
     }
 }
 
@@ -1163,9 +1181,9 @@ void load_engine_settings(const KeyFile& f, window_settings* ws)
     load_bool_setting(f, &pws->pixmaps.titlebar_repeat_enabled, "pixmaps_titlebar_repeat_enabled", SECT);
     load_bool_setting(f, &pws->pixmaps.titlebar_enabled, "pixmaps_titlebar_enabled", SECT);
 
-    pws->pixmaps.titlebar_surface = cairo_image_surface_create_from_png(make_filename("pixmaps", "titlebarpart", "png").c_str());
-    pws->pixmaps.titlebar_surface_buttons = cairo_image_surface_create_from_png(make_filename("pixmaps", "buttonpart", "png").c_str());
-    pws->pixmaps.titlebar_surface_large = cairo_image_surface_create_from_png(make_filename("pixmaps", "titlebar", "png").c_str());
+    pws->pixmaps.titlebar_surface = Cairo::ImageSurface::create_from_png(make_filename("pixmaps", "titlebarpart", "png"));
+    pws->pixmaps.titlebar_surface_buttons = Cairo::ImageSurface::create_from_png(make_filename("pixmaps", "buttonpart", "png"));
+    pws->pixmaps.titlebar_surface_large = Cairo::ImageSurface::create_from_png(make_filename("pixmaps", "titlebar", "png"));
 
     load_bool_setting(f, &((private_fs*)ws->fs_act->engine_fs)->gradient_repeat_enabled, "active_gradient_repeat_enabled" , SECT);
     load_bool_setting(f, &((private_fs*)ws->fs_inact->engine_fs)->gradient_repeat_enabled, "inactive_gradient_repeat_enabled" , SECT);

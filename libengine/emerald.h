@@ -253,7 +253,7 @@ struct window_settings {
     GdkPixmap* decor_normal_pixmap;// = NULL;
     GdkPixmap* decor_active_pixmap;// = NULL;
 
-    cairo_pattern_t* shadow_pattern;// = NULL;
+    Cairo::RefPtr<Cairo::SurfacePattern> shadow_pattern;// = NULL;
 
     int            text_height;
 
@@ -295,7 +295,7 @@ struct rectangle_t {
 
 struct button_fade_info_t {
     void** d;  // needed by the timer function
-    cairo_t* cr;
+    Cairo::RefPtr<Cairo::Context> cr;
     double    y1;
     int  counters[B_T_COUNT]; // 0: not fading, > 0: fading in, < 0: fading out
     // max value:  ws->button_fade_num_steps+1 (1 is reserved to indicate
@@ -338,7 +338,7 @@ struct decor_t {
     bool          active;
     PangoLayout*       layout;
     std::string        name;
-    cairo_pattern_t*   icon;
+    Cairo::RefPtr<Cairo::Pattern> icon;
     GdkPixmap*         icon_pixmap;
     GdkPixbuf*         icon_pixbuf;
     Wnck::WindowState   state;

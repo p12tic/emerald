@@ -39,7 +39,7 @@ void load_font_setting(const KeyFile& f, PangoFontDescription** fd,
                        const std::string& key, const std::string& sect);
 void load_string_setting(const KeyFile& f, std::string& s, const std::string& key,
                          const std::string& sect);
-void cairo_set_source_alpha_color(cairo_t* cr, alpha_color* c);
+void cairo_set_source_alpha_color(Cairo::RefPtr<Cairo::Context>& cr, alpha_color* c);
 #define PFACS(f,ws,zc,SECT) \
     load_color_setting((f),&((private_fs *)(ws)->fs_act->engine_fs)->zc.color,"active_" #zc ,SECT);\
     load_color_setting((f),&((private_fs *)(ws)->fs_inact->engine_fs)->zc.color,"inactive_" #zc ,SECT);\
@@ -47,7 +47,7 @@ void cairo_set_source_alpha_color(cairo_t* cr, alpha_color* c);
     load_float_setting((f),&((private_fs *)(ws)->fs_inact->engine_fs)->zc.alpha,"inactive_" #zc "_alpha",SECT);
 
 void
-fill_rounded_rectangle(cairo_t*       cr,
+fill_rounded_rectangle(Cairo::RefPtr<Cairo::Context>&       cr,
                        double        x,
                        double        y,
                        double        w,
@@ -59,7 +59,7 @@ fill_rounded_rectangle(cairo_t*       cr,
                        window_settings* ws,
                        double        radius);
 void
-rounded_rectangle(cairo_t* cr,
+rounded_rectangle(Cairo::RefPtr<Cairo::Context>& cr,
                   double  x,
                   double  y,
                   double  w,

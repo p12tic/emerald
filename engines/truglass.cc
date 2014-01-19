@@ -67,7 +67,7 @@ void get_meta_info(EngineMetaInfo* emi)
 }
 
 extern "C"
-void engine_draw_frame(decor_t* d, cairo_t* cr)
+void engine_draw_frame(decor_t* d, Cairo::RefPtr<Cairo::Context>& cr)
 {
     double        x1, y1, x2, y2, h;
     int       top;
@@ -104,8 +104,8 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
         corners = 0;
     }
 
-    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-    cairo_set_line_width(cr, 1.0);
+    cr->set_operator(Cairo::OPERATOR_SOURCE);
+    cr->set_line_width(1.0);
 
     // Top Top Glow
     fill_rounded_rectangle(cr,
@@ -212,7 +212,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                            pws->corner_radius);
 
     // ======= SECOND LAYER =======
-    cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
+    cr->set_operator(Cairo::OPERATOR_OVER);
 
     // Top Left
     fill_rounded_rectangle(cr,
@@ -326,9 +326,9 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
 
     // titlebar separator line
     cairo_set_source_alpha_color(cr, &pfs->separator_line);
-    cairo_move_to(cr, x1 + 0.5, y1 + top - 0.5);
-    cairo_rel_line_to(cr, x2 - x1 - 1.0, 0.0);
-    cairo_stroke(cr);
+    cr->move_to(x1 + 0.5, y1 + top - 0.5);
+    cr->rel_line_to(x2 - x1 - 1.0, 0.0);
+    cr->stroke();
 
 
     // do not draw outside the decoration area
@@ -338,9 +338,9 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                       (CORNER_TOPLEFT | CORNER_TOPRIGHT |
                        CORNER_BOTTOMLEFT | CORNER_BOTTOMRIGHT) & corners,
                       ws, pws->corner_radius);
-    cairo_clip(cr);
+    cr->clip();
 
-    cairo_translate(cr, 1.0, 1.0);
+    cr->translate(1.0, 1.0);
 
     // highlight
     rounded_rectangle(cr,
@@ -351,9 +351,9 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                       pws->corner_radius);
 
     cairo_set_source_alpha_color(cr, &pfs->window_highlight);
-    cairo_stroke(cr);
+    cr->stroke();
 
-    cairo_translate(cr, -2.0, -2.0);
+    cr->translate(-2.0, -2.0);
 
 
     // shadow
@@ -365,11 +365,11 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                       pws->corner_radius);
 
     cairo_set_source_alpha_color(cr, &pfs->window_shadow);
-    cairo_stroke(cr);
+    cr->stroke();
 
-    cairo_translate(cr, 1.0, 1.0);
+    cr->translate(1.0, 1.0);
 
-    cairo_reset_clip(cr);
+    cr->reset_clip();
 
     // halo
     rounded_rectangle(cr,
@@ -380,32 +380,32 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                       pws->corner_radius);
 
     cairo_set_source_alpha_color(cr, &pfs->window_halo);
-    cairo_stroke(cr);
+    cr->stroke();
 
     // inner border
     //TODO - make this a bit more pixel-perfect...but it works for now
 
-    cairo_set_line_width(cr, 1.0);
+    cr->set_line_width(1.0);
 
-    cairo_move_to(cr, pleft + pwidth + 1.5, ptop - 1);
-    cairo_rel_line_to(cr, -pwidth - 2.5, 0);
-    cairo_rel_line_to(cr, 0, pheight + 2.5);
+    cr->move_to(pleft + pwidth + 1.5, ptop - 1);
+    cr->rel_line_to(-pwidth - 2.5, 0);
+    cr->rel_line_to(0, pheight + 2.5);
     cairo_set_source_alpha_color(cr, &pfs->contents_shadow);
-    cairo_stroke(cr);
+    cr->stroke();
 
-    cairo_move_to(cr, pleft + pwidth + 1, ptop - 1.5);
-    cairo_rel_line_to(cr, 0, pheight + 2.5);
-    cairo_rel_line_to(cr, -pwidth - 2.5, 0);
+    cr->move_to(pleft + pwidth + 1, ptop - 1.5);
+    cr->rel_line_to(0, pheight + 2.5);
+    cr->rel_line_to(-pwidth - 2.5, 0);
     cairo_set_source_alpha_color(cr, &pfs->contents_highlight);
-    cairo_stroke(cr);
+    cr->stroke();
 
-    cairo_move_to(cr, pleft, ptop);
-    cairo_rel_line_to(cr, pwidth, 0);
-    cairo_rel_line_to(cr, 0, pheight);
-    cairo_rel_line_to(cr, -pwidth, 0);
-    cairo_rel_line_to(cr, 0, -pheight);
+    cr->move_to(pleft, ptop);
+    cr->rel_line_to(pwidth, 0);
+    cr->rel_line_to(0, pheight);
+    cr->rel_line_to(-pwidth, 0);
+    cr->rel_line_to(0, -pheight);
     cairo_set_source_alpha_color(cr, &pfs->contents_halo);
-    cairo_stroke(cr);
+    cr->stroke();
 }
 
 extern "C"

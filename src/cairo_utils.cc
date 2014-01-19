@@ -23,25 +23,23 @@
 #include "cairo_utils.h"
 #include "utils.h"
 
-void gdk_cairo_set_source_color_alpha(cairo_t* cr, GdkColor* color, double alpha)
+void gdk_cairo_set_source_color_alpha(Cairo::RefPtr<Cairo::Context>& cr, GdkColor* color, double alpha)
 {
-    cairo_set_source_rgba(cr,
-                          color->red / 65535.0,
-                          color->green / 65535.0,
-                          color->blue / 65535.0, alpha);
+    cr->set_source_rgba(color->red / 65535.0,
+                        color->green / 65535.0,
+                        color->blue / 65535.0, alpha);
 }
 
-void draw_shadow_background(decor_t* d, cairo_t* cr)
+void draw_shadow_background(decor_t* d, Cairo::RefPtr<Cairo::Context>& cr)
 {
-    cairo_matrix_t matrix;
     double w, h, x2, y2;
     int width, height;
     int left, right, top, bottom;
     window_settings* ws = d->fs->ws;
 
     if (!ws->large_shadow_pixmap) {
-        cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 0.0);
-        cairo_paint(cr);
+        cr->set_source_rgba(0.0, 0.0, 0.0, 0.0);
+        cr->paint();
 
         return;
     }
@@ -70,169 +68,167 @@ void draw_shadow_background(decor_t* d, cairo_t* cr)
     y2 = d->height - bottom;
 
     /* top left */
-    cairo_matrix_init_identity(&matrix);
-    cairo_pattern_set_matrix(ws->shadow_pattern, &matrix);
-    cairo_set_source(cr, ws->shadow_pattern);
-    cairo_rectangle(cr, 0.0, 0.0, left, top);
-    cairo_fill(cr);
+    ws->shadow_pattern->set_matrix(Cairo::identity_matrix());
+    cr->set_source(ws->shadow_pattern);
+    cr->rectangle(0.0, 0.0, left, top);
+    cr->fill();
 
     /* top */
     if (w > 0) {
-        cairo_matrix_init_translate(&matrix, left, 0.0);
-        cairo_matrix_scale(&matrix, 1.0 / w, 1.0);
-        cairo_matrix_translate(&matrix, -left, 0.0);
-        cairo_pattern_set_matrix(ws->shadow_pattern, &matrix);
-        cairo_set_source(cr, ws->shadow_pattern);
-        cairo_rectangle(cr, left, 0.0, w, top);
-        cairo_fill(cr);
+        auto mat = Cairo::translation_matrix(left, 0.0);
+        mat.scale(1.0 / w, 1.0);
+        mat.translate(-left, 0.0);
+        ws->shadow_pattern->set_matrix(mat);
+        cr->set_source(ws->shadow_pattern);
+        cr->rectangle(left, 0.0, w, top);
+        cr->fill();
     }
 
     /* top right */
-    cairo_matrix_init_translate(&matrix, width - right - x2, 0.0);
-    cairo_pattern_set_matrix(ws->shadow_pattern, &matrix);
-    cairo_set_source(cr, ws->shadow_pattern);
-    cairo_rectangle(cr, x2, 0.0, right, top);
-    cairo_fill(cr);
+    ws->shadow_pattern->set_matrix(
+                Cairo::translation_matrix(width - right - x2, 0.0));
+    cr->set_source(ws->shadow_pattern);
+    cr->rectangle(x2, 0.0, right, top);
+    cr->fill();
 
     /* left */
     if (h > 0) {
-        cairo_matrix_init_translate(&matrix, 0.0, top);
-        cairo_matrix_scale(&matrix, 1.0, 1.0 / h);
-        cairo_matrix_translate(&matrix, 0.0, -top);
-        cairo_pattern_set_matrix(ws->shadow_pattern, &matrix);
-        cairo_set_source(cr, ws->shadow_pattern);
-        cairo_rectangle(cr, 0.0, top, left, h);
-        cairo_fill(cr);
+        auto mat = Cairo::translation_matrix(0.0, top);
+        mat.scale(1.0, 1.0 / h);
+        mat.translate(0.0, -top);
+        ws->shadow_pattern->set_matrix(mat);
+        cr->set_source(ws->shadow_pattern);
+        cr->rectangle(0.0, top, left, h);
+        cr->fill();
     }
 
     /* right */
     if (h > 0) {
-        cairo_matrix_init_translate(&matrix, width - right - x2, top);
-        cairo_matrix_scale(&matrix, 1.0, 1.0 / h);
-        cairo_matrix_translate(&matrix, 0.0, -top);
-        cairo_pattern_set_matrix(ws->shadow_pattern, &matrix);
-        cairo_set_source(cr, ws->shadow_pattern);
-        cairo_rectangle(cr, x2, top, right, h);
-        cairo_fill(cr);
+        auto mat = Cairo::translation_matrix(width - right - x2, top);
+        mat.scale(1.0, 1.0 / h);
+        mat.translate(0.0, -top);
+        ws->shadow_pattern->set_matrix(mat);
+        cr->set_source(ws->shadow_pattern);
+        cr->rectangle(x2, top, right, h);
+        cr->fill();
     }
 
     /* bottom left */
-    cairo_matrix_init_translate(&matrix, 0.0, height - bottom - y2);
-    cairo_pattern_set_matrix(ws->shadow_pattern, &matrix);
-    cairo_set_source(cr, ws->shadow_pattern);
-    cairo_rectangle(cr, 0.0, y2, left, bottom);
-    cairo_fill(cr);
+    ws->shadow_pattern->set_matrix(
+                Cairo::translation_matrix(0.0, height - bottom - y2));
+    cr->set_source(ws->shadow_pattern);
+    cr->rectangle(0.0, y2, left, bottom);
+    cr->fill();
 
     /* bottom */
     if (w > 0) {
-        cairo_matrix_init_translate(&matrix, left, height - bottom - y2);
-        cairo_matrix_scale(&matrix, 1.0 / w, 1.0);
-        cairo_matrix_translate(&matrix, -left, 0.0);
-        cairo_pattern_set_matrix(ws->shadow_pattern, &matrix);
-        cairo_set_source(cr, ws->shadow_pattern);
-        cairo_rectangle(cr, left, y2, w, bottom);
-        cairo_fill(cr);
+        auto mat = Cairo::translation_matrix(left, height - bottom - y2);
+        mat.scale(1.0 / w, 1.0);
+        mat.translate(-left, 0.0);
+        ws->shadow_pattern->set_matrix(mat);
+        cr->set_source(ws->shadow_pattern);
+        cr->rectangle(left, y2, w, bottom);
+        cr->fill();
     }
 
     /* bottom right */
-    cairo_matrix_init_translate(&matrix, width - right - x2,
-                                height - bottom - y2);
-    cairo_pattern_set_matrix(ws->shadow_pattern, &matrix);
-    cairo_set_source(cr, ws->shadow_pattern);
-    cairo_rectangle(cr, x2, y2, right, bottom);
-    cairo_fill(cr);
+    ws->shadow_pattern->set_matrix(
+                Cairo::translation_matrix(width - right - x2, height - bottom - y2));
+    cr->set_source(ws->shadow_pattern);
+    cr->rectangle(x2, y2, right, bottom);
+    cr->fill();
 }
 
-void draw_help_button(cairo_t* cr)
+void draw_help_button(Cairo::RefPtr<Cairo::Context>& cr)
 {
-    cairo_rel_move_to(cr, 0.0, 6.0);
-    cairo_rel_line_to(cr, 0.0, 3.0);
-    cairo_rel_line_to(cr, 4.5, 0.0);
-    cairo_rel_line_to(cr, 0.0, 4.5);
-    cairo_rel_line_to(cr, 3.0, 0.0);
-    cairo_rel_line_to(cr, 0.0, -4.5);
+    cr->rel_move_to(0.0, 6.0);
+    cr->rel_line_to(0.0, 3.0);
+    cr->rel_line_to(4.5, 0.0);
+    cr->rel_line_to(0.0, 4.5);
+    cr->rel_line_to(3.0, 0.0);
+    cr->rel_line_to(0.0, -4.5);
 
-    cairo_rel_line_to(cr, 4.5, 0.0);
+    cr->rel_line_to(4.5, 0.0);
 
-    cairo_rel_line_to(cr, 0.0, -3.0);
-    cairo_rel_line_to(cr, -4.5, 0.0);
-    cairo_rel_line_to(cr, 0.0, -4.5);
-    cairo_rel_line_to(cr, -3.0, 0.0);
-    cairo_rel_line_to(cr, 0.0, 4.5);
+    cr->rel_line_to(0.0, -3.0);
+    cr->rel_line_to(-4.5, 0.0);
+    cr->rel_line_to(0.0, -4.5);
+    cr->rel_line_to(-3.0, 0.0);
+    cr->rel_line_to(0.0, 4.5);
 
-    cairo_close_path(cr);
+    cr->close_path();
 }
 
-void draw_close_button(cairo_t* cr, double s)
+void draw_close_button(Cairo::RefPtr<Cairo::Context>& cr, double s)
 {
-    cairo_rel_move_to(cr, 0.0, s);
+    cr->rel_move_to(0.0, s);
 
-    cairo_rel_line_to(cr, s, -s);
-    cairo_rel_line_to(cr, s, s);
-    cairo_rel_line_to(cr, s, -s);
-    cairo_rel_line_to(cr, s, s);
+    cr->rel_line_to(s, -s);
+    cr->rel_line_to(s, s);
+    cr->rel_line_to(s, -s);
+    cr->rel_line_to(s, s);
 
-    cairo_rel_line_to(cr, -s, s);
-    cairo_rel_line_to(cr, s, s);
-    cairo_rel_line_to(cr, -s, s);
-    cairo_rel_line_to(cr, -s, -s);
+    cr->rel_line_to(-s, s);
+    cr->rel_line_to(s, s);
+    cr->rel_line_to(-s, s);
+    cr->rel_line_to(-s, -s);
 
-    cairo_rel_line_to(cr, -s, s);
-    cairo_rel_line_to(cr, -s, -s);
-    cairo_rel_line_to(cr, s, -s);
+    cr->rel_line_to(-s, s);
+    cr->rel_line_to(-s, -s);
+    cr->rel_line_to(s, -s);
 
-    cairo_close_path(cr);
+    cr->close_path();
 }
 
-void draw_max_button(cairo_t* cr, double s)
+void draw_max_button(Cairo::RefPtr<Cairo::Context>& cr, double s)
 {
-    cairo_set_fill_rule(cr, CAIRO_FILL_RULE_EVEN_ODD);
+    cr->set_fill_rule(Cairo::FILL_RULE_EVEN_ODD);
 
-    cairo_rel_line_to(cr, 12.0, 0.0);
-    cairo_rel_line_to(cr, 0.0, 12.0);
-    cairo_rel_line_to(cr, -12.0, 0.0);
+    cr->rel_line_to(12.0, 0.0);
+    cr->rel_line_to(0.0, 12.0);
+    cr->rel_line_to(-12.0, 0.0);
 
-    cairo_close_path(cr);
+    cr->close_path();
 
-    cairo_rel_move_to(cr, 2.0, s);
+    cr->rel_move_to(2.0, s);
 
-    cairo_rel_line_to(cr, 8.0, 0.0);
-    cairo_rel_line_to(cr, 0.0, 10.0 - s);
-    cairo_rel_line_to(cr, -8.0, 0.0);
+    cr->rel_line_to(8.0, 0.0);
+    cr->rel_line_to(0.0, 10.0 - s);
+    cr->rel_line_to(-8.0, 0.0);
 
-    cairo_close_path(cr);
+    cr->close_path();
 }
 
-void draw_unmax_button(cairo_t* cr, double s)
+void draw_unmax_button(Cairo::RefPtr<Cairo::Context>& cr, double s)
 {
-    cairo_set_fill_rule(cr, CAIRO_FILL_RULE_EVEN_ODD);
+    cr->set_fill_rule(Cairo::FILL_RULE_EVEN_ODD);
 
-    cairo_rel_move_to(cr, 1.0, 1.0);
+    cr->rel_move_to(1.0, 1.0);
 
-    cairo_rel_line_to(cr, 10.0, 0.0);
-    cairo_rel_line_to(cr, 0.0, 10.0);
-    cairo_rel_line_to(cr, -10.0, 0.0);
+    cr->rel_line_to(10.0, 0.0);
+    cr->rel_line_to(0.0, 10.0);
+    cr->rel_line_to(-10.0, 0.0);
 
-    cairo_close_path(cr);
+    cr->close_path();
 
-    cairo_rel_move_to(cr, 2.0, s);
+    cr->rel_move_to(2.0, s);
 
-    cairo_rel_line_to(cr, 6.0, 0.0);
-    cairo_rel_line_to(cr, 0.0, 8.0 - s);
-    cairo_rel_line_to(cr, -6.0, 0.0);
+    cr->rel_line_to(6.0, 0.0);
+    cr->rel_line_to(0.0, 8.0 - s);
+    cr->rel_line_to(-6.0, 0.0);
 
-    cairo_close_path(cr);
+    cr->close_path();
 }
 
-void draw_min_button(cairo_t* cr, double s)
+void draw_min_button(Cairo::RefPtr<Cairo::Context>& cr, double s)
 {
-    cairo_rel_move_to(cr, 0.0, 8.0);
+    cr->rel_move_to(0.0, 8.0);
 
-    cairo_rel_line_to(cr, 12.0, 0.0);
-    cairo_rel_line_to(cr, 0.0, s);
-    cairo_rel_line_to(cr, -12.0, 0.0);
+    cr->rel_line_to(12.0, 0.0);
+    cr->rel_line_to(0.0, s);
+    cr->rel_line_to(-12.0, 0.0);
 
-    cairo_close_path(cr);
+    cr->close_path();
 }
 
 void get_button_pos(window_settings* ws, int b_t,
@@ -243,7 +239,7 @@ void get_button_pos(window_settings* ws, int b_t,
     *rx = get_real_pos(ws, b_t, d);
 }
 
-void button_state_paint(cairo_t* cr,
+void button_state_paint(Cairo::RefPtr<Cairo::Context>& cr,
                         alpha_color* color, alpha_color* color_2, unsigned state)
 {
     double alpha;
@@ -256,24 +252,24 @@ void button_state_paint(cairo_t* cr,
 
     if ((state & (PRESSED_EVENT_WINDOW | IN_EVENT_WINDOW))
             == (PRESSED_EVENT_WINDOW | IN_EVENT_WINDOW)) {
-        cairo_set_source_rgba(cr, color->color.r, color->color.g,
-                              color->color.b, alpha);
+        cr->set_source_rgba(color->color.r, color->color.g,
+                            color->color.b, alpha);
 
-        cairo_fill_preserve(cr);
+        cr->fill_preserve();
 
         cairo_set_source_alpha_color(cr, color_2);
 
-        cairo_set_line_width(cr, 1.0);
-        cairo_stroke(cr);
-        cairo_set_line_width(cr, 2.0);
+        cr->set_line_width(1.0);
+        cr->stroke();
+        cr->set_line_width(2.0);
     } else {
         cairo_set_source_alpha_color(cr, color_2);
-        cairo_stroke_preserve(cr);
+        cr->stroke_preserve();
 
-        cairo_set_source_rgba(cr, color->color.r, color->color.g,
-                              color->color.b, alpha);
+        cr->set_source_rgba(color->color.r, color->color.g,
+                            color->color.b, alpha);
 
-        cairo_fill(cr);
+        cr->fill();
     }
 }
 
@@ -290,18 +286,18 @@ int get_b_state(decor_t* d, int button)
     return ret;
 }
 
-void draw_pixbuf(GdkPixbuf* pixbuf, cairo_t* cr,
+void draw_pixbuf(GdkPixbuf* pixbuf, Cairo::RefPtr<Cairo::Context>& cr,
                  double x, double y, double x2, double y2, double alpha)
 {
-    cairo_save(cr);
-    cairo_rectangle(cr, x, y, x2 - x, y2 - y);
-    cairo_clip(cr);
-    gdk_cairo_set_source_pixbuf(cr, pixbuf, x, y);
-    cairo_paint_with_alpha(cr, alpha);
-    cairo_restore(cr);
+    cr->save();
+    cr->rectangle(x, y, x2 - x, y2 - y);
+    cr->clip();
+    gdk_cairo_set_source_pixbuf(cr->cobj(), pixbuf, x, y);
+    cr->paint_with_alpha(alpha);
+    cr->restore();
 }
 
-void draw_button_with_glow_alpha_bstate(int b_t, decor_t* d, cairo_t* cr,
+void draw_button_with_glow_alpha_bstate(int b_t, decor_t* d, Cairo::RefPtr<Cairo::Context>& cr,
                                         int y1, double button_alpha,
                                         double glow_alpha, int b_state)
 {
@@ -357,8 +353,8 @@ void draw_button_with_glow_alpha_bstate(int b_t, decor_t* d, cairo_t* cr,
         }
     } else {
         y += 3;
-        cairo_set_line_width(cr, 2.0);
-        cairo_move_to(cr, x, y);
+        cr->set_line_width(2.0);
+        cr->move_to(x, y);
         switch (b) {
         case B_CLOSE:
             draw_close_button(cr, 3.1);
@@ -373,7 +369,7 @@ void draw_button_with_glow_alpha_bstate(int b_t, decor_t* d, cairo_t* cr,
             draw_min_button(cr, 4.0);
             break;
         case B_HELP:
-            cairo_move_to(cr, x, y);
+            cr->move_to(x, y);
             draw_help_button(cr); // was (cr, 3.1)
             break;
         default:
@@ -385,14 +381,14 @@ void draw_button_with_glow_alpha_bstate(int b_t, decor_t* d, cairo_t* cr,
     }
 }
 
-void draw_button_with_glow(int b_t, decor_t* d, cairo_t* cr, int y1,
+void draw_button_with_glow(int b_t, decor_t* d, Cairo::RefPtr<Cairo::Context>& cr, int y1,
                            bool with_glow)
 {
     draw_button_with_glow_alpha_bstate(b_t, d, cr, y1, 1.0,
                                        (with_glow ? 1.0 : 0.0), -1);
 }
 
-void draw_button(int b_t, decor_t* d, cairo_t* cr, int y1)
+void draw_button(int b_t, decor_t* d, Cairo::RefPtr<Cairo::Context>& cr, int y1)
 {
     draw_button_with_glow_alpha_bstate(b_t, d, cr, y1, 1.0, 0.0, -1);
 }

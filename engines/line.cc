@@ -54,17 +54,16 @@ void get_meta_info(EngineMetaInfo* emi)
 }
 
 #ifdef SHADOW_FIX
-void draw_shadow_background(decor_t* d, cairo_t* cr)
+void draw_shadow_background(decor_t* d, Cairo::RefPtr<Cairo::Context>& cr)
 {
-    cairo_matrix_t matrix;
     double w, x2;
     int width, height;
     int left, right, top, bottom;
     window_settings* ws = d->fs->ws;
 
     if (!ws->large_shadow_pixmap) {
-        cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 0.0);
-        cairo_paint(cr);
+        cr->set_source_rgba(0.0, 0.0, 0.0, 0.0);
+        cr->paint();
 
         return;
     }
@@ -91,36 +90,36 @@ void draw_shadow_background(decor_t* d, cairo_t* cr)
     x2 = d->width - right;
 
     /* top left */
-    cairo_matrix_init_identity(&matrix);
-    cairo_pattern_set_matrix(ws->shadow_pattern, &matrix);
-    cairo_set_source(cr, ws->shadow_pattern);
-    cairo_rectangle(cr, 0.0, 0.0, left, top);
-    cairo_fill(cr);
+
+    ws->shadow_pattern->set_matrix(Cairo::identity_matrix());
+    cr->set_source(ws->shadow_pattern);
+    cr->rectangle(0.0, 0.0, left, top);
+    cr->fill();
 
     /* top */
     if (w > 0) {
-        cairo_matrix_init_translate(&matrix, left, 0.0);
-        cairo_matrix_scale(&matrix, 1.0 / w, 1.0);
-        cairo_matrix_translate(&matrix, -left, 0.0);
-        cairo_pattern_set_matrix(ws->shadow_pattern, &matrix);
-        cairo_set_source(cr, ws->shadow_pattern);
-        cairo_rectangle(cr, left, 0.0, w, top);
-        cairo_fill(cr);
+        auto mat = Cairo::translation_matrix(left, 0.0);
+        mat.scale(1.0 / w, 1.0);
+        mat.translate(-left, 0.0);
+        ws->shadow_pattern->set_matrix(mat);
+        cr->set_source(ws->shadow_pattern);
+        cr->rectangle(left, 0.0, w, top);
+        cr->fill();
     }
 
 
     /* top right */
-    cairo_matrix_init_translate(&matrix, width - right - x2, 0.0);
-    cairo_pattern_set_matrix(ws->shadow_pattern, &matrix);
-    cairo_set_source(cr, ws->shadow_pattern);
-    cairo_rectangle(cr, x2, 0.0, right, top);
-    cairo_clip_preserve(cr);
-    cairo_fill(cr);
+    ws->shadow_pattern->set_matrix(
+                Cairo::translation_matrix(width - right - x2, 0.0));
+    cr->set_source(ws->shadow_pattern);
+    cr->rectangle(x2, 0.0, right, top);
+    cr->clip_preserve();
+    cr->fill();
 }
 #endif
 
 extern "C"
-void engine_draw_frame(decor_t* d, cairo_t* cr)
+void engine_draw_frame(decor_t* d, Cairo::RefPtr<Cairo::Context>& cr)
 {
     frame_settings* fs = d->fs;
     private_fs* pfs = reinterpret_cast<private_fs*>(fs->engine_fs);
@@ -141,9 +140,9 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
     double border_width = MIN(m1, m2);
     double border_offset = border_width / 2.0;
 
-    cairo_set_line_width(cr, border_width);
+    cr->set_line_width(border_width);
 
-    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+    cr->set_operator(Cairo::OPERATOR_SOURCE);
 
     rounded_rectangle(cr,
                       x1 + border_offset,
@@ -152,7 +151,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                       y2 - y1 - top,
                       0, ws, 0);
     cairo_set_source_alpha_color(cr, &pfs->border);
-    cairo_stroke(cr);
+    cr->stroke();
 
     // title bar
     if (pfs->title_bar.alpha != 0.0) {
@@ -163,22 +162,22 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                           top,
                           0, ws, 0);
         cairo_set_source_alpha_color(cr, &pfs->title_bar);
-        cairo_fill(cr);
+        cr->fill();
     } else {
-        cairo_save(cr);
-        cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
-        cairo_rectangle(cr, 0.0, 0.0, d->width, top + y1 - border_width);
-        cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
-        cairo_fill(cr);
-        cairo_restore(cr);
+        cr->save();
+        cr->set_operator(Cairo::OPERATOR_CLEAR);
+        cr->rectangle(0.0, 0.0, d->width, top + y1 - border_width);
+        cr->set_source_rgba(1.0, 1.0, 1.0, 1.0);
+        cr->fill();
+        cr->restore();
 
 // FIXME => find a proper solution for this
 #ifdef SHADOW_FIX
-        cairo_rectangle(cr, 0.0, 0.0, d->width, top + y1 - border_width);
-        cairo_clip(cr);
-        cairo_translate(cr, 0.0, ws->top_space + ws->win_extents.top);
+        cr->rectangle(0.0, 0.0, d->width, top + y1 - border_width);
+        cr->clip();
+        cr->translate(0.0, ws->top_space + ws->win_extents.top);
         draw_shadow_background(d, cr);
-        cairo_translate(cr, 0.0, -ws->top_space - ws->win_extents.top);
+        cr->translate(0.0, -ws->top_space - ws->win_extents.top);
 #endif
     }
 }

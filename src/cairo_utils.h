@@ -22,26 +22,26 @@
 
 #include <libengine/emerald.h>
 
-void gdk_cairo_set_source_color_alpha(cairo_t* cr, GdkColor* color, double alpha);
-void draw_shadow_background(decor_t* d, cairo_t* cr);
-void draw_help_button(cairo_t* cr);
-void draw_close_button(cairo_t* cr, double s);
-void draw_max_button(cairo_t* cr, double s);
-void draw_unmax_button(cairo_t* cr, double s);
-void draw_min_button(cairo_t* cr, double s);
+void gdk_cairo_set_source_color_alpha(Cairo::RefPtr<Cairo::Context>& cr, GdkColor* color, double alpha);
+void draw_shadow_background(decor_t* d, Cairo::RefPtr<Cairo::Context>& cr);
+void draw_help_button(Cairo::RefPtr<Cairo::Context>& cr);
+void draw_close_button(Cairo::RefPtr<Cairo::Context>& cr, double s);
+void draw_max_button(Cairo::RefPtr<Cairo::Context>& cr, double s);
+void draw_unmax_button(Cairo::RefPtr<Cairo::Context>& cr, double s);
+void draw_min_button(Cairo::RefPtr<Cairo::Context>& cr, double s);
 void get_button_pos(window_settings* ws, int b_t,
                     decor_t* d, double y1, double* rx, double* ry);
-void button_state_paint(cairo_t* cr,
+void button_state_paint(Cairo::RefPtr<Cairo::Context>& cr,
                         alpha_color* color, alpha_color* color_2, unsigned state);
 int get_b_state(decor_t* d, int button);
-void draw_pixbuf(GdkPixbuf* pixbuf, cairo_t* cr,
+void draw_pixbuf(GdkPixbuf* pixbuf, Cairo::RefPtr<Cairo::Context>& cr,
                  double x, double y, double x2, double y2, double alpha);
-void draw_button_with_glow_alpha_bstate(int b_t, decor_t* d, cairo_t* cr,
+void draw_button_with_glow_alpha_bstate(int b_t, decor_t* d, Cairo::RefPtr<Cairo::Context>& cr,
                                         int y1, double button_alpha,
                                         double glow_alpha, int b_state);
-void draw_button_with_glow(int b_t, decor_t* d, cairo_t* cr, int y1,
+void draw_button_with_glow(int b_t, decor_t* d, Cairo::RefPtr<Cairo::Context>& cr, int y1,
                            bool with_glow);
-void draw_button(int b_t, decor_t* d, cairo_t* cr, int y1);
+void draw_button(int b_t, decor_t* d, Cairo::RefPtr<Cairo::Context>& cr, int y1);
 
 
 

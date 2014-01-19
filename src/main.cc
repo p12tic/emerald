@@ -162,7 +162,6 @@ update_default_decorations(GdkScreen* screen, frame_settings* fs_act,
 
     d.buffer_pixmap = NULL;
     d.layout = NULL;
-    d.icon = NULL;
     d.state = static_cast<Wnck::WindowState>(0);
     d.actions = static_cast<Wnck::WindowActions>(0);
     d.prop_xid = 0;
@@ -1210,7 +1209,6 @@ int update_shadow(frame_settings* fs)
     XFilters* filters;
     const char* filter = NULL;
     int size, n_params = 0;
-    cairo_t* cr;
     decor_t d;
 
     window_settings* ws = fs->ws;
@@ -1280,7 +1278,6 @@ int update_shadow(frame_settings* fs)
 
     d.buffer_pixmap = NULL;
     d.layout = NULL;
-    d.icon = NULL;
     d.state = static_cast<Wnck::WindowState>(0);
     d.actions = static_cast<Wnck::WindowActions>(0);
     d.prop_xid = 0;
@@ -1309,10 +1306,7 @@ int update_shadow(frame_settings* fs)
         ws->large_shadow_pixmap = NULL;
     }
 
-    if (ws->shadow_pattern) {
-        cairo_pattern_destroy(ws->shadow_pattern);
-        ws->shadow_pattern = NULL;
-    }
+    ws->shadow_pattern.clear();
 
     if (ws->shadow_pixmap) {
         g_object_unref(G_OBJECT(ws->shadow_pixmap));
@@ -1394,12 +1388,11 @@ int update_shadow(frame_settings* fs)
 
     ws->large_shadow_pixmap = d.pixmap;
 
-    cr = gdk_cairo_create(GDK_DRAWABLE(ws->large_shadow_pixmap));
-    ws->shadow_pattern =
-        cairo_pattern_create_for_surface(cairo_get_target(cr));
-    cairo_pattern_set_filter(ws->shadow_pattern, CAIRO_FILTER_NEAREST);
-    cairo_destroy(cr);
+    auto g_cr = gdk_cairo_create(GDK_DRAWABLE(ws->large_shadow_pixmap));
+    auto cr = Cairo::RefPtr<Cairo::Context>{new Cairo::Context{g_cr, true}};
 
+    ws->shadow_pattern = Cairo::SurfacePattern::create(cr->get_target());
+    ws->shadow_pattern->set_filter(Cairo::FILTER_NEAREST);
 
     /* WINDOWS WITHOUT DECORATIONS */
 

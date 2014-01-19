@@ -45,7 +45,7 @@ void set_decor(Wnck::Window* win, decor_t* decor)
 void reset_buttons_bg_and_fade(decor_t* d)
 {
     d->draw_only_buttons_region = false;
-    d->button_fade_info.cr = NULL;
+    d->button_fade_info.cr.clear();
     d->button_fade_info.timer = -1;
     int b_t;
 
@@ -72,10 +72,8 @@ void stop_button_fade(decor_t* d)
 {
     int j;
 
-    if (d->button_fade_info.cr) {
-        cairo_destroy(d->button_fade_info.cr);
-        d->button_fade_info.cr = NULL;
-    }
+    d->button_fade_info.cr.clear();
+
     if (d->button_fade_info.timer >= 0) {
         g_source_remove(d->button_fade_info.timer);
         d->button_fade_info.timer = -1;
@@ -276,7 +274,6 @@ void update_button_regions(decor_t* d)
 }
 void draw_window_decoration_real(decor_t* d, bool shadow_time)
 {
-    cairo_t* cr;
     frame_settings* fs = d->fs;
     window_settings* ws = fs->ws;
 
@@ -287,54 +284,51 @@ void draw_window_decoration_real(decor_t* d, bool shadow_time)
     double y1 = ws->top_space - ws->win_extents.top;
 
     if (!d->draw_only_buttons_region) {      // if not only drawing buttons
-        cr = gdk_cairo_create(GDK_DRAWABLE
-                              (IS_VALID(d->buffer_pixmap) ? d->buffer_pixmap :
-                               d->pixmap));
-        cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-        cairo_set_line_width(cr, 1.0);
-        cairo_save(cr);
+        auto *g_cr = gdk_cairo_create(GDK_DRAWABLE
+                                      (IS_VALID(d->buffer_pixmap) ? d->buffer_pixmap :
+                                        d->pixmap));
+        Cairo::RefPtr<Cairo::Context> cr{new Cairo::Context(g_cr, true)};
+        cr->set_operator(Cairo::OPERATOR_SOURCE);
+        cr->set_line_width(1.0);
+        cr->save();
         draw_shadow_background(d, cr);
         engine_draw_frame(d, cr);
-        cairo_restore(cr);
-        cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
-        cairo_set_line_width(cr, 2.0);
+        cr->restore();
+        cr->set_operator(Cairo::OPERATOR_OVER);
+        cr->set_line_width(2.0);
 
         /*color.r = 1;
           color.g = 1;
           color.b = 1; */
 
         // the buttons were previously drawn here, so we need to save the cairo state here
-        cairo_save(cr);
+        cr->save();
 
         if (d->layout && d->tobj_item_state[TBT_TITLE] != 3) {
             pango_layout_set_alignment(d->layout, ws->title_text_align);
-            cairo_move_to(cr,
-                          get_real_pos(ws, TBT_TITLE, d),
-                          y1 + 2.0 + (ws->titlebar_height -
-                                      ws->text_height) / 2.0);
+            cr->move_to(get_real_pos(ws, TBT_TITLE, d),
+                        y1 + 2.0 + (ws->titlebar_height - ws->text_height) / 2.0);
 
             /* ===================active text colors */
             cairo_set_source_alpha_color(cr, &fs->text_halo);
-            pango_cairo_layout_path(cr, d->layout);
-            cairo_stroke(cr);
+            pango_cairo_layout_path(cr->cobj(), d->layout);
+            cr->stroke();
 
             cairo_set_source_alpha_color(cr, &fs->text);
 
-            cairo_move_to(cr,
-                          get_real_pos(ws, TBT_TITLE, d),
-                          y1 + 2.0 + (ws->titlebar_height -
-                                      ws->text_height) / 2.0);
+            cr->move_to(get_real_pos(ws, TBT_TITLE, d),
+                        y1 + 2.0 + (ws->titlebar_height - ws->text_height) / 2.0);
 
-            pango_cairo_show_layout(cr, d->layout);
+            pango_cairo_show_layout(cr->cobj(), d->layout);
         }
         if (d->icon && d->tobj_item_state[TBT_ICON] != 3) {
-            cairo_translate(cr, get_real_pos(ws, TBT_ICON, d),
-                            y1 - 5.0 + ws->titlebar_height / 2);
+            cr->translate(get_real_pos(ws, TBT_ICON, d),
+                          y1 - 5.0 + ws->titlebar_height / 2);
 
-            cairo_set_source(cr, d->icon);
-            cairo_rectangle(cr, 0.0, 0.0, 16.0, 16.0);
-            cairo_clip(cr);
-            cairo_paint(cr);
+            cr->set_source(d->icon);
+            cr->rectangle(0.0, 0.0, 16.0, 16.0);
+            cr->clip();
+            cr->paint();
         }
         // Copy button region backgrounds to buffers
         // for fast drawing of buttons from now on
@@ -402,7 +396,7 @@ void draw_window_decoration_real(decor_t* d, bool shadow_time)
                 }
             }
         }
-        cairo_restore(cr);                // and restore the state for button drawing
+        cr->restore();                // and restore the state for button drawing
         /*if (!shadow_time)
           {
         //workaround for slowness, will grab and rotate the two side-pieces
@@ -413,7 +407,7 @@ void draw_window_decoration_real(decor_t* d, bool shadow_time)
         cairo_destroy(cr);
         int topspace = ws->top_space + ws->titlebar_height;
         cr = gdk_cairo_create (GDK_DRAWABLE (d->buffer_pixmap ? d->buffer_pixmap : d->pixmap));
-        cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+        cr->set_operator(Cairo::OPERATOR_SOURCE);
 
         gdk_drawable_get_size(pbuff,&w,&h);
         csur = cairo_xlib_surface_create(
@@ -428,28 +422,28 @@ void draw_window_decoration_real(decor_t* d, bool shadow_time)
 
         //draw all four quads from the old one to the new one
         //first top quad
-        cairo_save(cr);
-        cairo_rectangle(cr, 0, 0, d->width, topspace);
-        cairo_clip(cr);
+        cr->save();
+        cr->rectangle(0, 0, d->width, topspace);
+        cr->clip();
         cairo_pattern_set_matrix(sr, &cm);
-        cairo_paint(cr);
-        cairo_restore(cr);
+        cr->paint();
+        cr->restore();
 
         //then bottom, easiest this way
-        cairo_save(cr);
-        cairo_rectangle(cr, 0, topspace, d->width, ws->bottom_space);
-        cairo_clip(cr);
+        cr->save();
+        cr->rectangle(0, topspace, d->width, ws->bottom_space);
+        cr->clip();
         cm.y0 = d->height - (top_space + ws->bottom_space);
         cm.x0 = 0;
         cairo_pattern_set_matrix(sr,&cm);
-        cairo_paint(cr);
-        cairo_restore(cr);
+        cr->paint();
+        cr->restore();
 
         //now left
-        cairo_save(cr);
-        cairo_rectangle(cr, 0, topspace + ws->bottom_space,
+        cr->save();
+        cr->rectangle(0, topspace + ws->bottom_space,
         d->height-(topspace + ws->bottom_space), ws->left_space);
-        cairo_clip(cr);
+        cr->clip();
         cm.xx=0;
         cm.xy=1;
         cm.yx=1;
@@ -457,20 +451,20 @@ void draw_window_decoration_real(decor_t* d, bool shadow_time)
         cm.x0 = - topspace - ws->bottom_space;
         cm.y0 = topspace;
         cairo_pattern_set_matrix(sr,&cm);
-        cairo_paint(cr);
-        cairo_restore(cr);
+        cr->paint();
+        cr->restore();
 
         //now right
-        cairo_save(cr);
-        cairo_rectangle(cr, 0, topspace + ws->bottom_space + ws->left_space,
+        cr->save();
+        cr->rectangle(0, topspace + ws->bottom_space + ws->left_space,
         d->height-(topspace + ws->bottom_space), ws->right_space);
-        cairo_clip(cr);
+        cr->clip();
         cm.y0 = topspace;
         cm.x0 = d->width-
         (topspace + ws->bottom_space + ws->left_space + ws->right_space);
         cairo_pattern_set_matrix(sr,&cm);
-        cairo_paint(cr);
-        cairo_restore(cr);
+        cr->paint();
+        cr->restore();
 
 
         cairo_destroy(cr);
@@ -481,18 +475,17 @@ void draw_window_decoration_real(decor_t* d, bool shadow_time)
     }
     // Draw buttons
 
-    cr = gdk_cairo_create(GDK_DRAWABLE(IS_VALID(d->buffer_pixmap) ?
-                                       d->buffer_pixmap : d->pixmap));
+    auto g_cr = gdk_cairo_create(GDK_DRAWABLE(IS_VALID(d->buffer_pixmap) ?
+                                         d->buffer_pixmap : d->pixmap));
+    Cairo::RefPtr<Cairo::Context> cr{new Cairo::Context(g_cr, true)};
 
-    cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
+    cr->set_operator(Cairo::OPERATOR_OVER);
 
     if (ws->use_button_fade && ws->use_pixmap_buttons) {
         draw_buttons_with_fade(d, cr, y1);
     } else {
         draw_buttons_without_fade(d, cr, y1);
     }
-
-    cairo_destroy(cr);
 
     if (IS_VALID(d->buffer_pixmap)) {
         /*if (d->draw_only_buttons_region && d->min_drawn_buttons_region.x1 < 10000)        // if region is updated at least once
@@ -621,7 +614,6 @@ void decor_update_switcher_property(decor_t* d)
 void draw_switcher_background(decor_t* d)
 {
     Display* xdisplay = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
-    cairo_t* cr;
     GtkStyle* style;
     decor_color_t color;
     alpha_color acolor;
@@ -646,9 +638,10 @@ void draw_switcher_background(decor_t* d)
     acolor.alpha = alpha;
     acolor2.alpha = alpha * 0.75;
 
-    cr = gdk_cairo_create(GDK_DRAWABLE(d->buffer_pixmap));
+    auto* g_cr = gdk_cairo_create(GDK_DRAWABLE(d->buffer_pixmap));
+    Cairo::RefPtr<Cairo::Context> cr{new Cairo::Context(g_cr, true)};
 
-    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+    cr->set_operator(Cairo::OPERATOR_SOURCE);
 
     top = ws->win_extents.bottom;
 
@@ -659,9 +652,9 @@ void draw_switcher_background(decor_t* d)
 
     h = y2 - y1 - ws->win_extents.bottom - ws->win_extents.bottom;
 
-    cairo_set_line_width(cr, 1.0);
+    cr->set_line_width(1.0);
 
-    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+    cr->set_operator(Cairo::OPERATOR_SOURCE);
     if (d->prop_xid || !IS_VALID(d->buffer_pixmap)) {
         draw_shadow_background(d, cr);
     }
@@ -730,35 +723,24 @@ void draw_switcher_background(decor_t* d)
                            &acolor, &acolor2,
                            SHADE_BOTTOM | SHADE_RIGHT, ws, 5.0);
 
-    cairo_rectangle(cr, x1 + ws->win_extents.left,
+    cr->rectangle(x1 + ws->win_extents.left,
                     y1 + top,
                     x2 - x1 - ws->win_extents.left - ws->win_extents.right,
                     h);
     gdk_cairo_set_source_color_alpha(cr, &style->bg[GTK_STATE_NORMAL], alpha);
-    cairo_fill(cr);
+    cr->fill();
 
-    cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
-    cairo_identity_matrix(cr);
-    cairo_rectangle(cr, x1 + 1, y1 + 1,
+    cr->set_operator(Cairo::OPERATOR_OVER);
+    cr->set_identity_matrix();
+    cr->rectangle(x1 + 1, y1 + 1,
                     x2 - x1 - 1.0,
                     y2 - y1 - 1.0);
 
 
 
-    cairo_clip(cr);
+    cr->clip();
 
-    cairo_translate(cr, 1.0, 1.0);
-
-    rounded_rectangle(cr,
-                      x1 + 0.5, y1 + 0.5,
-                      x2 - x1 - 1.0, y2 - y1 - 1.0,
-                      CORNER_TOPLEFT | CORNER_TOPRIGHT | CORNER_BOTTOMLEFT |
-                      CORNER_BOTTOMRIGHT, ws, 5.0);
-
-    cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.4);
-    cairo_stroke(cr);
-
-    cairo_translate(cr, -2.0, -2.0);
+    cr->translate(1.0, 1.0);
 
     rounded_rectangle(cr,
                       x1 + 0.5, y1 + 0.5,
@@ -766,12 +748,23 @@ void draw_switcher_background(decor_t* d)
                       CORNER_TOPLEFT | CORNER_TOPRIGHT | CORNER_BOTTOMLEFT |
                       CORNER_BOTTOMRIGHT, ws, 5.0);
 
-    cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 0.1);
-    cairo_stroke(cr);
+    cr->set_source_rgba(1.0, 1.0, 1.0, 0.4);
+    cr->stroke();
 
-    cairo_translate(cr, 1.0, 1.0);
+    cr->translate(-2.0, -2.0);
 
-    cairo_reset_clip(cr);
+    rounded_rectangle(cr,
+                      x1 + 0.5, y1 + 0.5,
+                      x2 - x1 - 1.0, y2 - y1 - 1.0,
+                      CORNER_TOPLEFT | CORNER_TOPRIGHT | CORNER_BOTTOMLEFT |
+                      CORNER_BOTTOMRIGHT, ws, 5.0);
+
+    cr->set_source_rgba(0.0, 0.0, 0.0, 0.1);
+    cr->stroke();
+
+    cr->translate(1.0, 1.0);
+
+    cr->reset_clip();
 
     rounded_rectangle(cr,
                       x1 + 0.5, y1 + 0.5,
@@ -781,9 +774,7 @@ void draw_switcher_background(decor_t* d)
 
     gdk_cairo_set_source_color_alpha(cr, &style->fg[GTK_STATE_NORMAL], alpha);
 
-    cairo_stroke(cr);
-
-    cairo_destroy(cr);
+    cr->stroke();
 
     gdk_draw_drawable(d->pixmap,
                       d->gc,
@@ -828,17 +819,18 @@ void draw_switcher_foreground(decor_t* d)
     double y1 = ws->top_space - ws->win_extents.top;
     double x2 = d->width - ws->right_space + ws->win_extents.right;
 
-    cairo_t* cr = gdk_cairo_create(GDK_DRAWABLE(d->buffer_pixmap));
+    auto* g_cr = gdk_cairo_create(GDK_DRAWABLE(d->buffer_pixmap));
+    Cairo::RefPtr<Cairo::Context> cr{new Cairo::Context(g_cr, true)};
 
-    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+    cr->set_operator(Cairo::OPERATOR_SOURCE);
 
-    cairo_rectangle(cr, x1 + ws->win_extents.left,
+    cr->rectangle(x1 + ws->win_extents.left,
                     y1 + top + ws->switcher_top_corner_space,
                     x2 - x1 - ws->win_extents.left - ws->win_extents.right,
                     SWITCHER_SPACE);
 
     gdk_cairo_set_source_color_alpha(cr, &style->bg[GTK_STATE_NORMAL], alpha);
-    cairo_fill(cr);
+    cr->fill();
 
     if (d->layout) {
         int w;
@@ -891,21 +883,19 @@ void draw_switcher_foreground(decor_t* d)
         pango_layout_set_ellipsize(d->layout, PANGO_ELLIPSIZE_END);
         pango_layout_set_width(d->layout, (x2 - x1) * PANGO_SCALE);
 
-        cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
+        cr->set_operator(Cairo::OPERATOR_OVER);
 
         gdk_cairo_set_source_color_alpha(cr,
                                          &style->fg[GTK_STATE_NORMAL], 1.0);
 
         pango_layout_get_pixel_size(d->layout, &w, NULL);
 
-        cairo_move_to(cr, d->width / 2 - w / 2,
+        cr->move_to(d->width / 2 - w / 2,
                       y1 + top + ws->switcher_top_corner_space +
                       SWITCHER_SPACE / 2 - ws->text_height / 2);
 
-        pango_cairo_show_layout(cr, d->layout);
+        pango_cairo_show_layout(cr->cobj(), d->layout);
     }
-
-    cairo_destroy(cr);
 
     gdk_draw_drawable(d->pixmap,
                       d->gc,
@@ -962,7 +952,7 @@ bool draw_decor_list(void* data)
 }
 
 
-void draw_buttons_with_fade(decor_t* d, cairo_t* cr, double y1)
+void draw_buttons_with_fade(decor_t* d, Cairo::RefPtr<Cairo::Context>& cr, double y1)
 {
     (void) cr;
     window_settings* ws = d->fs->ws;
@@ -1047,11 +1037,11 @@ int draw_buttons_timer_func(void* data)
     d->min_drawn_buttons_region.y2 = -100;
 
     if (!fade_info->cr) {
-        fade_info->cr =
-            gdk_cairo_create(GDK_DRAWABLE
-                             (IS_VALID(d->buffer_pixmap) ? d->buffer_pixmap :
-                              d->pixmap));
-        cairo_set_operator(fade_info->cr, CAIRO_OPERATOR_OVER);
+        auto* g_cr = gdk_cairo_create(GDK_DRAWABLE
+                            (IS_VALID(d->buffer_pixmap) ? d->buffer_pixmap : d->pixmap));
+        fade_info->cr = Cairo::RefPtr<Cairo::Context>{new Cairo::Context(g_cr, true)};
+
+        fade_info->cr->set_operator(Cairo::OPERATOR_OVER);
     }
 
     // Determine necessary updates
@@ -1177,8 +1167,7 @@ int draw_buttons_timer_func(void* data)
     }
     fade_info->first_draw = false;
     if (!any_active_buttons) {
-        cairo_destroy(fade_info->cr);
-        fade_info->cr = NULL;
+        fade_info->cr.clear();
         if (fade_info->timer >= 0) {
             g_source_remove(fade_info->timer);
             fade_info->timer = -1;
@@ -1188,7 +1177,7 @@ int draw_buttons_timer_func(void* data)
     return true;
 }
 
-void draw_buttons_without_fade(decor_t* d, cairo_t* cr, double y1)
+void draw_buttons_without_fade(decor_t* d, Cairo::RefPtr<Cairo::Context>& cr, double y1)
 {
     window_settings* ws = d->fs->ws;
 

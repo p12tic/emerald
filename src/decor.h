@@ -40,8 +40,8 @@ void queue_decor_draw_for_buttons(decor_t* d, bool for_buttons);
 void queue_decor_draw(decor_t* d);
 int draw_buttons_timer_func(void* data);
 bool draw_decor_list(void* data);
-void draw_buttons_with_fade(decor_t* d, cairo_t* cr, double y1);
-void draw_buttons_without_fade(decor_t* d, cairo_t* cr, double y1);
+void draw_buttons_with_fade(decor_t* d, Cairo::RefPtr<Cairo::Context>& cr, double y1);
+void draw_buttons_without_fade(decor_t* d, Cairo::RefPtr<Cairo::Context>& cr, double y1);
 void
 decor_update_blur_property(decor_t* d,
                            int     width,

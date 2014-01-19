@@ -27,8 +27,16 @@
 #include <pixmap_icon.h>
 
 #define SECT "pixmap_settings"
-#define TEXTURE_FROM_PNG(surface, png) \
-        surface = (cairo_surface_t*) cairo_image_surface_create_from_png(png);
+
+std::pair<Cairo::RefPtr<Cairo::ImageSurface>, bool>
+    read_png(const std::string& fn)
+{
+    try {
+        return {Cairo::ImageSurface::create_from_png(fn), true};
+    } catch (...) {
+        return {Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, 0, 0), false};
+    }
+}
 
 /*
  * pixmap data structs
@@ -74,7 +82,8 @@ enum {
 };
 
 struct pixmap_data {
-    cairo_surface_t* surface;
+    Cairo::RefPtr<Cairo::ImageSurface> surface;
+    bool is_valid;
     bool use_scaled;
     bool use_width;
     bool use_height;
@@ -113,7 +122,7 @@ void get_meta_info(EngineMetaInfo* emi)
 }
 
 void
-fill_rounded_rectangle_pixmap_blend(cairo_t*       cr,
+fill_rounded_rectangle_pixmap_blend(Cairo::RefPtr<Cairo::Context>&       cr,
                                     double        x, double        y,
                                     double        w, double        h,
                                     int           corner,
@@ -125,42 +134,39 @@ fill_rounded_rectangle_pixmap_blend(cairo_t*       cr,
                                     double    radius,
                                     bool blend_only_if_pixmaps_available)
 {
-    cairo_pattern_t* pattern;
     bool blend = true;
     int iw, ih;
 
-    if (cairo_surface_status(pix->surface) == CAIRO_STATUS_SUCCESS) {
-        iw = cairo_image_surface_get_width(pix->surface);
-        ih = cairo_image_surface_get_height(pix->surface);
+    if (pix->is_valid) {
+        iw = pix->surface->get_width();
+        ih = pix->surface->get_height();
 
-        cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-        cairo_set_line_width(cr, 0.0);
+        cr->set_operator(Cairo::OPERATOR_SOURCE);
+        cr->set_line_width(0.0);
 
         // While using scaled pixmaps
         if (pix->use_scaled) {
-            cairo_matrix_t matrix;
-            cairo_matrix_init_scale(&matrix, iw / w, ih / h);
-            cairo_matrix_translate(&matrix, -x, -y);
+            auto mat = Cairo::scaling_matrix(iw / w, ih / h);
+            mat.translate(-x, -y);
 
-            pattern = cairo_pattern_create_for_surface(pix->surface);
-            cairo_pattern_set_matrix(pattern, &matrix);
-            cairo_set_source(cr, pattern);
-            cairo_pattern_set_extend(pattern, CAIRO_EXTEND_REPEAT);
+            auto pat = Cairo::SurfacePattern::create(pix->surface);
+            pat->set_matrix(mat);
+            cr->set_source(pat);
+            pat->set_extend(Cairo::EXTEND_REPEAT);
         } else {
             // While using tiled pixmaps
-            cairo_set_source_surface(cr, pix->surface, x, y);
-            pattern = cairo_pattern_reference(cairo_get_source(cr));
-            cairo_pattern_set_extend(pattern, CAIRO_EXTEND_REPEAT);
+            cr->set_source(pix->surface, x, y);
+            cairo_pattern_set_extend(cr->get_source()->cobj(), CAIRO_EXTEND_REPEAT);
         }
 
         rounded_rectangle(cr, x, y, w, h, corner, ws, radius);
-        cairo_fill(cr);
-        cairo_pattern_destroy(pattern);
+        cr->fill();
+
     } else if (blend_only_if_pixmaps_available) {
         blend = false;
     }
 
-    cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
+    cr->set_operator(Cairo::OPERATOR_OVER);
     if (w > 0 && blend) {
         // Now blend in the gradients
         fill_rounded_rectangle(cr, x, y, w, h, corner, c0, c1, gravity, ws, radius);
@@ -187,7 +193,7 @@ int get_real_pos(window_settings* ws, int tobj, decor_t* d)
 }
 
 extern "C"
-void engine_draw_frame(decor_t* d, cairo_t* cr)
+void engine_draw_frame(decor_t* d, Cairo::RefPtr<Cairo::Context>& cr)
 {
     double        x1, y1, x2, y2, h;
     double        top_left_width, top_right_width;
@@ -226,11 +232,11 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
     right_width = top_right_width = bottom_right_width = ws->win_extents.right;
     title_width = title_left_width = title_right_width = 0;
 
-    if (cairo_surface_status(pfs->pixmaps[TITLE].surface) == CAIRO_STATUS_SUCCESS) {
-        title_left_width = cairo_image_surface_get_width(pfs->pixmaps[TITLE].surface);
+    if (pfs->pixmaps[TITLE].is_valid) {
+        title_left_width = pfs->pixmaps[TITLE].surface->get_width();
     }
-    if (cairo_surface_status(pfs->pixmaps[TITLE_LEFT].surface) == CAIRO_STATUS_SUCCESS) {
-        title_right_width = cairo_image_surface_get_width(pfs->pixmaps[TITLE_LEFT].surface);
+    if (pfs->pixmaps[TITLE_LEFT].is_valid) {
+        title_right_width = pfs->pixmaps[TITLE_LEFT].surface->get_width();
     }
 
     top_left_height = top_right_height = top;
@@ -382,7 +388,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                                         SHADE_BOTTOM | SHADE_RIGHT, &pfs->pixmaps[BOTTOM_RIGHT], ws,
                                         pws->bottom_corner_radius, false);
 
-    cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
+    cr->set_operator(Cairo::OPERATOR_OVER);
 
     // Draw Title pixmaps
     if (PANGO_IS_LAYOUT(d->layout)) {
@@ -433,7 +439,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                                         SHADE_TOP, &pfs->pixmaps[TITLE_RIGHT], ws,
                                         pws->top_corner_radius, true);
 
-    cairo_stroke(cr);
+    cr->stroke();
 }
 
 extern "C"
@@ -457,7 +463,9 @@ void load_engine_settings(const KeyFile& f, window_settings* ws)
     private_fs* pfs = reinterpret_cast<private_fs*>(ws->fs_act->engine_fs);
     for (int i = 0; i < 11; i++) {
         std::string key = pre + "_" + p_types[i];
-        TEXTURE_FROM_PNG(pfs->pixmaps[i].surface, make_filename("pixmaps", key, "png").c_str());
+        auto png = read_png(make_filename("pixmaps", key, "png"));
+        pfs->pixmaps[i].surface = png.first;
+        pfs->pixmaps[i].is_valid = png.second;
 
         load_bool_setting(f, &pfs->pixmaps[i].use_scaled, key + "_use_scaled", SECT);
         load_bool_setting(f, &pfs->pixmaps[i].use_width, key + "_use_width", SECT);
@@ -473,7 +481,10 @@ void load_engine_settings(const KeyFile& f, window_settings* ws)
     }
     for (int i = 0; i < 11; i++) {
         std::string key = pre + "_" + p_types[i];
-        TEXTURE_FROM_PNG(pfs->pixmaps[i].surface, make_filename("pixmaps", key, "png").c_str());
+
+        auto png = read_png(make_filename("pixmaps", key, "png"));
+        pfs->pixmaps[i].surface = png.first;
+        pfs->pixmaps[i].is_valid = png.second;
 
         load_bool_setting(f, &pfs->pixmaps[i].use_scaled, key + "_use_scaled", SECT);
         load_bool_setting(f, &pfs->pixmaps[i].use_width, key + "_use_width", SECT);

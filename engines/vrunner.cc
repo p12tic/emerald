@@ -77,7 +77,7 @@ void get_meta_info(EngineMetaInfo* emi)
 }
 
 void
-draw_closed_curve(cairo_t* cr,
+draw_closed_curve(Cairo::RefPtr<Cairo::Context>& cr,
                   double  x,
                   double  y,
                   double  w,
@@ -85,26 +85,26 @@ draw_closed_curve(cairo_t* cr,
                   double ch,
                   bool tophalf)
 {
-    cairo_move_to(cr, x, y);
+    cr->move_to(x, y);
     if (tophalf || ch == 0) {
-        cairo_line_to(cr, x + w, y);
+        cr->line_to(x + w, y);
     } else {
-        cairo_curve_to(cr, x, y, x + w / 2, y + ch, x + w, y);
+        cr->curve_to(x, y, x + w / 2, y + ch, x + w, y);
     }
 
-    cairo_line_to(cr, x + w, y + h);
+    cr->line_to(x + w, y + h);
 
     if (tophalf && ch != 0) {
-        cairo_curve_to(cr, x + w, y + h, x + w / 2, y + h + ch, x, y + h);
+        cr->curve_to(x + w, y + h, x + w / 2, y + h + ch, x, y + h);
     } else {
-        cairo_line_to(cr, x, y + h);
+        cr->line_to(x, y + h);
     }
 
-    cairo_line_to(cr, x, y);
+    cr->line_to(x, y);
 }
 
 void
-draw_filled_closed_curve(cairo_t* cr,
+draw_filled_closed_curve(Cairo::RefPtr<Cairo::Context>& cr,
                          double        x,
                          double        y,
                          double        w,
@@ -115,31 +115,24 @@ draw_filled_closed_curve(cairo_t* cr,
                          alpha_color* c1,
                          alpha_color* c2)
 {
-    cairo_pattern_t* pattern;
-
     draw_closed_curve(cr, x, y, w, h, ch, tophalf);
 
-    pattern = cairo_pattern_create_linear(x, y, x + w, y + h);
-    cairo_pattern_add_color_stop_rgba(pattern, 0.0, c0->color.r, c0->color.g,
-                                      c0->color.b, c0->alpha);
-    cairo_pattern_add_color_stop_rgba(pattern, 0.5, c1->color.r, c1->color.g,
-                                      c1->color.b, c1->alpha);
-    cairo_pattern_add_color_stop_rgba(pattern, 1.0, c2->color.r, c2->color.g,
-                                      c2->color.b, c2->alpha);
-    //cairo_pattern_set_extend (pattern, CAIRO_EXTEND_PAD);
-    cairo_set_source(cr, pattern);
-    cairo_fill(cr);
-    cairo_pattern_destroy(pattern);
+    auto pat = Cairo::LinearGradient::create(x, y, x + w, y + h);
+    pat->add_color_stop_rgba(0.0, c0->color.r, c0->color.g, c0->color.b, c0->alpha);
+    pat->add_color_stop_rgba(0.5, c1->color.r, c1->color.g, c1->color.b, c1->alpha);
+    pat->add_color_stop_rgba(1.0, c2->color.r, c2->color.g, c2->color.b, c2->alpha);
+    cr->set_source(pat);
+    cr->fill();
 }
 
-void create_glow(decor_t* d, cairo_t* cr,
+void create_glow(decor_t* d, Cairo::RefPtr<Cairo::Context>& cr,
                  double x, double y, double w, double h,
                  alpha_color* c0, double p)
 {
     double r = 0.0;
     double wp = p;
     double hp = p;
-    //cairo_rectangle(cr, x1, y1, w, h);
+    //cr->rectangle(x1, y1, w, h);
     frame_settings* fs = d->fs;
     // private_fs * pfs = reinterpret_cast<private_fs*>(fs->engine_fs);
     window_settings* ws = fs->ws;
@@ -160,7 +153,7 @@ void create_glow(decor_t* d, cairo_t* cr,
     alpha_color c1;
     c1.color = c0->color;
     c1.alpha = 0;
-    cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
+    cr->set_operator(Cairo::OPERATOR_OVER);
 
     fill_rounded_rectangle(cr,
                            x - wp, y - hp, wp, hp, CORNER_TOPLEFT,
@@ -187,9 +180,9 @@ void create_glow(decor_t* d, cairo_t* cr,
                            x + w, y + h, wp, hp, CORNER_BOTTOMRIGHT,
                            c0, &c1, (SHADE_RIGHT | SHADE_BOTTOM), ws, r);
 
-    cairo_rectangle(cr, x, y, w, h);
+    cr->rectangle(x, y, w, h);
     cairo_set_source_alpha_color(cr, c0);
-    cairo_fill(cr);
+    cr->fill();
 }
 
 int get_real_pos(window_settings* ws, int tobj, decor_t* d)
@@ -213,7 +206,7 @@ int get_real_pos(window_settings* ws, int tobj, decor_t* d)
 }
 
 extern "C"
-void engine_draw_frame(decor_t* d, cairo_t* cr)
+void engine_draw_frame(decor_t* d, Cairo::RefPtr<Cairo::Context>& cr)
 {
     double        x1, y1, x2, y2, h,
                   top_title_height, bottom_title_height,
@@ -253,8 +246,8 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
         corners = 0;
     }
 
-    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-    cairo_set_line_width(cr, 0.0);
+    cr->set_operator(Cairo::OPERATOR_SOURCE);
+    cr->set_line_width(0.0);
 
     top_title_height    = (top - 0.5) * pfs->title_notch_position + 1;
     bottom_title_height = (top - 0.5) * (1 - pfs->title_notch_position) + 1;
@@ -276,7 +269,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                       top + 1,
                       (CORNER_TOPLEFT | CORNER_TOPRIGHT) & corners, ws,
                       pws->corner_radius);
-    cairo_clip(cr);
+    cr->clip();
 
     draw_filled_closed_curve(cr,
                              x1 + 0.5,
@@ -300,7 +293,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                              &pfs->title_middle_lower,
                              &pfs->title_right_lower);
 
-    cairo_reset_clip(cr);
+    cr->reset_clip();
 
     // Left and Right
     fill_rounded_rectangle(cr,
@@ -332,7 +325,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                       (CORNER_BOTTOMLEFT | CORNER_BOTTOMRIGHT) & corners, ws,
                       pws->corner_radius);
 
-    cairo_clip(cr);
+    cr->clip();
 
     draw_filled_closed_curve(cr,
                              x1 + 0.5,
@@ -345,11 +338,11 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                              &pfs->title_middle_lower,
                              &pfs->title_right_lower);
 
-    cairo_reset_clip(cr);
+    cr->reset_clip();
 
     // Title Glow
     if (pfs->use_glow) {
-        cairo_set_operator(cr, CAIRO_OPERATOR_ATOP);
+        cr->set_operator(Cairo::OPERATOR_ATOP);
 
         if (PANGO_IS_LAYOUT(d->layout)) {
             pango_layout_get_pixel_size(d->layout, &title_width, &title_height);
@@ -362,15 +355,15 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
 
 
     // ======= NEW LAYER ======
-    cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
-    cairo_set_line_width(cr, 1.0);
+    cr->set_operator(Cairo::OPERATOR_OVER);
+    cr->set_line_width(1.0);
 
     // Titlebar Separator
     if (pfs->separator_line.alpha > 0) {
         cairo_set_source_alpha_color(cr, &pfs->separator_line);
-        cairo_move_to(cr, x1 + 0.5, y1 + top - 0.5);
-        cairo_rel_line_to(cr, x2 - x1 - 1, 0.0);
-        cairo_stroke(cr);
+        cr->move_to(x1 + 0.5, y1 + top - 0.5);
+        cr->rel_line_to(x2 - x1 - 1, 0.0);
+        cr->stroke();
     }
 
     // Frame Clip
@@ -380,9 +373,9 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                       (CORNER_TOPLEFT | CORNER_TOPRIGHT | CORNER_BOTTOMLEFT |
                        CORNER_BOTTOMRIGHT) & corners, ws,
                       pws->corner_radius);
-    cairo_clip(cr);
+    cr->clip();
 
-    cairo_translate(cr, 1.0, 1.0);
+    cr->translate(1.0, 1.0);
 
     // highlight
     rounded_rectangle(cr,
@@ -393,9 +386,9 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                       pws->corner_radius);
 
     cairo_set_source_alpha_color(cr, &pfs->window_highlight);
-    cairo_stroke(cr);
+    cr->stroke();
 
-    cairo_translate(cr, -2.0, -2.0);
+    cr->translate(-2.0, -2.0);
 
     // shadow
     rounded_rectangle(cr,
@@ -406,11 +399,11 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                       pws->corner_radius);
 
     cairo_set_source_alpha_color(cr, &pfs->window_shadow);
-    cairo_stroke(cr);
+    cr->stroke();
 
-    cairo_translate(cr, 1.0, 1.0);
+    cr->translate(1.0, 1.0);
 
-    cairo_reset_clip(cr);
+    cr->reset_clip();
 
     // halo
     rounded_rectangle(cr,
@@ -421,32 +414,32 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
                       pws->corner_radius);
 
     cairo_set_source_alpha_color(cr, &pfs->window_halo);
-    cairo_stroke(cr);
+    cr->stroke();
 
     // inner border
     //TODO - make this a bit more pixel-perfect...but it works for now
 
-    cairo_set_line_width(cr, 1.0);
+    cr->set_line_width(1.0);
 
-    cairo_move_to(cr, pleft + pwidth + 1.5, ptop - 1);
-    cairo_rel_line_to(cr, -pwidth - 2.5, 0);
-    cairo_rel_line_to(cr, 0, pheight + 2.5);
+    cr->move_to(pleft + pwidth + 1.5, ptop - 1);
+    cr->rel_line_to(-pwidth - 2.5, 0);
+    cr->rel_line_to(0, pheight + 2.5);
     cairo_set_source_alpha_color(cr, &pfs->contents_shadow);
-    cairo_stroke(cr);
+    cr->stroke();
 
-    cairo_move_to(cr, pleft + pwidth + 1, ptop - 1.5);
-    cairo_rel_line_to(cr, 0, pheight + 2.5);
-    cairo_rel_line_to(cr, -pwidth - 2.5, 0);
+    cr->move_to(pleft + pwidth + 1, ptop - 1.5);
+    cr->rel_line_to(0, pheight + 2.5);
+    cr->rel_line_to(-pwidth - 2.5, 0);
     cairo_set_source_alpha_color(cr, &pfs->contents_highlight);
-    cairo_stroke(cr);
+    cr->stroke();
 
-    cairo_move_to(cr, pleft, ptop);
-    cairo_rel_line_to(cr, pwidth, 0);
-    cairo_rel_line_to(cr, 0, pheight);
-    cairo_rel_line_to(cr, -pwidth, 0);
-    cairo_rel_line_to(cr, 0, -pheight);
+    cr->move_to(pleft, ptop);
+    cr->rel_line_to(pwidth, 0);
+    cr->rel_line_to(0, pheight);
+    cr->rel_line_to(-pwidth, 0);
+    cr->rel_line_to(0, -pheight);
     cairo_set_source_alpha_color(cr, &pfs->contents_halo);
-    cairo_stroke(cr);
+    cr->stroke();
 }
 
 extern "C"

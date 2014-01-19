@@ -173,7 +173,7 @@ void theme_list_append(const std::string& value, const std::string& dir,
                                             s_th_version.c_str(), s_creator.c_str(),
                                             s_sugg.c_str());
         row[theme_columns_.markup] = val ? val : "";
-        g_free(val);\
+        g_free(val);
     }
 
     auto pix = Gdk::Pixbuf::create_from_file(imgpath, -1, 100);
