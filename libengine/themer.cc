@@ -46,11 +46,11 @@ std::string active_engine;
 
 std::string display_part(std::string name)
 {
-    unsigned colon_pos = name.find_last_of(':');
+    auto colon_pos = name.find_last_of(':');
     if (colon_pos != std::string::npos) {
         name = name.substr(colon_pos+1);
     }
-    unsigned dot_pos = name.find_first_of('.');
+    auto dot_pos = name.find_first_of('.');
     name = name.substr(0, dot_pos);
 
     return name;
