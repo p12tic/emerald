@@ -1244,7 +1244,6 @@ decor_update_blur_property(decor_t* d,
                            int     right_offset)
 {
     Display* xdisplay = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
-    long*    data = NULL;
     int     size = 0;
     window_settings* ws = d->fs->ws;
 
@@ -1271,12 +1270,11 @@ decor_update_blur_property(decor_t* d,
         size += right_region->numRects;
     }
 
-    if (size) {
-        data = malloc(sizeof(long) * (2 + size * 6));
-    }
+    if (size > 0) {
+        std::vector<long> data;
+        data.resize(2 + size * 6);
 
-    if (data) {
-        decor_region_to_blur_property(data, 4, 0, width, height,
+        decor_region_to_blur_property(data.data(), 4, 0, width, height,
                                       top_region, top_offset,
                                       bottom_region, bottom_offset,
                                       left_region, left_offset,
@@ -1286,12 +1284,10 @@ decor_update_blur_property(decor_t* d,
         XChangeProperty(xdisplay, d->prop_xid,
                         win_blur_decor_atom,
                         XA_INTEGER,
-                        32, PropModeReplace, (guchar*) data,
+                        32, PropModeReplace, reinterpret_cast<unsigned char*>(data.data()),
                         2 + size * 6);
         XSync(xdisplay, false);
         gdk_error_trap_pop();
-
-        free(data);
     } else {
         gdk_error_trap_push();
         XDeleteProperty(xdisplay, d->prop_xid, win_blur_decor_atom);

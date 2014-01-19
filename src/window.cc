@@ -976,11 +976,10 @@ void active_window_changed(Wnck::Window* previously_active_win,
 
 void window_opened(Wnck::Window* win)
 {
-    decor_t* d;
     Window window;
     unsigned long xid;
 
-    d = g_malloc(sizeof(decor_t));
+    decor_t* d = new decor_t;
     if (!d) {
         return;
     }
@@ -1028,7 +1027,7 @@ void window_closed(Wnck::Window* win)
 
     set_decor(win, nullptr);
 
-    g_free(d);
+    delete d;
 }
 
 void connect_screen(Wnck::Screen* screen)

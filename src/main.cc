@@ -1143,16 +1143,15 @@ XRenderSetPictureFilter_wrapper(Display* dpy,
     XRenderSetPictureFilter(dpy, picture, filter, params, nparams);
     XSync(dpy, False);
     if (gdk_error_trap_pop()) {
-        long* long_params = g_new(long, nparams);
-        int i;
+        std::vector<long> long_params;
+        long_params.reserve(nparams);
 
-        for (i = 0; i < nparams; i++) {
+        for (unsigned i = 0; i < nparams; i++) {
             long_params[i] = params[i];
         }
 
         XRenderSetPictureFilter(dpy, picture, filter,
-                                (XFixed*) long_params, nparams);
-        g_free(long_params);
+                                (XFixed*) long_params.data(), nparams);
     }
 }
 
@@ -1173,13 +1172,11 @@ set_picture_transform(Display* xdisplay, Picture p, int dx, int dy)
     XRenderSetPictureTransform(xdisplay, p, &transform);
 }
 
-static XFixed* create_gaussian_kernel(double radius,
-                                      double sigma,
-                                      double alpha,
-                                      double opacity, int* r_size)
+static std::vector<XFixed> create_gaussian_kernel(double radius, double sigma,
+                                                  double alpha, double opacity,
+                                                  int* r_size)
 {
-    XFixed* params;
-    double* amp, scale, x_scale, fx, sum;
+    double scale, x_scale, fx, sum;
     int size, x, i, n;
 
     scale = 1.0 / (2.0 * M_PI * sigma * sigma);
@@ -1193,22 +1190,18 @@ static XFixed* create_gaussian_kernel(double radius,
     x_scale = 2.0 * radius / size;
 
     if (size < 3) {
-        return NULL;
+        return {};
     }
 
     n = size;
 
-    amp = g_malloc(sizeof(double) * n);
-    if (!amp) {
-        return NULL;
-    }
+    std::vector<double> amp;
+    amp.resize(n);
 
     n += 2;
 
-    params = g_malloc(sizeof(XFixed) * n);
-    if (!params) {
-        return NULL;
-    }
+    std::vector<XFixed> params;
+    params.resize(n);
 
     i = 0;
     sum = 0.0f;
@@ -1234,8 +1227,6 @@ static XFixed* create_gaussian_kernel(double radius,
         params[i] = XDoubleToFixed(amp[i - 2] * sum * opacity * 1.2);
     }
 
-    g_free(amp);
-
     *r_size = size;
 
     return params;
@@ -1250,7 +1241,6 @@ static int update_shadow(frame_settings* fs)
     XRenderPictFormat* format;
     GdkPixmap* pixmap;
     Picture src, dst, tmp;
-    XFixed* params;
     XFilters* filters;
     char* filter = NULL;
     int size, n_params = 0;
@@ -1271,10 +1261,10 @@ static int update_shadow(frame_settings* fs)
     color.alpha = 0xffff;
 
     /* compute a gaussian convolution kernel */
-    params = create_gaussian_kernel(ws->shadow_radius, ws->shadow_radius / 2.0,        // SIGMA
-                                    ws->shadow_radius,        // ALPHA
-                                    ws->shadow_opacity, &size);
-    if (!params) {
+    auto params = create_gaussian_kernel(ws->shadow_radius, ws->shadow_radius / 2.0,        // SIGMA
+                                         ws->shadow_radius,        // ALPHA
+                                         ws->shadow_opacity, &size);
+    if (params.empty()) {
         ws->shadow_offset_x = ws->shadow_offset_y = size = 0;
     }
 
@@ -1366,16 +1356,11 @@ static int update_shadow(frame_settings* fs)
 
     /* no shadow */
     if (size <= 0) {
-        if (params) {
-            g_free(params);
-        }
-
         return 1;
     }
 
     pixmap = create_pixmap(d.width, d.height);
     if (!pixmap) {
-        g_free(params);
         return 0;
     }
 
@@ -1397,8 +1382,6 @@ static int update_shadow(frame_settings* fs)
     if (!filter) {
         std::cerr << "can't generate shadows, X server doesn't support "
                      "convolution filters\n";
-
-        g_free(params);
         g_object_unref(G_OBJECT(pixmap));
         return 1;
     }
@@ -1407,7 +1390,6 @@ static int update_shadow(frame_settings* fs)
 
     d.pixmap = create_pixmap(d.width, d.height);
     if (!d.pixmap) {
-        g_free(params);
         g_object_unref(G_OBJECT(pixmap));
         return 0;
     }
@@ -1425,7 +1407,7 @@ static int update_shadow(frame_settings* fs)
     params[1] = 1 << 16;
 
     set_picture_transform(xdisplay, dst, ws->shadow_offset_x, 0);
-    XRenderSetPictureFilter(xdisplay, dst, filter, params, n_params);
+    XRenderSetPictureFilter(xdisplay, dst, filter, params.data(), n_params);
     XRenderComposite(xdisplay,
                      PictOpSrc,
                      src, dst, tmp, 0, 0, 0, 0, 0, 0, d.width, d.height);
@@ -1435,7 +1417,7 @@ static int update_shadow(frame_settings* fs)
     params[1] = (n_params - 2) << 16;
 
     set_picture_transform(xdisplay, tmp, 0, ws->shadow_offset_y);
-    XRenderSetPictureFilter(xdisplay, tmp, filter, params, n_params);
+    XRenderSetPictureFilter(xdisplay, tmp, filter, params.data(), n_params);
     XRenderComposite(xdisplay,
                      PictOpSrc,
                      src, tmp, dst, 0, 0, 0, 0, 0, 0, d.width, d.height);
@@ -1463,14 +1445,12 @@ static int update_shadow(frame_settings* fs)
 
     pixmap = create_pixmap(d.width, d.height);
     if (!pixmap) {
-        g_free(params);
         return 0;
     }
 
     d.pixmap = create_pixmap(d.width, d.height);
     if (!d.pixmap) {
         g_object_unref(G_OBJECT(pixmap));
-        g_free(params);
         return 0;
     }
 
@@ -1496,7 +1476,7 @@ static int update_shadow(frame_settings* fs)
     params[1] = 1 << 16;
 
     set_picture_transform(xdisplay, dst, ws->shadow_offset_x, 0);
-    XRenderSetPictureFilter(xdisplay, dst, filter, params, n_params);
+    XRenderSetPictureFilter(xdisplay, dst, filter, params.data(), n_params);
     XRenderComposite(xdisplay,
                      PictOpSrc,
                      src, dst, tmp, 0, 0, 0, 0, 0, 0, d.width, d.height);
@@ -1506,7 +1486,7 @@ static int update_shadow(frame_settings* fs)
     params[1] = (n_params - 2) << 16;
 
     set_picture_transform(xdisplay, tmp, 0, ws->shadow_offset_y);
-    XRenderSetPictureFilter(xdisplay, tmp, filter, params, n_params);
+    XRenderSetPictureFilter(xdisplay, tmp, filter, params.data(), n_params);
     XRenderComposite(xdisplay,
                      PictOpSrc,
                      src, tmp, dst, 0, 0, 0, 0, 0, 0, d.width, d.height);
@@ -1516,8 +1496,6 @@ static int update_shadow(frame_settings* fs)
     XRenderFreePicture(xdisplay, src);
 
     g_object_unref(G_OBJECT(pixmap));
-
-    g_free(params);
 
     ws->shadow_pixmap = d.pixmap;
 
@@ -1876,9 +1854,8 @@ int main(int argc, char* argv[])
     PangoFontMetrics* metrics;
     PangoLanguage* lang;
     frame_settings* pfs;
-    window_settings* ws;
 
-    ws = malloc(sizeof(window_settings));
+    window_settings* ws = new window_settings;
     bzero(ws, sizeof(window_settings));
     global_ws = ws;
     setlocale(LC_ALL, "");
@@ -1905,7 +1882,7 @@ int main(int argc, char* argv[])
     ws->tobj_layout = g_strdup("IT::HNXC");        // DEFAULT TITLE OBJECT LAYOUT, does not use any odd buttons
     //ws->tobj_layout=g_strdup("CNX:IT:HM");
 
-    pfs = malloc(sizeof(frame_settings));
+    pfs = new frame_settings;
     bzero(pfs, sizeof(frame_settings));
     pfs->ws = ws;
     ACOLOR(pfs, text, 1.0, 1.0, 1.0, 1.0);
@@ -1914,7 +1891,7 @@ int main(int argc, char* argv[])
     ACOLOR(pfs, button_halo, 0.0, 0.0, 0.0, 0.2);
     ws->fs_act = pfs;
 
-    pfs = malloc(sizeof(frame_settings));
+    pfs = new frame_settings;
     bzero(pfs, sizeof(frame_settings));
     pfs->ws = ws;
     ACOLOR(pfs, text, 0.8, 0.8, 0.8, 0.8);
