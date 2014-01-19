@@ -168,6 +168,8 @@ struct pos_t {
 struct frame_settings;
 
 struct window_settings {
+    window_settings();
+
     void* engine_ws;
     int button_offset;
     int button_hoffset;
@@ -309,6 +311,9 @@ struct button_region_t {
 };
 
 struct decor_t {
+
+    decor_t();
+
     Window        event_windows[3][3];
     Window        button_windows[B_T_COUNT];
     unsigned         button_states[B_T_COUNT];

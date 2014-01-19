@@ -978,7 +978,7 @@ void window_opened(Wnck::Window* win)
     Window window;
     unsigned long xid;
 
-    decor_t* d = new decor_t{};
+    decor_t* d = new decor_t;
     if (!d) {
         return;
     }

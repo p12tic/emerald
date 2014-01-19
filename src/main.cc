@@ -115,7 +115,7 @@ update_default_decorations(GdkScreen* screen, frame_settings* fs_act,
     GdkDisplay* gdkdisplay = gdk_display_get_default();
     Display* xdisplay = gdk_x11_display_get_xdisplay(gdkdisplay);
     Atom bareAtom, activeAtom;
-    decor_t d{};
+    decor_t d;
     unsigned int nQuad;
     decor_quad_t quads[N_QUADS_MAX];
     window_settings* ws = fs_act->ws;        // hackish, I know, FIXME
@@ -1243,7 +1243,7 @@ static int update_shadow(frame_settings* fs)
     char* filter = NULL;
     int size, n_params = 0;
     cairo_t* cr;
-    decor_t d{};
+    decor_t d;
 
     window_settings* ws = fs->ws;
 
@@ -1852,7 +1852,7 @@ int main(int argc, char* argv[])
     PangoLanguage* lang;
     frame_settings* pfs;
 
-    window_settings* ws = new window_settings{};
+    window_settings* ws = new window_settings;
     global_ws = ws;
     setlocale(LC_ALL, "");
     bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
