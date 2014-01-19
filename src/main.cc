@@ -1128,7 +1128,7 @@ GdkFilterReturn selection_event_filter_func(GdkXEvent* gdkxevent,
 void
 XRenderSetPictureFilter_wrapper(Display* dpy,
                                 Picture picture,
-                                char* filter, XFixed* params, int nparams)
+                                const char* filter, XFixed* params, int nparams)
 {
     gdk_error_trap_push();
     XRenderSetPictureFilter(dpy, picture, filter, params, nparams);
@@ -1232,7 +1232,7 @@ int update_shadow(frame_settings* fs)
     GdkPixmap* pixmap;
     Picture src, dst, tmp;
     XFilters* filters;
-    char* filter = NULL;
+    const char* filter = NULL;
     int size, n_params = 0;
     cairo_t* cr;
     decor_t d;
