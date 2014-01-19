@@ -166,7 +166,7 @@ fill_rounded_rectangle_pixmap_blend(cairo_t*       cr,
         fill_rounded_rectangle(cr, x, y, w, h, corner, c0, c1, gravity, ws, radius);
     }
 }
-static int get_real_pos(window_settings* ws, int tobj, decor_t* d)
+int get_real_pos(window_settings* ws, int tobj, decor_t* d)
 {
     int width = d->width;
     int base = ws->left_space;
@@ -597,7 +597,7 @@ void layout_engine_colors(Gtk::Box& vbox)
     my_engine_settings(hbox, false);
 }
 
-static void layout_pixmap_box(Gtk::Box& vbox, int b_t, bool active)
+void layout_pixmap_box(Gtk::Box& vbox, int b_t, bool active)
 {
     std::string pre = active ? "active" : "inactive";
     std::string key = pre + "_" + p_types[b_t];

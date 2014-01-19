@@ -121,6 +121,11 @@
 
 #define PROP_MOTIF_WM_HINT_ELEMENTS 3
 
+/*  FIXME FIXME FIXME: currently many internal symbols are exported too. This
+    should be fixed by using a visibility attribute explicitly and invoking the
+    compiler with -fvisibility=hidden
+*/
+
 struct MwmHints {
     unsigned long flags;
     unsigned long functions;

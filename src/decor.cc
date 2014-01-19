@@ -274,7 +274,7 @@ void update_button_regions(decor_t* d)
         memcpy(button_region_inact, button_region, sizeof(button_region_t));
     }
 }
-static void draw_window_decoration_real(decor_t* d, bool shadow_time)
+void draw_window_decoration_real(decor_t* d, bool shadow_time)
 {
     cairo_t* cr;
     frame_settings* fs = d->fs;
@@ -805,7 +805,7 @@ void draw_switcher_background(decor_t* d)
     d->prop_xid = 0;
 }
 
-static void draw_switcher_foreground(decor_t* d)
+void draw_switcher_foreground(decor_t* d)
 {
     if (!IS_VALID(d->pixmap) || !IS_VALID(d->buffer_pixmap)) {
         return;

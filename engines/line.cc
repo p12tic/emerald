@@ -54,7 +54,7 @@ void get_meta_info(EngineMetaInfo* emi)
 }
 
 #ifdef SHADOW_FIX
-static void draw_shadow_background(decor_t* d, cairo_t* cr)
+void draw_shadow_background(decor_t* d, cairo_t* cr)
 {
     cairo_matrix_t matrix;
     double w, x2;

@@ -44,7 +44,7 @@ DBusConnection* dbcon;
 #endif
 std::string active_engine;
 
-static std::string display_part(std::string name)
+std::string display_part(std::string name)
 {
     unsigned colon_pos = name.find_last_of(':');
     if (colon_pos != std::string::npos) {
@@ -353,7 +353,7 @@ void layout_engine_list(Gtk::Box& vbox)
     vbox.pack_start(*engine_container_, Gtk::PACK_EXPAND_WIDGET);
 }
 
-static std::string canonize_name(const std::string& dlname)
+std::string canonize_name(const std::string& dlname)
 {
     auto res = boost::algorithm::find_last(dlname, "/lib");
     if (res.begin() == res.end()) {
@@ -367,7 +367,7 @@ static std::string canonize_name(const std::string& dlname)
     }
 }
 
-static bool engine_is_unique(const std::string& canname)
+bool engine_is_unique(const std::string& canname)
 {
     for (auto& item : g_engine_list) {
         if (item.canname == canname) {
@@ -377,7 +377,7 @@ static bool engine_is_unique(const std::string& canname)
     return true;
 }
 
-static void append_engine(const std::string& dlname)
+void append_engine(const std::string& dlname)
 {
     (void) dlerror();
     void* hand = dlopen(dlname.c_str(), RTLD_NOW);
@@ -441,7 +441,7 @@ static void append_engine(const std::string& dlname)
     dlclose(hand);
 }
 
-static void engine_scan_dir(const std::string& dir)
+void engine_scan_dir(const std::string& dir)
 {
     GPatternSpec* ps = g_pattern_spec_new("lib*.so");
     if (!fs::is_directory(dir)) {

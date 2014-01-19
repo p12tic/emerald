@@ -63,8 +63,8 @@ Gtk::Button* export_button_;
 std::string svnpath;
 std::string themecache;
 
-static void theme_list_append(const std::string& value, const std::string& dir,
-                              const std::string& fil)
+void theme_list_append(const std::string& value, const std::string& dir,
+                       const std::string& fil)
 {
     std::string path = dir + "/" + fil + "/theme.ini";
     std::string imgpath = dir + "/" + fil + "/theme.screenshot.png";
@@ -185,7 +185,7 @@ static void theme_list_append(const std::string& value, const std::string& dir,
     }
 }
 
-static void theme_scan_dir(const std::string& dir, bool writable)
+void theme_scan_dir(const std::string& dir, bool writable)
 {
     if (!fs::exists(dir)) {
         return;
@@ -200,7 +200,7 @@ static void theme_scan_dir(const std::string& dir, bool writable)
     }
 }
 
-static void scroll_to_theme(const std::string& theme)
+void scroll_to_theme(const std::string& theme)
 {
     auto it = theme_model_->children().begin();
     auto it_end = theme_model_->children().end();
@@ -213,7 +213,7 @@ static void scroll_to_theme(const std::string& theme)
     }
 }
 
-static void refresh_theme_list(const std::string& theme)
+void refresh_theme_list(const std::string& theme)
 {
     theme_model_->clear();
     theme_scan_dir(DATA_DIR "/emerald/themes/", false);
@@ -224,33 +224,33 @@ static void refresh_theme_list(const std::string& theme)
     }
 }
 
-static void cb_refresh()
+void cb_refresh()
 {
     refresh_theme_list(NULL);
 }
 
-static bool confirm_dialog(const std::string& fmt, const std::string& val)
+bool confirm_dialog(const std::string& fmt, const std::string& val)
 {
     Gtk::MessageDialog dlg(*main_window_, std::string(format(fmt, val)), false,
                            Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, true);
     return (dlg.run() == Gtk::RESPONSE_YES);
 }
 
-static void info_dialog(const std::string& val)
+void info_dialog(const std::string& val)
 {
     Gtk::MessageDialog dlg(*main_window_, val, false, Gtk::MESSAGE_INFO,
                            Gtk::BUTTONS_CLOSE, true);
     dlg.run();
 }
 
-static void error_dialog(const std::string& val)
+void error_dialog(const std::string& val)
 {
     Gtk::MessageDialog dlg(*main_window_, val, false, Gtk::MESSAGE_ERROR,
                            Gtk::BUTTONS_CLOSE, true);
     dlg.run();
 }
 
-static void cb_load()
+void cb_load()
 {
     //first normalize the name
     auto it = theme_select_->get_selected();
@@ -317,7 +317,7 @@ static void cb_load()
     send_reload_signal();
 }
 
-static std::string import_theme(const std::string& file_s)
+std::string import_theme(const std::string& file_s)
 {
     fs::path homedir = g_get_home_dir();
     fs::path file = file_s;
@@ -345,7 +345,7 @@ static std::string import_theme(const std::string& file_s)
     return name;
 }
 
-static void export_theme(const std::string& file_s)
+void export_theme(const std::string& file_s)
 {
     fs::path homedir = g_get_home_dir();
 
@@ -380,7 +380,7 @@ static void export_theme(const std::string& file_s)
     info_dialog(_("Theme Exported"));
 }
 
-static void cb_save()
+void cb_save()
 {
     //first normalize the name
     std::string at = entry_box_->get_text();
@@ -444,7 +444,7 @@ static void cb_save()
     refresh_theme_list(NULL);
 }
 
-static void cb_delete(Gtk::Widget* w)
+void cb_delete(Gtk::Widget* w)
 {
     //first normalize the name
     auto row = theme_select_->get_selected();
@@ -478,14 +478,14 @@ static void cb_delete(Gtk::Widget* w)
     }
 }
 
-static bool cb_main_destroy(GdkEventAny*)
+bool cb_main_destroy(GdkEventAny*)
 {
     main_window_->hide();
     gtk_main_quit();
     return true;
 }
 
-static void layout_button_box(Gtk::Box& vbox, int b_t)
+void layout_button_box(Gtk::Box& vbox, int b_t)
 {
 
     table_append(*Gtk::manage(new Gtk::Label(b_names[b_t])), false);
@@ -689,7 +689,7 @@ void add_meta_string_value(const std::string& title, const std::string& key)
     SettingItem::create(entry, "theme", key);
 }
 
-static void cb_export()
+void cb_export()
 {
     //get a filename
     Gtk::FileChooserDialog& dialog =
@@ -1042,7 +1042,7 @@ void cb_clearbox(Gtk::Entry& w)
     w.set_text("");
 }
 
-static void cb_import()
+void cb_import()
 {
     //get a filename
     Gtk::FileChooserDialog dialog{*main_window_, _("Import Theme..."),

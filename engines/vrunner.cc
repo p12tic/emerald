@@ -192,7 +192,7 @@ void create_glow(decor_t* d, cairo_t* cr,
     cairo_fill(cr);
 }
 
-static int get_real_pos(window_settings* ws, int tobj, decor_t* d)
+int get_real_pos(window_settings* ws, int tobj, decor_t* d)
 {
     int width = d->width;
     int base = ws->left_space;

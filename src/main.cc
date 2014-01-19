@@ -107,7 +107,7 @@ _cursor cursor[3][3] = {
 };
 _cursor button_cursor = C(hand2);
 
-static void
+void
 update_default_decorations(GdkScreen* screen, frame_settings* fs_act,
                            frame_settings* fs_inact)
 {
@@ -231,7 +231,7 @@ update_default_decorations(GdkScreen* screen, frame_settings* fs_act,
                                          * to normal
                                          */
 
-static void show_tooltip(const std::string& text)
+void show_tooltip(const std::string& text)
 {
     if (!enable_tooltips) {
         return;
@@ -281,7 +281,7 @@ static void show_tooltip(const std::string& text)
     tip_window->show();
 }
 
-static void hide_tooltip(void)
+void hide_tooltip()
 {
     if (tip_window->get_visible()) {
         g_get_current_time(&tooltip_last_popdown);
@@ -295,7 +295,7 @@ static void hide_tooltip(void)
     }
 }
 
-static bool tooltip_recently_shown(void)
+bool tooltip_recently_shown()
 {
     GTimeVal now;
     glong msec;
@@ -308,7 +308,7 @@ static bool tooltip_recently_shown(void)
     return (msec < STICKY_REVERT_DELAY);
 }
 
-static int tooltip_timeout(void* data)
+int tooltip_timeout(void* data)
 {
     tooltip_timer_tag = 0;
 
@@ -317,7 +317,7 @@ static int tooltip_timeout(void* data)
     return false;
 }
 
-static void tooltip_start_delay(const char* text)
+void tooltip_start_delay(const char* text)
 {
     unsigned delay = DEFAULT_DELAY;
 
@@ -333,7 +333,7 @@ static void tooltip_start_delay(const char* text)
                                       tooltip_timeout, (void*) text);
 }
 
-static int tooltip_paint_window()
+int tooltip_paint_window()
 {
     Gtk::Requisition req = tip_window->size_request();
     Gdk::Rectangle dummy;
@@ -352,7 +352,7 @@ bool tooltip_paint_window_lambda(GdkEventExpose*)
     return tooltip_paint_window();
 }
 
-static bool create_tooltip_window()
+bool create_tooltip_window()
 {
     tip_window = new Gtk::Window(Gtk::WINDOW_POPUP); // FIXME: this is a leak
 
@@ -380,7 +380,7 @@ static bool create_tooltip_window()
     return true;
 }
 
-static void
+void
 handle_tooltip_event(Wnck::Window* win,
                      XEvent* xevent, unsigned state, const char* tip)
 {
@@ -402,12 +402,12 @@ handle_tooltip_event(Wnck::Window* win,
         break;
     }
 }
-static void action_menu_unmap()
+void action_menu_unmap()
 {
     action_menu_mapped = false;
 }
 
-static void action_menu_map(Wnck::Window* win, long button, Time time)
+void action_menu_map(Wnck::Window* win, long button, Time time)
 {
     // FIXME:
     // do not convert to gdkmm for now since get_default_screen has a bug that
@@ -459,8 +459,7 @@ static void action_menu_map(Wnck::Window* win, long button, Time time)
  * 0: nothing, hover, ButtonPress
  * XEvent Button code: ButtonRelease (mouse click)
  */
-static int generic_button_event(Wnck::Window* win, XEvent* xevent,
-                                 int button, int bpict)
+int generic_button_event(Wnck::Window* win, XEvent* xevent, int button, int bpict)
 {
     // Display *xdisplay = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
     const char* tooltips[B_COUNT] = {
@@ -526,14 +525,14 @@ static int generic_button_event(Wnck::Window* win, XEvent* xevent,
     return ret;
 }
 
-static void close_button_event(Wnck::Window* win, XEvent* xevent)
+void close_button_event(Wnck::Window* win, XEvent* xevent)
 {
     if (generic_button_event(win, xevent, B_T_CLOSE, B_CLOSE)) {
         win->close(xevent->xbutton.time);
     }
 }
 
-static void max_button_event(Wnck::Window* win, XEvent* xevent)
+void max_button_event(Wnck::Window* win, XEvent* xevent)
 {
     bool maximized = win->is_maximized();
 
@@ -561,14 +560,14 @@ static void max_button_event(Wnck::Window* win, XEvent* xevent)
     }
 }
 
-static void min_button_event(Wnck::Window* win, XEvent* xevent)
+void min_button_event(Wnck::Window* win, XEvent* xevent)
 {
     if (generic_button_event(win, xevent, B_T_MINIMIZE, B_MINIMIZE)) {
         win->minimize();
     }
 }
 
-static void above_button_event(Wnck::Window* win, XEvent* xevent)
+void above_button_event(Wnck::Window* win, XEvent* xevent)
 {
     if (win->is_above()) {
         if (generic_button_event(win, xevent, B_T_ABOVE, B_UNABOVE)) {
@@ -581,7 +580,7 @@ static void above_button_event(Wnck::Window* win, XEvent* xevent)
     }
 }
 
-static void sticky_button_event(Wnck::Window* win, XEvent* xevent)
+void sticky_button_event(Wnck::Window* win, XEvent* xevent)
 {
     if (win->is_sticky()) {
         if (generic_button_event(win, xevent, B_T_STICKY, B_UNSTICK)) {
@@ -594,7 +593,7 @@ static void sticky_button_event(Wnck::Window* win, XEvent* xevent)
     }
 }
 
-static void send_help_message(Wnck::Window* win)
+void send_help_message(Wnck::Window* win)
 {
     Display* xdisplay;
     GdkDisplay* gdkdisplay;
@@ -626,19 +625,19 @@ static void send_help_message(Wnck::Window* win)
     XSync(xdisplay, false);
 }
 
-static void help_button_event(Wnck::Window* win, XEvent* xevent)
+void help_button_event(Wnck::Window* win, XEvent* xevent)
 {
     if (generic_button_event(win, xevent, B_T_HELP, B_HELP)) {
         send_help_message(win);
     }
 }
-static void menu_button_event(Wnck::Window* win, XEvent* xevent)
+void menu_button_event(Wnck::Window* win, XEvent* xevent)
 {
     if (generic_button_event(win, xevent, B_T_MENU, B_MENU)) {
         action_menu_map(win, xevent->xbutton.button, xevent->xbutton.time);
     }
 }
-static void shade_button_event(Wnck::Window* win, XEvent* xevent)
+void shade_button_event(Wnck::Window* win, XEvent* xevent)
 {
     if (generic_button_event(win, xevent, B_T_SHADE, B_SHADE)) {
         if (win->is_shaded()) {
@@ -650,37 +649,37 @@ static void shade_button_event(Wnck::Window* win, XEvent* xevent)
 }
 
 
-static void top_left_event(Wnck::Window* win, XEvent* xevent)
+void top_left_event(Wnck::Window* win, XEvent* xevent)
 {
     if (xevent->xbutton.button == 1) {
         move_resize_window(win, WM_MOVERESIZE_SIZE_TOPLEFT, xevent);
     }
 }
 
-static void top_event(Wnck::Window* win, XEvent* xevent)
+void top_event(Wnck::Window* win, XEvent* xevent)
 {
     if (xevent->xbutton.button == 1) {
         move_resize_window(win, WM_MOVERESIZE_SIZE_TOP, xevent);
     }
 }
 
-static void top_right_event(Wnck::Window* win, XEvent* xevent)
+void top_right_event(Wnck::Window* win, XEvent* xevent)
 {
     if (xevent->xbutton.button == 1) {
         move_resize_window(win, WM_MOVERESIZE_SIZE_TOPRIGHT, xevent);
     }
 }
 
-static void left_event(Wnck::Window* win, XEvent* xevent)
+void left_event(Wnck::Window* win, XEvent* xevent)
 {
     if (xevent->xbutton.button == 1) {
         move_resize_window(win, WM_MOVERESIZE_SIZE_LEFT, xevent);
     }
 }
 
-static void title_event(Wnck::Window* win, XEvent* xevent)
+void title_event(Wnck::Window* win, XEvent* xevent)
 {
-    static unsigned int last_button_num = 0;
+    static unsigned int last_button_num = 0; // FIXME: not thread-safe, fix
     static Window last_button_xwindow = None;
     static Time last_button_time = 0;
     decor_t* d = get_decor(win);
@@ -743,35 +742,35 @@ static void title_event(Wnck::Window* win, XEvent* xevent)
     }
 }
 
-static void right_event(Wnck::Window* win, XEvent* xevent)
+void right_event(Wnck::Window* win, XEvent* xevent)
 {
     if (xevent->xbutton.button == 1) {
         move_resize_window(win, WM_MOVERESIZE_SIZE_RIGHT, xevent);
     }
 }
 
-static void bottom_left_event(Wnck::Window* win, XEvent* xevent)
+void bottom_left_event(Wnck::Window* win, XEvent* xevent)
 {
     if (xevent->xbutton.button == 1) {
         move_resize_window(win, WM_MOVERESIZE_SIZE_BOTTOMLEFT, xevent);
     }
 }
 
-static void bottom_event(Wnck::Window* win, XEvent* xevent)
+void bottom_event(Wnck::Window* win, XEvent* xevent)
 {
     if (xevent->xbutton.button == 1) {
         move_resize_window(win, WM_MOVERESIZE_SIZE_BOTTOM, xevent);
     }
 }
 
-static void bottom_right_event(Wnck::Window* win, XEvent* xevent)
+void bottom_right_event(Wnck::Window* win, XEvent* xevent)
 {
     if (xevent->xbutton.button == 1) {
         move_resize_window(win, WM_MOVERESIZE_SIZE_BOTTOMRIGHT, xevent);
     }
 }
 
-static void force_quit_dialog_realize(GtkWidget* dialog, void* data)
+void force_quit_dialog_realize(GtkWidget* dialog, void* data)
 {
     Wnck::Window* win = data;
 
@@ -783,7 +782,7 @@ static void force_quit_dialog_realize(GtkWidget* dialog, void* data)
     gdk_error_trap_pop();
 }
 
-static std::string get_client_machine(Window xwindow)
+std::string get_client_machine(Window xwindow)
 {
     Atom atom, type;
     unsigned long nitems, bytes_after;
@@ -820,7 +819,7 @@ static std::string get_client_machine(Window xwindow)
     return ret;
 }
 
-static void kill_window(Wnck::Window* win)
+void kill_window(Wnck::Window* win)
 {
     Wnck::Application* app = win->get_application();
     if (app) {
@@ -845,8 +844,7 @@ static void kill_window(Wnck::Window* win)
     gdk_error_trap_pop();
 }
 
-static void
-force_quit_dialog_response(GtkWidget* dialog, int response, void* data)
+void force_quit_dialog_response(GtkWidget* dialog, int response, void* data)
 {
     Wnck::Window* win = data;
     decor_t* d = get_decor(win);
@@ -861,7 +859,7 @@ force_quit_dialog_response(GtkWidget* dialog, int response, void* data)
     }
 }
 
-static void show_force_quit_dialog(Wnck::Window* win, Time timestamp)
+void show_force_quit_dialog(Wnck::Window* win, Time timestamp)
 {
     decor_t* d = get_decor(win);
     GtkWidget* dialog;
@@ -916,7 +914,7 @@ static void show_force_quit_dialog(Wnck::Window* win, Time timestamp)
     d->force_quit_dialog = dialog;
 }
 
-static void hide_force_quit_dialog(Wnck::Window* win)
+void hide_force_quit_dialog(Wnck::Window* win)
 {
     decor_t* d = get_decor(win);
 
@@ -926,7 +924,7 @@ static void hide_force_quit_dialog(Wnck::Window* win)
     }
 }
 
-static GdkFilterReturn
+GdkFilterReturn
 event_filter_func(GdkXEvent* gdkxevent, GdkEvent* event, void* data)
 {
     Display* xdisplay;
@@ -1095,9 +1093,8 @@ event_filter_func(GdkXEvent* gdkxevent, GdkEvent* event, void* data)
     return GDK_FILTER_CONTINUE;
 }
 
-static GdkFilterReturn
-selection_event_filter_func(GdkXEvent* gdkxevent,
-                            GdkEvent* event, void* data)
+GdkFilterReturn selection_event_filter_func(GdkXEvent* gdkxevent,
+                                            GdkEvent* event, void* data)
 {
     Display* xdisplay;
     GdkDisplay* gdkdisplay;
@@ -1128,7 +1125,7 @@ selection_event_filter_func(GdkXEvent* gdkxevent,
 /* XRenderSetPictureFilter used to be broken on LP64. This
  * works with either the broken or fixed version.
  */
-static void
+void
 XRenderSetPictureFilter_wrapper(Display* dpy,
                                 Picture picture,
                                 char* filter, XFixed* params, int nparams)
@@ -1152,8 +1149,7 @@ XRenderSetPictureFilter_wrapper(Display* dpy,
 #define XRenderSetPictureFilter XRenderSetPictureFilter_wrapper
 #endif
 
-static void
-set_picture_transform(Display* xdisplay, Picture p, int dx, int dy)
+void set_picture_transform(Display* xdisplay, Picture p, int dx, int dy)
 {
     XTransform transform = {
         {
@@ -1166,9 +1162,9 @@ set_picture_transform(Display* xdisplay, Picture p, int dx, int dy)
     XRenderSetPictureTransform(xdisplay, p, &transform);
 }
 
-static std::vector<XFixed> create_gaussian_kernel(double radius, double sigma,
-                                                  double alpha, double opacity,
-                                                  int* r_size)
+std::vector<XFixed> create_gaussian_kernel(double radius, double sigma,
+                                           double alpha, double opacity,
+                                           int* r_size)
 {
     double scale, x_scale, fx, sum;
     int size, x, i, n;
@@ -1229,7 +1225,7 @@ static std::vector<XFixed> create_gaussian_kernel(double radius, double sigma,
 /* to save some memory, value is specific to current decorations */
 #define CORNER_REDUCTION 3
 
-static int update_shadow(frame_settings* fs)
+int update_shadow(frame_settings* fs)
 {
     Display* xdisplay = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
     XRenderPictFormat* format;
@@ -1494,7 +1490,8 @@ static int update_shadow(frame_settings* fs)
 
     return 1;
 }
-static void titlebar_font_changed(window_settings* ws)
+
+void titlebar_font_changed(window_settings* ws)
 {
     PangoFontMetrics* metrics;
     PangoLanguage* lang;
@@ -1515,7 +1512,8 @@ static void titlebar_font_changed(window_settings* ws)
     pango_font_metrics_unref(metrics);
 
 }
-static void load_buttons_image(window_settings* ws, int y)
+
+void load_buttons_image(window_settings* ws, int y)
 {
     int rel_button = get_b_offset(y);
 
@@ -1541,7 +1539,8 @@ static void load_buttons_image(window_settings* ws, int y)
                                      pix_width, pix_height);
     }
 }
-static void load_buttons_glow_images(window_settings* ws)
+
+void load_buttons_glow_images(window_settings* ws)
 {
     int pix_width, pix_height;
     int pix_width2, pix_height2;
@@ -1654,7 +1653,8 @@ void load_button_image_setting(window_settings* ws)
         load_buttons_glow_images(ws);
     }
 }
-static void load_settings(window_settings* ws)
+
+void load_settings(window_settings* ws)
 {
     fs::path path = fs::path(g_get_home_dir()) / ".emerald/settings.ini";
     KeyFile f;
@@ -1760,7 +1760,7 @@ static void load_settings(window_settings* ws)
                      "titlebar");
 }
 
-static void update_settings(window_settings* ws)
+void update_settings(window_settings* ws)
 {
     //assumes ws is fully allocated
 
@@ -1794,7 +1794,7 @@ static void update_settings(window_settings* ws)
 }
 
 #ifdef USE_DBUS
-static DBusHandlerResult
+DBusHandlerResult
 dbus_signal_filter(DBusConnection* connection, DBusMessage* message,
                    void* user_data)
 {
