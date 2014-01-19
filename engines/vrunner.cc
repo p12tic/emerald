@@ -497,18 +497,16 @@ void init_engine(window_settings* ws)
     private_fs* pfs;
     private_ws* pws;
 
-    pws = new private_ws;
+    pws = new private_ws{};
     ws->engine_ws = pws;
-    bzero(pws, sizeof(private_ws));
     pws->round_top_left = true;
     pws->round_top_right = true;
     pws->round_bottom_left = true;
     pws->round_bottom_right = true;
     pws->corner_radius = 5.0;
 
-    pfs = new private_fs;
+    pfs = new private_fs{};
     ws->fs_act->engine_fs = pfs;
-    bzero(pfs, sizeof(private_fs));
     pfs->title_notch_position = 0.5;
     pfs->curve_offset = 0.0;
     pfs->color_contrast = 0.9;
@@ -530,8 +528,7 @@ void init_engine(window_settings* ws)
     ACOLOR(pfs, contents_halo, 0.8, 0.8, 0.8, 0.8);
     ACOLOR(pfs, glow_inner, 0.9, 0.9, 0.9, 0.9);
 
-    pfs = new private_fs;
-    bzero(pfs, sizeof(private_fs));
+    pfs = new private_fs{};
     ws->fs_inact->engine_fs = pfs;
     pfs->title_notch_position = 0.5;
     pfs->curve_offset = 0.0;

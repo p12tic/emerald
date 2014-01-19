@@ -115,13 +115,11 @@ update_default_decorations(GdkScreen* screen, frame_settings* fs_act,
     GdkDisplay* gdkdisplay = gdk_display_get_default();
     Display* xdisplay = gdk_x11_display_get_xdisplay(gdkdisplay);
     Atom bareAtom, activeAtom;
-    decor_t d;
+    decor_t d{};
     unsigned int nQuad;
     decor_quad_t quads[N_QUADS_MAX];
     window_settings* ws = fs_act->ws;        // hackish, I know, FIXME
     decor_extents_t extents = ws->win_extents;
-
-    bzero(&d, sizeof(decor_t));
 
     xroot = RootWindowOfScreen(gdk_x11_screen_get_xscreen(screen));
 
@@ -1245,9 +1243,8 @@ static int update_shadow(frame_settings* fs)
     char* filter = NULL;
     int size, n_params = 0;
     cairo_t* cr;
-    decor_t d;
+    decor_t d{};
 
-    bzero(&d, sizeof(decor_t));
     window_settings* ws = fs->ws;
 
     //    double        save_decoration_alpha;
@@ -1855,8 +1852,7 @@ int main(int argc, char* argv[])
     PangoLanguage* lang;
     frame_settings* pfs;
 
-    window_settings* ws = new window_settings;
-    bzero(ws, sizeof(window_settings));
+    window_settings* ws = new window_settings{};
     global_ws = ws;
     setlocale(LC_ALL, "");
     bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
@@ -1882,8 +1878,7 @@ int main(int argc, char* argv[])
     ws->tobj_layout = g_strdup("IT::HNXC");        // DEFAULT TITLE OBJECT LAYOUT, does not use any odd buttons
     //ws->tobj_layout=g_strdup("CNX:IT:HM");
 
-    pfs = new frame_settings;
-    bzero(pfs, sizeof(frame_settings));
+    pfs = new frame_settings{};
     pfs->ws = ws;
     ACOLOR(pfs, text, 1.0, 1.0, 1.0, 1.0);
     ACOLOR(pfs, text_halo, 0.0, 0.0, 0.0, 0.2);
@@ -1891,8 +1886,7 @@ int main(int argc, char* argv[])
     ACOLOR(pfs, button_halo, 0.0, 0.0, 0.0, 0.2);
     ws->fs_act = pfs;
 
-    pfs = new frame_settings;
-    bzero(pfs, sizeof(frame_settings));
+    pfs = new frame_settings{};
     pfs->ws = ws;
     ACOLOR(pfs, text, 0.8, 0.8, 0.8, 0.8);
     ACOLOR(pfs, text_halo, 0.0, 0.0, 0.0, 0.2);

@@ -446,9 +446,8 @@ void init_engine(window_settings* ws)
     private_ws* pws;
 
     // private window settings
-    pws = new private_ws;
+    pws = new private_ws{};
     ws->engine_ws = pws;
-    bzero(pws, sizeof(private_ws));
     pws->round_top_left = true;
     pws->round_top_right = true;
     pws->round_bottom_left = true;
@@ -457,9 +456,8 @@ void init_engine(window_settings* ws)
     pws->glow_height = 10;
 
     // private frame settings for active frames
-    pfs = new private_fs;
+    pfs = new private_fs{};
     ws->fs_act->engine_fs = pfs;
-    bzero(pfs, sizeof(private_fs));
     ACOLOR(pfs, base, 0.8, 0.8, 0.8, 0.5);
     ACOLOR(pfs, upper_glow, 0.8, 0.8, 0.8, 0.8);
     ACOLOR(pfs, lower_glow, 0.8, 0.8, 0.8, 0.8);
@@ -475,8 +473,7 @@ void init_engine(window_settings* ws)
     ACOLOR(pfs, contents_halo, 0.8, 0.8, 0.8, 0.8);
 
     // private frame settings for inactive frames
-    pfs = new private_fs;
-    bzero(pfs, sizeof(private_fs));
+    pfs = new private_fs{};
     ws->fs_inact->engine_fs = pfs;
     ACOLOR(pfs, base, 0.8, 0.8, 0.8, 0.3);
     ACOLOR(pfs, upper_glow, 0.8, 0.8, 0.8, 0.6);

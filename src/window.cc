@@ -535,14 +535,13 @@ bool update_window_decoration_size(Wnck::Window* win)
 void add_frame_window(Wnck::Window* win, Window frame)
 {
     Display* xdisplay;
-    XSetWindowAttributes attr;
+    XSetWindowAttributes attr{};
     unsigned long xid = win->get_xid();
     decor_t* d = get_decor(win);
     int i, j;
 
     xdisplay = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
 
-    bzero(&attr, sizeof(XSetWindowAttributes));
     attr.event_mask = ButtonPressMask | EnterWindowMask | LeaveWindowMask;
     attr.override_redirect = true;
 
@@ -979,11 +978,10 @@ void window_opened(Wnck::Window* win)
     Window window;
     unsigned long xid;
 
-    decor_t* d = new decor_t;
+    decor_t* d = new decor_t{};
     if (!d) {
         return;
     }
-    bzero(d, sizeof(decor_t));
 
     auto rect = win->get_geometry();
     d->client_width = rect.get_width();
