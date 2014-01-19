@@ -1,7 +1,7 @@
 ## Process this file with automake to produce Makefile.in
 include $(top_srcdir)/common.am
 
-AM_CXXFLAGS = $(COMMON_CXXFLAGS) -fpermissive
+AM_CXXFLAGS = $(COMMON_CXXFLAGS)
 
 emerald_LDADD   =                       \
     @EMERALD_LIBS@                      \

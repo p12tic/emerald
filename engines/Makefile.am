@@ -3,7 +3,7 @@
 include $(top_srcdir)/common.am
 
 AM_CPPFLAGS = -I$(top_srcdir) @EMERALD_CFLAGS@
-AM_CXXFLAGS = $(COMMON_CXXFLAGS) -fpermissive
+AM_CXXFLAGS = $(COMMON_CXXFLAGS)
 
 ENGINELIBS = ../libengine/libemeraldengine.la
 

@@ -15,7 +15,7 @@ emerald_theme_manager_LDADD =           \
 
 bin_PROGRAMS = emerald-theme-manager
 
-AM_CXXFLAGS = $(COMMON_CXXFLAGS) -fpermissive
+AM_CXXFLAGS = $(COMMON_CXXFLAGS)
 
 AM_CPPFLAGS = @EMERALD_CFLAGS@ \
 		   -DPIXMAPS_DIR=\""$(datadir)/pixmaps"\"\
