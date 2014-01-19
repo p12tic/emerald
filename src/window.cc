@@ -21,6 +21,7 @@
 #include "utils.h"
 #include "decor.h"
 #include <libengine/titlebar.h>
+#include <libengine/format.h>
 #include <X11/Xatom.h>
 
 GdkPixmap* create_pixmap(int w, int h)
@@ -382,7 +383,7 @@ void update_window_decoration_actions(Wnck::Window* win)
 
     /* code to check for context help protocol */
     Atom actual;
-    int result, format;
+    int result;
     unsigned long n, left;
     unsigned long offset;
     unsigned char* data;
@@ -404,9 +405,10 @@ void update_window_decoration_actions(Wnck::Window* win)
     left = 1;
     offset = 0;
     while (left) {
+        int fmt;
         result = XGetWindowProperty(xdisplay, id, wm_protocols_atom,
                                     offset, 1L, false, XA_ATOM, &actual,
-                                    &format, &n, &left, &data);
+                                    &fmt, &n, &left, &data);
         offset++;
         if (result == Success && n && data) {
             Atom a;
@@ -419,9 +421,8 @@ void update_window_decoration_actions(Wnck::Window* win)
             data = NULL;
         } else if (result != Success) {
             /* Closes #161 */
-            fprintf(stderr,
-                    "XGetWindowProperty() returned non-success value (%d) for window '%s'.\n",
-                    result, win->get_name().c_str());
+            std::cerr << format("XGetWindowProperty() returned non-success value"
+                                "(%d) for window '%s'.\n", result, win->get_name());
             break;
         }
     }

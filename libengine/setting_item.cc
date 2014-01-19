@@ -20,6 +20,7 @@
 #include <libengine/setting_item.h>
 #include <libengine/libengine.h>
 #include <libengine/filesystem.h>
+#include <libengine/format.h>
 #include <list>
 #include <cstdlib>
 #include <memory>
@@ -30,9 +31,6 @@ extern std::shared_ptr<KeyFile> global_theme_file;
 extern std::shared_ptr<KeyFile> global_settings_file;
 extern std::list<SettingItem> g_setting_list;
 extern std::list<EngineData> g_engine_list;
-
-char* globalStr = NULL;
-char globalFloatStr[G_ASCII_DTOSTR_BUF_SIZE + 1];
 
 void SettingItem::write_setting(KeyFile& f)
 {
@@ -136,20 +134,14 @@ int SettingItem::get_int()
 
 std::string SettingItem::get_float_str()
 {
-    g_ascii_dtostr(globalFloatStr, G_ASCII_DTOSTR_BUF_SIZE,
-                   get_float());
-    return globalFloatStr;
+    return std::to_string(get_float());
 }
 
 std::string SettingItem::get_color()
 {
-    if (globalStr) {
-        g_free(globalStr);
-    }
     Gdk::Color c = ((Gtk::ColorButton*) widget_)->get_color();
-    globalStr = g_strdup_printf("#%02x%02x%02x", c.get_red() >> 8,
-                                c.get_green() >> 8, c.get_blue() >> 8);
-    return globalStr;
+    return format("#%02x%02x%02x", c.get_red() >> 8,
+                  c.get_green() >> 8, c.get_blue() >> 8);
 }
 
 std::string SettingItem::get_font()

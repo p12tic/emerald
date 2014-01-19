@@ -22,6 +22,7 @@
 #endif
 #include <libengine/emerald.h>
 #include <libengine/engine.h>
+#include <libengine/format.h>
 #include "cairo_utils.h"
 #include "window.h"
 #include "utils.h"
@@ -870,7 +871,7 @@ static void show_force_quit_dialog(Wnck::Window* win, Time timestamp)
 {
     decor_t* d = win->get_data(Glib::QueryQuark("decor"));
     GtkWidget* dialog;
-    char* str, *tmp;
+    char* tmp;
 
     if (d->force_quit_dialog) {
         return;
@@ -879,19 +880,16 @@ static void show_force_quit_dialog(Wnck::Window* win, Time timestamp)
     std::string name = win->get_name();
 
     tmp = g_markup_escape_text(name.c_str(), -1);
-    str = g_strdup_printf(_("The window \"%s\" is not responding."), tmp);
-
-    g_free(tmp);
+    std::string str = format(_("The window \"%s\" is not responding."), tmp);
 
     dialog = gtk_message_dialog_new(NULL, 0,
                                     GTK_MESSAGE_WARNING,
                                     GTK_BUTTONS_NONE,
                                     "<b>%s</b>\n\n%s",
-                                    str,
+                                    str.c_str(),
                                     _("Forcing this application to "
                                       "quit will cause you to lose any "
                                       "unsaved changes."));
-    g_free(str);
 
     gtk_window_set_icon_name(GTK_WINDOW(dialog), "force-quit");
 
@@ -1397,8 +1395,8 @@ static int update_shadow(frame_settings* fs)
     }
 
     if (!filter) {
-        fprintf(stderr, "can't generate shadows, X server doesn't support "
-                "convolution filters\n");
+        std::cerr << "can't generate shadows, X server doesn't support "
+                     "convolution filters\n";
 
         g_free(params);
         g_object_unref(G_OBJECT(pixmap));
@@ -1845,7 +1843,7 @@ dbus_signal_filter(DBusConnection* connection, DBusMessage* message,
 void dbc(DBusError* err)
 {
     if (dbus_error_is_set(err)) {
-        fprintf(stderr, "emerald: Connection Error (%s)\n", err->message);
+        std::cout << format("emerald: Connection Error (%s)\n", err->message);
         dbus_error_free(err);
     }
 }
@@ -1953,11 +1951,12 @@ int main(int argc, char* argv[])
         if (strcmp(argv[i], "--replace") == 0) {
             replace = true;
         } else if (strcmp(argv[i], "--version") == 0) {
-            printf("%s: %s version %s\n", program_name.c_str(), PACKAGE, VERSION);
+            std::cerr << format("%s: %s version %s\n", program_name, PACKAGE,
+                                VERSION);
             return 0;
         } else if (strcmp(argv[i], "--help") == 0) {
-            fprintf(stderr, "%s [--replace] [--help] [--version]\n",
-                    program_name.c_str());
+            std::cerr << format("%s [--replace] [--help] [--version]\n",
+                                program_name);
             return 0;
         }
     }
@@ -2022,19 +2021,17 @@ int main(int argc, char* argv[])
 
     if (status != DECOR_ACQUIRE_STATUS_SUCCESS) {
         if (status == DECOR_ACQUIRE_STATUS_FAILED) {
-            fprintf(stderr,
-                    "%s: Could not acquire decoration manager "
-                    "selection on screen %d display \"%s\"\n",
-                    program_name.c_str(), DefaultScreen(xdisplay),
-                    DisplayString(xdisplay));
+            std::cerr << format("%s: Could not acquire decoration manager "
+                                "selection on screen %d display \"%s\"\n",
+                                program_name, DefaultScreen(xdisplay),
+                                DisplayString(xdisplay));
         } else if (status == DECOR_ACQUIRE_STATUS_OTHER_DM_RUNNING) {
-            fprintf(stderr,
-                    "%s: Screen %d on display \"%s\" already "
-                    "has a decoration manager; try using the "
-                    "--replace option to replace the current "
-                    "decoration manager.\n",
-                    program_name.c_str(), DefaultScreen(xdisplay),
-                    DisplayString(xdisplay));
+            std::cerr << format("%s: Screen %d on display \"%s\" already "
+                                "has a decoration manager; try using the "
+                                "--replace option to replace the current "
+                                "decoration manager.\n",
+                                program_name, DefaultScreen(xdisplay),
+                                DisplayString(xdisplay));
         }
 
         return 1;
@@ -2054,7 +2051,7 @@ int main(int argc, char* argv[])
     frame_table = g_hash_table_new(NULL, NULL);
 
     if (!create_tooltip_window()) {
-        fprintf(stderr, "%s, Couldn't create tooltip window\n", argv[0]);
+        std::cerr << format("%s, Couldn't create tooltip window\n", argv[0]);
         return 1;
     }
 

@@ -382,8 +382,7 @@ static void draw_window_decoration_real(decor_t* d, bool shadow_time)
                     button_region->bg_pixmap = create_pixmap(rw, rh);
                 }
                 if (!button_region->bg_pixmap) {
-                    fprintf(stderr,
-                            "%s: Error allocating buffer.\n", program_name.c_str());
+                    std::cerr << program_name << ": Error allocating buffer.\n";
                 } else {
                     gdk_draw_drawable(button_region->bg_pixmap, d->gc,
                                       IS_VALID(d->buffer_pixmap) ?

@@ -26,6 +26,7 @@
 
 #include <libengine/emerald.h>
 #include <libengine/engine.h>
+#include <libengine/format.h>
 #include <zootreeves_icon.h>
 
 #define SECT "zootreeves_settings"
@@ -1508,19 +1509,19 @@ void my_engine_settings(Gtk::Box& hbox, bool active)
     table_append(*Gtk::manage(new Gtk::Label("")), false);
 
     Gtk::CheckButton* btn;
-    char* key_line = g_strdup_printf(active ? "active_%s" : "inactive_%s", "gradient_repeat_enabled");
+    std::string key_line = format(active ? "active_%s" : "inactive_%s", "gradient_repeat_enabled");
     btn = Gtk::manage(new Gtk::CheckButton());
     table_append(*btn, true);
     SettingItem::create(*btn, SECT, key_line);
 
     table_append(*Gtk::manage(new Gtk::Label(_("Vertical Repeat?"))), false);
     table_append(*Gtk::manage(new Gtk::Label("")), false);
-    key_line = g_strdup_printf(active ? "active_%s" : "inactive_%s", "gradient_repeat_direction_vertical");
+    key_line = format(active ? "active_%s" : "inactive_%s", "gradient_repeat_direction_vertical");
     btn = Gtk::manage(new Gtk::CheckButton());
     table_append(*btn, true);
     SettingItem::create(*btn, SECT, key_line);
 
-    key_line = g_strdup_printf(active ? "active_%s" : "inactive_%s", "gradient_repeat_direction_diagonal");
+    key_line = format(active ? "active_%s" : "inactive_%s", "gradient_repeat_direction_diagonal");
     table_append(*Gtk::manage(new Gtk::Label(_("Diagonal Repeat?"))), false);
     table_append(*Gtk::manage(new Gtk::Label("")), false);
     btn = Gtk::manage(new Gtk::CheckButton());
@@ -1529,7 +1530,7 @@ void my_engine_settings(Gtk::Box& hbox, bool active)
 
     table_append(*Gtk::manage(new Gtk::Label(_("Repeat Frequency"))), false);
     table_append(*Gtk::manage(new Gtk::Label("")), false);
-    key_line = g_strdup_printf(active ? "active_%s" : "inactive_%s", "gradient_repeat_height");
+    key_line = format(active ? "active_%s" : "inactive_%s", "gradient_repeat_height");
     auto& scaler = *scaler_new(0, 20, 0.5);
     table_append(scaler, true);
     SettingItem::create(scaler, SECT, key_line);

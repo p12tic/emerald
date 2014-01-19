@@ -5,6 +5,7 @@
 #include <libengine/engine.h>
 #include <libengine/keyfile.h>
 #include <libengine/filesystem.h>
+#include <libengine/format.h>
 #include <gtkmm.h>
 #include <boost/algorithm/string.hpp>
 #include <functional>
@@ -225,11 +226,10 @@ static void cb_refresh()
     refresh_theme_list(NULL);
 }
 
-static bool confirm_dialog(const std::string& val, const std::string& val2)
+static bool confirm_dialog(const std::string& fmt, const std::string& val)
 {
-    // FIXME: val is a printf-string
-    Gtk::MessageDialog dlg(*main_window_, val + val2, false, Gtk::MESSAGE_QUESTION,
-                           Gtk::BUTTONS_YES_NO, true);
+    Gtk::MessageDialog dlg(*main_window_, std::string(format(fmt, val)), false,
+                           Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, true);
     return (dlg.run() == Gtk::RESPONSE_YES);
 }
 
@@ -1331,10 +1331,10 @@ int main(int argc, char* argv[])
             //-i arg found so next option should be the file to install
             if (loop_count + 1 < argc) {
                 input_file = argv[loop_count + 1];
-                printf("File To Install %s\n", input_file.c_str());
+                std::cout << format("File To Install %s\n", input_file);
                 install_file = 1;
             } else {
-                printf("Usage: -i /file/to/install\n");
+                std::cout << "Usage: -i /file/to/install\n";
             }
         }
         loop_count++;
