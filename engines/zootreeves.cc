@@ -92,7 +92,7 @@ struct private_ws {
     int     title_bar_dip_radius;
     int     title_bar_dip_button_width;
     int     left_bar_dip_radius;
-    pixmaps     pixmaps;
+    struct pixmaps     pixmaps;
 
 };
 
