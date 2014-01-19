@@ -171,8 +171,8 @@ bool get_window_prop(Window xwindow, Atom atom, Window* val)
 {
     Atom type;
     int format;
-    gulong nitems;
-    gulong bytes_after;
+    unsigned long nitems;
+    unsigned long bytes_after;
     Window* w;
     int err, result;
 

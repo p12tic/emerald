@@ -938,7 +938,7 @@ event_filter_func(GdkXEvent* gdkxevent, GdkEvent* event, void* data)
     Display* xdisplay;
     GdkDisplay* gdkdisplay;
     XEvent* xevent = gdkxevent;
-    gulong xid = 0;
+    unsigned long xid = 0;
 
     gdkdisplay = gdk_display_get_default();
     xdisplay = GDK_DISPLAY_XDISPLAY(gdkdisplay);
@@ -946,19 +946,19 @@ event_filter_func(GdkXEvent* gdkxevent, GdkEvent* event, void* data)
     switch (xevent->type) {
     case ButtonPress:
     case ButtonRelease:
-        xid = (gulong)
+        xid = (unsigned long)
               g_hash_table_lookup(frame_table,
                                   GINT_TO_POINTER(xevent->xbutton.window));
         break;
     case EnterNotify:
     case LeaveNotify:
-        xid = (gulong)
+        xid = (unsigned long)
               g_hash_table_lookup(frame_table,
                                   GINT_TO_POINTER(xevent->xcrossing.
                                           window));
         break;
     case MotionNotify:
-        xid = (gulong)
+        xid = (unsigned long)
               g_hash_table_lookup(frame_table,
                                   GINT_TO_POINTER(xevent->xmotion.window));
         break;
