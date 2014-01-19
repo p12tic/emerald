@@ -61,10 +61,6 @@
 #include <cairo.h>
 #include <cairo-xlib.h>
 
-#if CAIRO_VERSION < CAIRO_VERSION_ENCODE(1, 1, 0)
-#define CAIRO_EXTEND_PAD CAIRO_EXTEND_NONE
-#endif
-
 #include <pango/pango-context.h>
 #include <pango/pangocairo.h>
 
