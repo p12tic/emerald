@@ -1,4 +1,7 @@
 ## Process this file with automake to produce Makefile.in
+
+include $(top_srcdir)/common.am
+
 emerald_theme_manager_SOURCES = main.cc
 emerald_theme_manager_LDFLAGS =         \
     $(BOOST_FILESYSTEM_LDFLAGS)         \
@@ -12,7 +15,7 @@ emerald_theme_manager_LDADD =           \
 
 bin_PROGRAMS = emerald-theme-manager
 
-AM_CXXFLAGS = -fpermissive -std=c++11
+AM_CXXFLAGS = $(COMMON_CXXFLAGS) -fpermissive
 
 AM_CPPFLAGS = @EMERALD_CFLAGS@ \
 		   -DPIXMAPS_DIR=\""$(datadir)/pixmaps"\"\

@@ -1,7 +1,9 @@
 ## Process this file with automake to produce Makefile.in
-#intentionally blank
+
+include $(top_srcdir)/common.am
+
 AM_CPPFLAGS = -I$(top_srcdir) @EMERALD_CFLAGS@
-AM_CXXFLAGS = -fpermissive -std=c++11
+AM_CXXFLAGS = $(COMMON_CXXFLAGS) -fpermissive
 
 ENGINELIBS = ../libengine/libemeraldengine.la
 

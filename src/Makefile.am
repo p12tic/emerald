@@ -1,5 +1,8 @@
 ## Process this file with automake to produce Makefile.in
-AM_CXXFLAGS = -fpermissive -std=c++11
+include $(top_srcdir)/common.am
+
+AM_CXXFLAGS = $(COMMON_CXXFLAGS) -fpermissive
+
 emerald_LDADD   =                       \
     @EMERALD_LIBS@                      \
     $(top_builddir)/libengine/libemeraldengine.la   \

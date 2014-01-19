@@ -9,6 +9,7 @@ README
 TODO
 VERSION
 autogen.sh
+common.am
 configure.ac
 defaults/Makefile.am
 defaults/settings.ini

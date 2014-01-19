@@ -1,9 +1,11 @@
 ## Process this file with automake to produce Makefile.in
+include $(top_srcdir)/common.am
+
 AM_CPPFLAGS = @EMERALD_CFLAGS@ -I$(top_srcdir) \
 		   -DENGINE_DIR=\"$(enginesdir)\" \
 		   -DDEFTHEMEDIR='"@datadir@/emerald/theme/"' \
 		   -DDEFSETTINGSFILE='"@datadir@/emerald/settings.ini"'
-AM_CXXFLAGS = -fpermissive -std=c++11
+AM_CXXFLAGS = $(COMMON_CXXFLAGS) -fpermissive
 libemeraldengine_la_LIBADD =    \
     @EMERALD_LIBS@              \
     $(BOOST_FILESYSTEM_LIBS)    \
