@@ -275,7 +275,7 @@ void do_engine(const std::string& name)
 bool get_engine_meta_info(const std::string& engine, EngineMetaInfo* inf)
 {
     for (auto& item : g_engine_list) {
-        if (!std::strcmp(item.canname, engine.c_str()) == 0) {
+        if (item.canname == engine) {
             *inf = item.meta;
             return true;
         }
@@ -370,7 +370,7 @@ static std::string canonize_name(const std::string& dlname)
 static bool engine_is_unique(const std::string& canname)
 {
     for (auto& item : g_engine_list) {
-        if (strcmp(item.canname, canname.c_str()) == 0) {
+        if (item.canname == canname) {
             return false;
         }
     }
@@ -407,9 +407,9 @@ static void append_engine(const std::string& dlname)
             if ((err = dlerror())) {
                 g_warning("%s", err);
             }
-            d->meta.description = g_strdup("No Description");
-            d->meta.version = g_strdup("0.0");
-            d->meta.last_compat = g_strdup("0.0");
+            d->meta.description = "No Description";
+            d->meta.version = "0.0";
+            d->meta.last_compat = "0.0";
             auto icon_theme = Gtk::IconTheme::get_default();
             d->meta.icon = icon_theme->load_icon(GTK_STOCK_MISSING_IMAGE, Gtk::ICON_SIZE_LARGE_TOOLBAR);
 
@@ -419,8 +419,8 @@ static void append_engine(const std::string& dlname)
                 g_warning("Engine %s has no meta info, please update it, using defaults.", dlname.c_str());
             }
 
-            d->dlname = g_strdup(dlname.c_str());
-            d->canname = g_strdup(can.c_str());
+            d->dlname = dlname;
+            d->canname = can;
             d->vbox = Gtk::manage(new Gtk::VBox{false, 2});
             lay(*(d->vbox));
 
@@ -430,7 +430,10 @@ static void append_engine(const std::string& dlname)
             row[g_engine_columns.version] = d->meta.version;
             row[g_engine_columns.last_compat] = d->meta.last_compat;
             row[g_engine_columns.icon] = d->meta.icon;
-            row[g_engine_columns.markup] = g_markup_printf_escaped(format, d->canname, d->meta.version, d->meta.description); // FIXME: LEAK possible
+            row[g_engine_columns.markup] =
+                    g_markup_printf_escaped(format, d->canname.c_str(),
+                                            d->meta.version.c_str(),
+                                            d->meta.description.c_str()); // FIXME: LEAK possible
 
             //engine_combo_->prepend_text(d->canname);
         }

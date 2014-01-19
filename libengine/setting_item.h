@@ -114,14 +114,14 @@ private:
 };
 
 struct EngineMetaInfo {// TODO: move to a separate file
-    char* description;
-    char* version;
-    char* last_compat;
+    std::string description;
+    std::string version;
+    std::string last_compat;
     Glib::RefPtr<Gdk::Pixbuf> icon;
 };
 struct EngineData { // TODO: move to a separate file
-    const char* canname;
-    char* dlname;
+    std::string canname;
+    std::string dlname;
     Gtk::Box* vbox;
     EngineMetaInfo meta;
 };

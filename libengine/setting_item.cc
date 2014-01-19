@@ -198,7 +198,7 @@ void SettingItem::set_engine_combo(const std::string& val)
     } else {
         i = 0;
         for (auto& item : g_engine_list) {
-            if (strcmp(item.canname, "legacy") == 0) {
+            if (item.canname == "legacy") {
                 ((Gtk::ComboBox*) widget_)->set_active(i);
                 break;
             }

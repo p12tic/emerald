@@ -91,7 +91,10 @@ static void theme_list_append(const std::string& value, const std::string& dir,
         auto th_ver_o = f.get_string_opt("theme", "version");
         std::string th_ver = th_ver_o ? *th_ver_o : "0.0.0"; // tver
 
-        std::string elc = emi.last_compat ? emi.last_compat : "0.0.0";
+        std::string elc = emi.last_compat;
+        if (elc.empty()) {
+            elc = "0.0.0";
+        }
 
         bool is_en_uptodate = strverscmp(ver.c_str(), elc.c_str()) >= 0;
         bool is_th_uptodate = strverscmp(th_ver.c_str(), LAST_COMPAT_VER) >= 0;
@@ -154,7 +157,7 @@ static void theme_list_append(const std::string& value, const std::string& dir,
               "<b>Use With</b> %s\n"
               "</small>");
         if (value[0] == '*') {
-            value += 2;
+            value = value.substr(2);
             format =
                 _("<b><big>%s</big></b> (System Theme)\n"
                   "<i>%s</i>\n"

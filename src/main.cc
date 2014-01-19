@@ -23,6 +23,7 @@
 #include <libengine/emerald.h>
 #include <libengine/engine.h>
 #include <libengine/format.h>
+#include <libengine/filesystem.h>
 #include "cairo_utils.h"
 #include "window.h"
 #include "utils.h"
@@ -230,7 +231,7 @@ update_default_decorations(GdkScreen* screen, frame_settings* fs_act,
                                          * to normal
                                          */
 
-static void show_tooltip(const char* text)
+static void show_tooltip(const std::string& text)
 {
     if (!enable_tooltips) {
         return;
@@ -782,14 +783,13 @@ static void force_quit_dialog_realize(GtkWidget* dialog, void* data)
     gdk_error_trap_pop();
 }
 
-static char* get_client_machine(Window xwindow)
+static std::string get_client_machine(Window xwindow)
 {
     Atom atom, type;
     unsigned long nitems, bytes_after;
     char* str = NULL;
     unsigned char* sstr = NULL;
     int format, result;
-    char* retval;
 
     atom = XInternAtom(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), "WM_CLIENT_MACHINE", false);
 
@@ -813,33 +813,29 @@ static char* get_client_machine(Window xwindow)
         return NULL;
     }
 
-    retval = g_strdup(str);
+    std::string ret = str ? str : "";
 
     XFree(str);
 
-    return retval;
+    return ret;
 }
 
 static void kill_window(Wnck::Window* win)
 {
     Wnck::Application* app = win->get_application();
     if (app) {
-        char buf[257], *client_machine;
+        char buf[257];
         int pid;
 
         pid = app->get_pid();
-        client_machine = get_client_machine(app->get_xid());
+        std::string client_machine = get_client_machine(app->get_xid());
 
-        if (client_machine && pid > 0) {
+        if (!client_machine.empty() && pid > 0) {
             if (gethostname(buf, sizeof(buf) - 1) == 0) {
-                if (strcmp(buf, client_machine) == 0) {
+                if (client_machine == buf) {
                     kill(pid, 9);
                 }
             }
-        }
-
-        if (client_machine) {
-            g_free(client_machine);
         }
     }
 
@@ -1547,9 +1543,7 @@ static void load_buttons_image(window_settings* ws, int y)
 }
 static void load_buttons_glow_images(window_settings* ws)
 {
-    char* file1 = NULL;
-    char* file2 = NULL;
-    int x, pix_width, pix_height;
+    int pix_width, pix_height;
     int pix_width2, pix_height2;
     bool success1 = false;
     bool success2 = false;
@@ -1662,15 +1656,13 @@ void load_button_image_setting(window_settings* ws)
 }
 static void load_settings(window_settings* ws)
 {
-    char* path =
-        g_strjoin("/", g_get_home_dir(), ".emerald/settings.ini", NULL);
+    fs::path path = fs::path(g_get_home_dir()) / ".emerald/settings.ini";
     KeyFile f;
 
     copy_from_defaults_if_needed();
 
     //settings
-    f.load_from_file(path);
-    g_free(path);
+    f.load_from_file(path.native());
     load_int_setting(f, &ws->double_click_action, "double_click_action",
                      "titlebars");
     load_int_setting(f, &ws->button_hover_cursor, "hover_cursor", "buttons");
@@ -1726,9 +1718,9 @@ static void load_settings(window_settings* ws)
                      "blur_type", "decorations");
 
     //theme
-    path = g_strjoin("/", g_get_home_dir(), ".emerald/theme/theme.ini", NULL);
-    f.load_from_file(path);
-    g_free(path);
+    path = fs::path(g_get_home_dir()) / ".emerald/theme/theme.ini";
+    f.load_from_file(path.native());
+
     load_string_setting(f, engine, "engine", "engine");
     if (!load_engine(engine, ws)) {
         engine = "legacy";
@@ -1757,7 +1749,7 @@ static void load_settings(window_settings* ws)
     std::string tmp;
     load_string_setting(f, tmp, "title_object_layout",
                         "titlebar");
-    ws->tobj_layout = g_strdup(tmp.c_str()); // FIXME memory leak
+    ws->tobj_layout = tmp;
     load_int_setting(f, &ws->button_offset, "vertical_offset", "buttons");
     load_int_setting(f, &ws->button_hoffset, "horizontal_offset", "buttons");
     load_int_setting(f, &ws->win_extents.top, "top", "borders");
@@ -1875,7 +1867,7 @@ int main(int argc, char* argv[])
     ws->button_fade_num_steps = 5;
     ws->blur_type = BLUR_TYPE_NONE;
 
-    ws->tobj_layout = g_strdup("IT::HNXC");        // DEFAULT TITLE OBJECT LAYOUT, does not use any odd buttons
+    ws->tobj_layout = "IT::HNXC";        // DEFAULT TITLE OBJECT LAYOUT, does not use any odd buttons
     //ws->tobj_layout=g_strdup("CNX:IT:HM");
 
     pfs = new frame_settings{};
@@ -1899,8 +1891,7 @@ int main(int argc, char* argv[])
     ws->round_bottom_left = true;
     ws->round_bottom_right = true;
 
-    engine = g_strdup("legacy");
-    load_engine(engine, ws);        // assumed to always return true
+    load_engine("legacy", ws);        // assumed to always return true
 
     program_name = argv[0];
 

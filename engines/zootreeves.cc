@@ -99,9 +99,9 @@ struct private_ws {
 extern "C"
 void get_meta_info(EngineMetaInfo* emi)
 {
-    emi->version = g_strdup("0.1");
-    emi->description = g_strdup(_("Evolved from the legacy engine"));
-    emi->last_compat = g_strdup("0.0"); // old themes marked still compatible for testing-NeOS
+    emi->version = "0.1";
+    emi->description = _("Evolved from the legacy engine");
+    emi->last_compat = "0.0"; // old themes marked still compatible for testing-NeOS
     emi->icon = Gdk::Pixbuf::create_from_inline(sizeof(my_pixbuf), my_pixbuf, true);
 }
 
@@ -721,10 +721,7 @@ void engine_draw_frame(decor_t* d, cairo_t* cr)
             left_bar_dip_offset = (2 * pws->left_bar_dip_radius);
 
             if (pws->done_indent == false && ws->tobj_layout[0] != '(') {
-                char* layout;
-                layout = g_strdup_printf("(-%i)%s", left_bar_dip_offset, ws->tobj_layout);
-                g_free(ws->tobj_layout);
-                ws->tobj_layout = layout;
+                ws->tobj_layout = format("(-%i)%s", left_bar_dip_offset, ws->tobj_layout);
                 pws->done_indent = true;
             }
         }

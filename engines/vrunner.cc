@@ -70,9 +70,9 @@ struct private_ws {
 extern "C"
 void get_meta_info(EngineMetaInfo* emi)
 {
-    emi->version = g_strdup("0.2");
-    emi->description = g_strdup(_("Multiple gradients with somewhat glassy features too"));
-    emi->last_compat = g_strdup("0.0"); // old themes marked still compatible for now
+    emi->version = "0.2";
+    emi->description = _("Multiple gradients with somewhat glassy features too");
+    emi->last_compat = "0.0"; // old themes marked still compatible for now
     emi->icon = Gdk::Pixbuf::create_from_inline(sizeof(my_pixbuf), my_pixbuf, true);
 }
 

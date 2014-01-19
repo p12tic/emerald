@@ -126,7 +126,7 @@ void layout_title_objects(Wnck::Window* win)
     d->tobj_size[2] = 0;
 
     Gdk::Rectangle rect = win->get_geometry();
-    for (i = 0; i < strlen(ws->tobj_layout); i++) {
+    for (i = 0; i < ws->tobj_layout.length(); i++) {
         if (ws->tobj_layout[i] == '(') {
             i++;
             d->tobj_size[state] +=
@@ -159,11 +159,11 @@ void layout_title_objects(Wnck::Window* win)
         d->tobj_item_state[i] = 3;
     }
 
-    for (i = 0; i < strlen(ws->tobj_layout); i++) {
+    for (i = 0; i < ws->tobj_layout.length(); i++) {
         if (ws->tobj_layout[i] == '(') {
             i++;
             x += g_ascii_strtoull(&ws->tobj_layout[i], NULL, 0);
-            while (ws->tobj_layout[i] && g_ascii_isdigit(ws->tobj_layout[i])) {
+            while (ws->tobj_layout[i] && std::isdigit(ws->tobj_layout[i])) {
                 i++;
             }
             continue;
@@ -280,8 +280,8 @@ int max_window_name_width(Wnck::Window* win)
     pango_layout_set_text(d->layout, name.c_str(), name.length());
     pango_layout_get_pixel_size(d->layout, &w, NULL);
 
-    if (d->name) {
-        pango_layout_set_text(d->layout, d->name, strlen(d->name));
+    if (!d->name.empty()) {
+        pango_layout_set_text(d->layout, d->name.c_str(), d->name.length());
     }
 
     return w + 6;
@@ -294,10 +294,7 @@ void update_window_decoration_name(Wnck::Window* win)
     PangoLayoutLine* line;
     window_settings* ws = d->fs->ws;
 
-    if (d->name) {
-        g_free(d->name);
-        d->name = NULL;
-    }
+    d->name = "";
 
     std::string name = win->get_name();
     if (!name.empty()) {
@@ -325,14 +322,12 @@ void update_window_decoration_name(Wnck::Window* win)
                 d->layout = NULL;
                 return;
             }
-
-            d->name = g_strndup(name.c_str(), name_length);
-            strcpy(d->name + name_length - 3, "...");
+            d->name = name.substr(name_length - 3) + "...";
         } else {
-            d->name = g_strndup(name.c_str(), name_length);
+            d->name = name;
         }
 
-        pango_layout_set_text(d->layout, d->name, name_length);
+        pango_layout_set_text(d->layout, d->name.c_str(), name_length);
         layout_title_objects(win);
     } else if (d->layout) {
         g_object_unref(G_OBJECT(d->layout));
@@ -645,10 +640,7 @@ bool update_switcher_window(Wnck::Window* win, Window selected)
     if (selected_win) {
         PangoLayoutLine* line;
 
-        if (d->name) {
-            g_free(d->name);
-            d->name = NULL;
-        }
+        d->name = "";
 
         std::string name = selected_win->get_name();
         if (!name.empty()) {
@@ -672,15 +664,14 @@ bool update_switcher_window(Wnck::Window* win, Window selected)
                         g_object_unref(G_OBJECT(d->layout));
                         d->layout = NULL;
                     } else {
-                        d->name = g_strndup(name.c_str(), name_length);
-                        strcpy(d->name + name_length - 3, "...");
+                        d->name = d->name.substr(name_length - 3) + "...";
                     }
                 } else {
-                    d->name = g_strndup(name.c_str(), name_length);
+                    d->name = name.substr(name_length);
                 }
 
                 if (d->layout) {
-                    pango_layout_set_text(d->layout, d->name, name_length);
+                    pango_layout_set_text(d->layout, d->name.c_str(), name_length);
                 }
             }
         } else if (d->layout) {
@@ -811,10 +802,7 @@ void remove_frame_window(Wnck::Window* win)
         d->button_fade_info.timer = -1;
     }
 
-    if (d->name) {
-        g_free(d->name);
-        d->name = NULL;
-    }
+    d->name = "";
 
     if (d->layout) {
         g_object_unref(G_OBJECT(d->layout));

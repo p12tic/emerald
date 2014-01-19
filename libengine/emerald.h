@@ -173,7 +173,7 @@ struct window_settings {
     void* engine_ws;
     int button_offset;
     int button_hoffset;
-    char* tobj_layout;
+    std::string tobj_layout;
 
     int double_click_action;
     int button_hover_cursor;
@@ -332,7 +332,7 @@ struct decor_t {
     bool          decorated;
     bool          active;
     PangoLayout*       layout;
-    char*         name;
+    std::string        name;
     cairo_pattern_t*   icon;
     GdkPixmap*         icon_pixmap;
     GdkPixbuf*         icon_pixbuf;
