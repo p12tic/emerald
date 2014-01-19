@@ -6,6 +6,7 @@ config.h.in*
 config.sub
 configure
 depcomp
+compile
 install-sh
 ltmain.sh
 m4/*
