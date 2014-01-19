@@ -300,10 +300,6 @@ void SettingItem::set_sf_int_combo(int i)
 
 void SettingItem::read_setting(const KeyFile& f)
 {
-    GError* e = NULL;
-    bool b;
-    int i;
-    char* s;
     switch (type_) {
     case ST_BOOL: {
         auto opt = f.get_boolean_opt(section_, key_);
@@ -362,7 +358,7 @@ void SettingItem::read_setting(const KeyFile& f)
         }*/
         std::string file = std::string{g_get_home_dir()} + "/.emerald/theme/"
                 + section_ + "." + key_ + ".png";
-        set_img_file(s);
+        set_img_file(file);
         break;
     }
     case ST_ENGINE_COMBO: {
