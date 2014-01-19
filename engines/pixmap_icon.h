@@ -7,9 +7,9 @@
 #include <cstdint>
 
 #ifdef __GNUC__
-static const std::uint8_t my_pixbuf[] __attribute__((__aligned__(4))) =
+const std::uint8_t my_pixbuf[] __attribute__((__aligned__(4))) =
 #else
-static const std::uint8_t my_pixbuf[] =
+const std::uint8_t my_pixbuf[] =
 #endif
 {
     ""

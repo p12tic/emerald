@@ -57,7 +57,8 @@ enum btypes {
     B_T_STICKY,
     B_T_COUNT
 };
-static const bool btbistate[B_T_COUNT] = {
+
+const bool btbistate[B_T_COUNT] = {
     false,
     true,
     false,
@@ -67,7 +68,8 @@ static const bool btbistate[B_T_COUNT] = {
     true,
     true,
 };
-static const int btstateflag[B_T_COUNT] = {
+
+const int btstateflag[B_T_COUNT] = {
     0,
     Wnck::WINDOW_STATE_MAXIMIZED_HORIZONTALLY | Wnck::WINDOW_STATE_MAXIMIZED_VERTICALLY,
     0,
@@ -93,7 +95,8 @@ enum tbtypes {
     TBT_COUNT,
 };
 #define BX_COUNT B_COUNT+2
-static unsigned button_actions[B_T_COUNT] = {
+
+unsigned const button_actions[B_T_COUNT] = {
     Wnck::WINDOW_ACTION_CLOSE,
     Wnck::WINDOW_ACTION_MAXIMIZE,
     Wnck::WINDOW_ACTION_MINIMIZE,
@@ -103,7 +106,8 @@ static unsigned button_actions[B_T_COUNT] = {
     0xFFFFFFFF,//Wnck::WINDOW_ACTION_ABOVE,
     Wnck::WINDOW_ACTION_STICK,
 };
-static const char* b_types[] = {
+
+const char* const b_types[] = {
     "close",
     "max",
     "restore",
@@ -119,7 +123,7 @@ static const char* b_types[] = {
     "glow",
     "inactive_glow"
 };
-static const char* b_names[] = {
+const char* const b_names[] = {
     "Close",
     "Maximize",
     "Restore",
@@ -141,7 +145,7 @@ enum {
     DOUBLE_CLICK_MINIMIZE,
     TITLEBAR_ACTION_COUNT
 };
-static const char* titlebar_action_name[TITLEBAR_ACTION_COUNT] = {
+const char* const titlebar_action_name[TITLEBAR_ACTION_COUNT] = {
     "Shade",
     "Maximize/Restore",
     "Minimize",
