@@ -210,19 +210,15 @@ void SettingItem::set_engine_combo(const std::string& val)
 
 std::string SettingItem::get_engine_combo()
 {
-    static std::string s;
-    GtkTreeIter i;
-
-    //s = gtk_combo_box_get_active_text(GTK_COMBO_BOX(widget_));
-    Gtk::ComboBox* cv = widget_;
-    auto it = cv->get_active();
-    if (it) {
-        s = (*it)[g_engine_columns.name];
-        if (s == "") {
-            s = "legacy";
-        }
+    auto it = (static_cast<Gtk::ComboBox*>(widget_))->get_active();
+    if (!it) {
+        return "";
     }
-    return s.c_str();
+    std::string s = (*it)[g_engine_columns.name];
+    if (s == "") {
+        return "legacy";
+    }
+    return s;
 }
 
 int SettingItem::get_sf_int_combo()
