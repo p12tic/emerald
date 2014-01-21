@@ -483,7 +483,7 @@ void cb_delete(Gtk::Widget* w)
 bool cb_main_destroy(GdkEventAny*)
 {
     main_window_->hide();
-    gtk_main_quit();
+    Gtk::Main::quit();
     return true;
 }
 
@@ -1199,7 +1199,7 @@ void fetch_svn()
     fe->dialog = &dialog;
     fe->progbar = &progbar;
     fe->pd = pd;
-    g_timeout_add(100, reinterpret_cast<GSourceFunc>(watcher_func), fe);
+    Glib::signal_timeout().connect(sigc::bind(&watcher_func, fe), 100);;
 }
 
 void fetch_gpl_svn()

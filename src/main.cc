@@ -1786,9 +1786,8 @@ void reload_all_settings(int sig)
     }
 }
 #endif
-bool reload_if_needed(void* p)
+bool reload_if_needed()
 {
-    (void) p;
     if (do_reload) {
         do_reload = false;
         puts("Reloading...");
@@ -2011,7 +2010,7 @@ int main(int argc, char* argv[])
 
     update_settings(ws);
 
-    g_timeout_add(500, reinterpret_cast<GSourceFunc>(reload_if_needed), NULL);
+    Glib::signal_timeout().connect(&reload_if_needed, 500);
 
     kit.run();
     gdk_error_trap_pop();

@@ -324,7 +324,7 @@ void cb_clear_file(SettingItem* item)
 {
     item->check_file("");
     item->fvalue_ = "";
-    gtk_file_chooser_unselect_all(GTK_FILE_CHOOSER(item->widget_));
+    static_cast<Gtk::FileChooserDialog*>(item->widget_)->unselect_all();
     item->write_setting(*global_theme_file);
     if (apply) {
         apply_settings();
@@ -438,18 +438,16 @@ void append_engine(const std::string& dlname)
 
 void engine_scan_dir(const std::string& dir)
 {
-    GPatternSpec* ps = g_pattern_spec_new("lib*.so");
     if (!fs::is_directory(dir)) {
-        g_pattern_spec_free(ps);
         return;
     }
 
+    Glib::PatternSpec ps("lib*.so");
     for (auto& entry : fs::directory_iterator(dir)) {
-        if (g_pattern_match_string(ps, entry.path().filename().c_str())) {
+        if (ps.match(entry.path().filename().native())) {
             append_engine(entry.path().native());
         }
     }
-    g_pattern_spec_free(ps);
 }
 
 void init_engine_list()
