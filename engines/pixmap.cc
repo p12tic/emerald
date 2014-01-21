@@ -391,8 +391,9 @@ void engine_draw_frame(decor_t* d, Cairo::RefPtr<Cairo::Context>& cr)
     cr->set_operator(Cairo::OPERATOR_OVER);
 
     // Draw Title pixmaps
-    if (PANGO_IS_LAYOUT(d->layout)) {
-        pango_layout_get_pixel_size(d->layout, &title_width, NULL);
+    if (d->layout) {
+        int dummy;
+        d->layout->get_pixel_size(title_width, dummy);
     }
     title_pos = get_real_pos(ws, TBT_TITLE, d);
 

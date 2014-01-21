@@ -56,7 +56,7 @@ extern Wnck::ActionMenu* action_menu;
 extern std::string program_name;
 
 extern std::vector<decor_t*> g_draw_list;
-extern GtkWidget* style_window;
+extern Gtk::Widget* style_window;
 
 extern Atom frame_window_atom;
 extern Atom win_decor_atom;

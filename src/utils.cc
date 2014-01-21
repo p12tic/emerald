@@ -112,9 +112,8 @@ int get_title_object_width(char obj, window_settings* ws, decor_t* d)
         return -1;
     case TBT_TITLE:
         if (d->layout) {
-            int w;
-
-            pango_layout_get_pixel_size(d->layout, &w, NULL);
+            int w, h;
+            d->layout->get_pixel_size(w, h);
             return w + 2;
         } else {
             return 2;

@@ -814,21 +814,18 @@ void engine_draw_frame(decor_t* d, Cairo::RefPtr<Cairo::Context>& cr)
     if (enable_dip == true) {
 
 ////////////////////////////////Trim text//////////////////////////////////////////
-        PangoLayoutLine* line;
 
         int name_length = pane_1_width * 1000 - (2000 * ptop);
-        pango_layout_set_width(d->layout, name_length);
+        d->layout->set_width(name_length);
         //char name[strlen(pango_layout_get_text(d->layout)) + 3];
-        const char* name;
-        name = pango_layout_get_text(d->layout);
-        pango_layout_set_wrap(d->layout, PANGO_WRAP_CHAR);
+        std::string name = d->layout->get_text();
+        d->layout->set_wrap(Pango::WRAP_CHAR);
 
 //////// //if anyone reports segfaults look at this first///////////////////////////
-        if (pango_layout_get_line_count(d->layout) > 1) {
-            line = pango_layout_get_line(d->layout, 0);
-            name = g_strndup(name, line->length - 3);
-            //name = strcat(name, "...");
-            pango_layout_set_text(d->layout, name, line->length);
+        if (d->layout->get_line_count() > 1) {
+            auto line = d->layout->get_line(0);
+            name = name.substr(0, line->get_length() - 3 - 1) + "...";
+            d->layout->set_text(name);
         }
 ///////////////////////////////////////////////////////////////////////////////////
 

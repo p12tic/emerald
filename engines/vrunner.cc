@@ -344,8 +344,8 @@ void engine_draw_frame(decor_t* d, Cairo::RefPtr<Cairo::Context>& cr)
     if (pfs->use_glow) {
         cr->set_operator(Cairo::OPERATOR_ATOP);
 
-        if (PANGO_IS_LAYOUT(d->layout)) {
-            pango_layout_get_pixel_size(d->layout, &title_width, &title_height);
+        if (d->layout) {
+            d->layout->get_pixel_size(title_width, title_height);
         }
         title_pos = get_real_pos(ws, TBT_TITLE, d);
         create_glow(d, cr, title_pos, y1 + top / 2.0 - title_height / 2.0,

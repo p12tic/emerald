@@ -197,7 +197,7 @@ struct window_settings {
     int min_titlebar_height;
     bool use_pixmap_buttons;// = false;
     double  corner_radius;//    =   5.0;
-    PangoAlignment title_text_align;// = PANGO_ALIGN_CENTER;
+    Pango::Alignment title_text_align;// = PANGO_ALIGN_CENTER;
     GdkPixbuf* ButtonPix[S_COUNT* B_COUNT];
     GdkPixbuf* ButtonArray[B_COUNT];
 
@@ -261,8 +261,8 @@ struct window_settings {
 
     int            text_height;
 
-    PangoFontDescription* font_desc;
-    PangoContext* pango_context;
+    Pango::FontDescription font_desc;
+    Glib::RefPtr<Pango::Context> pango_context;
 
     decor_extents_t switcher_extents;// = { 0, 0, 0, 0 };
     GdkPixmap* switcher_pixmap;// = NULL;
@@ -340,7 +340,7 @@ struct decor_t {
     int              client_height;
     bool          decorated;
     bool          active;
-    PangoLayout*       layout;
+    Glib::RefPtr<Pango::Layout> layout;
     std::string        name;
     Cairo::RefPtr<Cairo::Pattern> icon;
     GdkPixmap*         icon_pixmap;

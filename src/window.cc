@@ -257,7 +257,6 @@ void update_event_windows(Wnck::Window* win)
 int max_window_name_width(Wnck::Window* win)
 {
     decor_t* d = get_decor(win);
-    int w;
     window_settings* ws = d->fs->ws;
 
     std::string name = win->get_name();
@@ -266,21 +265,22 @@ int max_window_name_width(Wnck::Window* win)
     }
 
     if (!d->layout) {
-        d->layout = pango_layout_new(ws->pango_context);
+        d->layout = Pango::Layout::create(ws->pango_context);
         if (!d->layout) {
             return 0;
         }
 
-        pango_layout_set_wrap(d->layout, PANGO_WRAP_CHAR);
+        d->layout->set_wrap(Pango::WRAP_CHAR);
     }
 
-    pango_layout_set_auto_dir(d->layout, false);
-    pango_layout_set_width(d->layout, -1);
-    pango_layout_set_text(d->layout, name.c_str(), name.length());
-    pango_layout_get_pixel_size(d->layout, &w, NULL);
+    d->layout->set_auto_dir(false);
+    d->layout->set_width(-1);
+    d->layout->set_text(name);
+    int w, h;
+    d->layout->get_pixel_size(w, h);
 
     if (!d->name.empty()) {
-        pango_layout_set_text(d->layout, d->name.c_str(), d->name.length());
+        d->layout->set_text(d->name);
     }
 
     return w + 6;
@@ -289,36 +289,32 @@ int max_window_name_width(Wnck::Window* win)
 void update_window_decoration_name(Wnck::Window* win)
 {
     decor_t* d = get_decor(win);
-    glong name_length;
-    PangoLayoutLine* line;
     window_settings* ws = d->fs->ws;
 
     d->name = "";
 
     std::string name = win->get_name();
     if (!name.empty()) {
-        int w;
-
-        pango_layout_set_auto_dir(d->layout, false);
-        pango_layout_set_text(d->layout, "", 0);
-        pango_layout_set_width(d->layout, 0);
+        d->layout->set_auto_dir(false);
+        d->layout->set_text("");
+        d->layout->set_width(0);
         layout_title_objects(win);
-        w = d->width - ws->left_space - ws->right_space - d->tobj_size[0]
-            - d->tobj_size[1] - d->tobj_size[2];
+
+        int w = d->width - ws->left_space - ws->right_space - d->tobj_size[0]
+                - d->tobj_size[1] - d->tobj_size[2];
         if (w < 1) {
             w = 1;
         }
 
-        pango_layout_set_width(d->layout, w * PANGO_SCALE);
-        pango_layout_set_text(d->layout, name.c_str(), name.length());
+        d->layout->set_width(w * PANGO_SCALE);
+        d->layout->set_text(name);
 
-        line = pango_layout_get_line(d->layout, 0);
+        auto line = d->layout->get_line(0);
+        long name_length = line->get_length();
 
-        name_length = line->length;
-        if (pango_layout_get_line_count(d->layout) > 1) {
+        if (d->layout->get_line_count() > 1) {
             if (name_length < 4) {
-                g_object_unref(G_OBJECT(d->layout));
-                d->layout = NULL;
+                d->layout.clear();
                 return;
             }
             d->name = name.substr(name_length - 3) + "...";
@@ -326,11 +322,10 @@ void update_window_decoration_name(Wnck::Window* win)
             d->name = name;
         }
 
-        pango_layout_set_text(d->layout, d->name.c_str(), name_length);
+        d->layout->set_text(d->name);
         layout_title_objects(win);
-    } else if (d->layout) {
-        g_object_unref(G_OBJECT(d->layout));
-        d->layout = NULL;
+    } else {
+        d->layout.clear();
     }
 }
 
@@ -633,45 +628,42 @@ bool update_switcher_window(Wnck::Window* win, Window selected)
 
     selected_win = Wnck::Window::get_for_xid(selected);
     if (selected_win) {
-        PangoLayoutLine* line;
 
         d->name = "";
 
         std::string name = selected_win->get_name();
         if (!name.empty()) {
             if (!d->layout) {
-                d->layout = pango_layout_new(ws->pango_context);
+                d->layout = Pango::Layout::create(ws->pango_context);
                 if (d->layout) {
-                    pango_layout_set_wrap(d->layout, PANGO_WRAP_CHAR);
+                    d->layout->set_wrap(Pango::WRAP_CHAR);
                 }
             }
 
             if (d->layout) {
-                pango_layout_set_auto_dir(d->layout, false);
-                pango_layout_set_width(d->layout, -1);
-                pango_layout_set_text(d->layout, name.c_str(), name.length());
+                d->layout->set_auto_dir(false);
+                d->layout->set_width(-1);
+                d->layout->set_text(name);
 
-                line = pango_layout_get_line(d->layout, 0);
+                auto line = d->layout->get_line(0);
 
-                glong name_length = line->length;
-                if (pango_layout_get_line_count(d->layout) > 1) {
+                long name_length = line->get_length();
+                if (d->layout->get_line_count() > 1) {
                     if (name_length < 4) {
-                        g_object_unref(G_OBJECT(d->layout));
-                        d->layout = NULL;
+                        d->layout.clear();
                     } else {
                         d->name = d->name.substr(name_length - 3) + "...";
                     }
                 } else {
-                    d->name = name.substr(name_length);
+                    d->name = name;
                 }
 
                 if (d->layout) {
-                    pango_layout_set_text(d->layout, d->name.c_str(), name_length);
+                    d->layout->set_text(d->name);
                 }
             }
-        } else if (d->layout) {
-            g_object_unref(G_OBJECT(d->layout));
-            d->layout = NULL;
+        } else {
+            d->layout.clear();
         }
     }
 
@@ -795,12 +787,7 @@ void remove_frame_window(Wnck::Window* win)
     }
 
     d->name = "";
-
-    if (d->layout) {
-        g_object_unref(G_OBJECT(d->layout));
-        d->layout = NULL;
-    }
-
+    d->layout.clear();
     d->icon.clear();
 
     if (d->icon_pixmap) {

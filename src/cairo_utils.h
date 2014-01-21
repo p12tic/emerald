@@ -22,7 +22,8 @@
 
 #include <libengine/emerald.h>
 
-void gdk_cairo_set_source_color_alpha(Cairo::RefPtr<Cairo::Context>& cr, GdkColor* color, double alpha);
+void gdk_cairo_set_source_color_alpha(Cairo::RefPtr<Cairo::Context>& cr,
+                                      const Gdk::Color& color, double alpha);
 void draw_shadow_background(decor_t* d, Cairo::RefPtr<Cairo::Context>& cr);
 void draw_help_button(Cairo::RefPtr<Cairo::Context>& cr);
 void draw_close_button(Cairo::RefPtr<Cairo::Context>& cr, double s);

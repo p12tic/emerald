@@ -229,15 +229,12 @@ void load_bool_setting(const KeyFile& f, bool* b, const std::string& key,
     }
 }
 
-void load_font_setting(const KeyFile& f, PangoFontDescription** fd,
+void load_font_setting(const KeyFile& f, Pango::FontDescription& fd,
                        const std::string& key, const std::string& sect)
 {
     auto s = f.get_string_opt(sect, key);
     if (s) {
-        if (*fd) {
-            pango_font_description_free(*fd);
-        }
-        *fd = pango_font_description_from_string(s->c_str());
+        fd = Pango::FontDescription(*s);
     }
 }
 

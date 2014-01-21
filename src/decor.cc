@@ -305,13 +305,13 @@ void draw_window_decoration_real(decor_t* d, bool shadow_time)
         cr->save();
 
         if (d->layout && d->tobj_item_state[TBT_TITLE] != 3) {
-            pango_layout_set_alignment(d->layout, ws->title_text_align);
+            d->layout->set_alignment(ws->title_text_align);
             cr->move_to(get_real_pos(ws, TBT_TITLE, d),
                         y1 + 2.0 + (ws->titlebar_height - ws->text_height) / 2.0);
 
             /* ===================active text colors */
             cairo_set_source_alpha_color(cr, &fs->text_halo);
-            pango_cairo_layout_path(cr->cobj(), d->layout);
+            d->layout->add_to_cairo_context(cr);
             cr->stroke();
 
             cairo_set_source_alpha_color(cr, &fs->text);
@@ -319,7 +319,7 @@ void draw_window_decoration_real(decor_t* d, bool shadow_time)
             cr->move_to(get_real_pos(ws, TBT_TITLE, d),
                         y1 + 2.0 + (ws->titlebar_height - ws->text_height) / 2.0);
 
-            pango_cairo_show_layout(cr->cobj(), d->layout);
+            d->layout->show_in_cairo_context(cr);
         }
         if (d->icon && d->tobj_item_state[TBT_ICON] != 3) {
             cr->translate(get_real_pos(ws, TBT_ICON, d),
@@ -573,12 +573,11 @@ void draw_shadow_window(decor_t* d)
 void decor_update_switcher_property(decor_t* d)
 {
     long* data = NULL;
-    Display* xdisplay = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
+    Display* xdisplay = gdk_x11_display_get_xdisplay(Gdk::Display::get_default()->gobj());
     unsigned int nQuad;
     decor_quad_t quads[N_QUADS_MAX];
     window_settings* ws = d->fs->ws;
     decor_extents_t extents = ws->switcher_extents;
-    GtkStyle* style;
     long fgColor[4];
 
     nQuad = set_switcher_quads(quads, d->width, d->height, ws);
@@ -589,11 +588,10 @@ void decor_update_switcher_property(decor_t* d)
                             &extents, &extents, &extents, &extents,
                             0, 0, quads, nQuad, 0xffffff, 0, 0);
 
-    style = gtk_widget_get_style(style_window);
-
-    fgColor[0] = style->fg[GTK_STATE_NORMAL].red;
-    fgColor[1] = style->fg[GTK_STATE_NORMAL].green;
-    fgColor[2] = style->fg[GTK_STATE_NORMAL].blue;
+    auto color = style_window->get_style()->get_fg(Gtk::STATE_NORMAL);
+    fgColor[0] = color.get_red();
+    fgColor[1] = color.get_green();
+    fgColor[2] = color.get_blue();
     fgColor[3] = SWITCHER_ALPHA;
 
     gdk_error_trap_push();
@@ -614,7 +612,6 @@ void decor_update_switcher_property(decor_t* d)
 void draw_switcher_background(decor_t* d)
 {
     Display* xdisplay = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
-    GtkStyle* style;
     decor_color_t color;
     alpha_color acolor;
     alpha_color acolor2;
@@ -629,11 +626,12 @@ void draw_switcher_background(decor_t* d)
         return;
     }
 
-    style = gtk_widget_get_style(style_window);
+    auto normal_bg = style_window->get_style()->get_bg(Gtk::STATE_NORMAL);
+    auto normal_fg = style_window->get_style()->get_fg(Gtk::STATE_NORMAL);
+    color.r = normal_bg.get_red_p();
+    color.g = normal_bg.get_green_p();
+    color.b = normal_bg.get_blue_p();
 
-    color.r = style->bg[GTK_STATE_NORMAL].red / 65535.0;
-    color.g = style->bg[GTK_STATE_NORMAL].green / 65535.0;
-    color.b = style->bg[GTK_STATE_NORMAL].blue / 65535.0;
     acolor.color = acolor2.color = color;
     acolor.alpha = alpha;
     acolor2.alpha = alpha * 0.75;
@@ -727,7 +725,7 @@ void draw_switcher_background(decor_t* d)
                     y1 + top,
                     x2 - x1 - ws->win_extents.left - ws->win_extents.right,
                     h);
-    gdk_cairo_set_source_color_alpha(cr, &style->bg[GTK_STATE_NORMAL], alpha);
+    gdk_cairo_set_source_color_alpha(cr, normal_bg, alpha);
     cr->fill();
 
     cr->set_operator(Cairo::OPERATOR_OVER);
@@ -772,7 +770,7 @@ void draw_switcher_background(decor_t* d)
                       CORNER_TOPLEFT | CORNER_TOPRIGHT | CORNER_BOTTOMLEFT |
                       CORNER_BOTTOMRIGHT, ws, 5.0);
 
-    gdk_cairo_set_source_color_alpha(cr, &style->fg[GTK_STATE_NORMAL], alpha);
+    gdk_cairo_set_source_color_alpha(cr, normal_fg, alpha);
 
     cr->stroke();
 
@@ -780,10 +778,10 @@ void draw_switcher_background(decor_t* d)
                       d->gc,
                       d->buffer_pixmap, 0, 0, 0, 0, d->width, d->height);
 
-    pixel = ((((a * style->bg[GTK_STATE_NORMAL].red) >> 24) & 0x0000ff) |
-             (((a * style->bg[GTK_STATE_NORMAL].green) >> 16) & 0x00ff00) |
-             (((a * style->bg[GTK_STATE_NORMAL].blue) >> 8) & 0xff0000) |
-             (((a & 0xff00) << 16)));
+    pixel = (((a * normal_bg.get_red()) >> 24) & 0x0000ff) |
+            (((a * normal_bg.get_green()) >> 16) & 0x00ff00) |
+            (((a * normal_bg.get_blue()) >> 8) & 0xff0000) |
+            (((a & 0xff00) << 16));
 
     decor_update_switcher_property(d);
 
@@ -805,13 +803,14 @@ void draw_switcher_foreground(decor_t* d)
     double alpha = SWITCHER_ALPHA / 65535.0;
     window_settings* ws = d->fs->ws;
 
-    GtkStyle* style = gtk_widget_get_style(style_window);
+    auto normal_bg = style_window->get_style()->get_bg(Gtk::STATE_NORMAL);
+    auto normal_fg = style_window->get_style()->get_fg(Gtk::STATE_NORMAL);
 
     //decor_color_t color;
 
-    //color.r = style->bg[GTK_STATE_NORMAL].red / 65535.0;
-    //color.g = style->bg[GTK_STATE_NORMAL].green / 65535.0;
-    //color.b = style->bg[GTK_STATE_NORMAL].blue / 65535.0;
+    //color.r = normal_bg.get_red_p();
+    //color.g = normal_bg.get_green_p();
+    //color.b = normal_bg.get_blue_p();
 
     int top = ws->win_extents.bottom;
 
@@ -829,46 +828,36 @@ void draw_switcher_foreground(decor_t* d)
                     x2 - x1 - ws->win_extents.left - ws->win_extents.right,
                     SWITCHER_SPACE);
 
-    gdk_cairo_set_source_color_alpha(cr, &style->bg[GTK_STATE_NORMAL], alpha);
+    gdk_cairo_set_source_color_alpha(cr, normal_bg, alpha);
     cr->fill();
 
     if (d->layout) {
         int w;
-        int text_width;
-        int text_len = 0;
-        const char* text = NULL;
         const int SWITCHER_SUBST_FONT_SIZE = 10;
 
-        pango_layout_get_pixel_size(d->layout, &text_width, NULL);
-        text = pango_layout_get_text(d->layout);
-        if (text != NULL) {
-            text_len = strlen(text);
-        } else {
-            return;
-        }
+        int text_width, text_height;
+        d->layout->get_pixel_size(text_width, text_height);
+
+        auto text = d->layout->get_text();
 
         // some themes ("frame" e.g.) set the title text font to 0.0pt, try to fix it
         if (text_width == 0) {
-            if (text_len) {
-                // if the font size is set to 0 indeed, set it to 10, otherwise don't draw anything
+            if (!text.empty()) {
 
-                if (!pango_layout_get_font_description(d->layout)) {
-                    PangoContext* context =
-                        pango_layout_get_context(d->layout);
-                    PangoFontDescription* font =
-                        pango_context_get_font_description(context);
-                    if (font == NULL) {
+                // if the font size is set to 0 indeed, set it to 10, otherwise don't draw anything
+                auto fontdesc = d->layout->get_font_description();
+                if (!fontdesc.gobj()) {
+                    auto context = d->layout->get_context();
+                    auto font = context->get_font_description();
+                    if (!font.gobj()) {
                         return;
                     }
 
-                    int font_size = pango_font_description_get_size(font);
+                    int font_size = font.get_size();
 
                     if (font_size == 0) {
-                        pango_font_description_set_size(font,
-                                                        SWITCHER_SUBST_FONT_SIZE
-                                                        * PANGO_SCALE);
-                        pango_layout_get_pixel_size(d->layout, &text_width,
-                                                    NULL);
+                        font.set_size(SWITCHER_SUBST_FONT_SIZE * PANGO_SCALE);
+                        d->layout->get_pixel_size(text_width, text_height);
                     } else {
                         return;
                     }
@@ -880,21 +869,21 @@ void draw_switcher_foreground(decor_t* d)
 
         // fix too long title text in switcher
         // using ellipsize instead of cutting off text
-        pango_layout_set_ellipsize(d->layout, PANGO_ELLIPSIZE_END);
-        pango_layout_set_width(d->layout, (x2 - x1) * PANGO_SCALE);
+        d->layout->set_ellipsize(Pango::ELLIPSIZE_END);
+        d->layout->set_width((x2 - x1) * PANGO_SCALE);
 
         cr->set_operator(Cairo::OPERATOR_OVER);
 
-        gdk_cairo_set_source_color_alpha(cr,
-                                         &style->fg[GTK_STATE_NORMAL], 1.0);
+        gdk_cairo_set_source_color_alpha(cr, normal_fg, 1.0);
 
-        pango_layout_get_pixel_size(d->layout, &w, NULL);
+        int dummy;
+        d->layout->get_pixel_size(w, dummy);
 
         cr->move_to(d->width / 2 - w / 2,
                       y1 + top + ws->switcher_top_corner_space +
                       SWITCHER_SPACE / 2 - ws->text_height / 2);
 
-        pango_cairo_show_layout(cr->cobj(), d->layout);
+        d->layout->show_in_cairo_context(cr);
     }
 
     gdk_draw_drawable(d->pixmap,

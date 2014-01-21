@@ -76,7 +76,7 @@ Time dm_sn_timestamp;
 
 std::string program_name;
 
-GtkWidget* style_window;
+Gtk::Widget* style_window;
 
 GHashTable* frame_table;
 Wnck::ActionMenu* action_menu = NULL;
@@ -168,7 +168,6 @@ update_default_decorations(GdkScreen* screen, frame_settings* fs_act,
     extents.top += ws->titlebar_height;
 
     d.buffer_pixmap = NULL;
-    d.layout = NULL;
     d.state = static_cast<Wnck::WindowState>(0);
     d.actions = static_cast<Wnck::WindowActions>(0);
     d.prop_xid = 0;
@@ -451,6 +450,7 @@ void action_menu_map(Wnck::Window* win, long button, Time time)
     }
 
     action_menu = new Wnck::ActionMenu(win);
+    // don't convert to gtkmm, see above
     gtk_menu_set_screen(GTK_MENU(action_menu->gobj()), screen);
 
     action_menu->signal_unmap().connect(&action_menu_unmap);
@@ -1283,7 +1283,6 @@ int update_shadow(frame_settings* fs)
         MAX(0, ws->bottom_corner_space - SWITCHER_SPACE);
 
     d.buffer_pixmap = NULL;
-    d.layout = NULL;
     d.state = static_cast<Wnck::WindowState>(0);
     d.actions = static_cast<Wnck::WindowActions>(0);
     d.prop_xid = 0;
@@ -1468,24 +1467,16 @@ int update_shadow(frame_settings* fs)
 
 void titlebar_font_changed(window_settings* ws)
 {
-    PangoFontMetrics* metrics;
-    PangoLanguage* lang;
+    ws->pango_context->set_font_description(ws->font_desc);
+    auto lang = ws->pango_context->get_language();
+    auto metrics = ws->pango_context->get_metrics(ws->font_desc, lang);
 
-    pango_context_set_font_description(ws->pango_context, ws->font_desc);
-    lang = pango_context_get_language(ws->pango_context);
-    metrics =
-        pango_context_get_metrics(ws->pango_context, ws->font_desc, lang);
-
-    ws->text_height = PANGO_PIXELS(pango_font_metrics_get_ascent(metrics) +
-                                   pango_font_metrics_get_descent(metrics));
+    ws->text_height = PANGO_PIXELS(metrics.get_ascent() + metrics.get_descent());
 
     ws->titlebar_height = ws->text_height;
     if (ws->titlebar_height < ws->min_titlebar_height) {
         ws->titlebar_height = ws->min_titlebar_height;
     }
-
-    pango_font_metrics_unref(metrics);
-
 }
 
 void load_buttons_image(window_settings* ws, int y)
@@ -1723,7 +1714,7 @@ void load_settings(window_settings* ws)
     load_float_setting(f,&ws->fs_inact->button_halo.alpha,"inactive_button_halo_alpha", "buttons");
 
     load_engine_settings(f, ws);
-    load_font_setting(f, &ws->font_desc, "titlebar_font", "titlebar");
+    load_font_setting(f, ws->font_desc, "titlebar_font", "titlebar");
     load_bool_setting(f, &ws->use_pixmap_buttons, "use_pixmap_buttons",
                       "buttons");
     load_bool_setting(f, &ws->use_button_glow, "use_button_glow", "buttons");
@@ -1832,8 +1823,6 @@ int main(int argc, char* argv[])
 
     int i, j;
     bool replace = false;
-    PangoFontMetrics* metrics;
-    PangoLanguage* lang;
     frame_settings* pfs;
 
     window_settings* ws = new window_settings;
@@ -2017,24 +2006,20 @@ int main(int argc, char* argv[])
 
     connect_screen(screen);
 
-    style_window = gtk_window_new(GTK_WINDOW_POPUP);
-    gtk_widget_realize(style_window);
-    ws->pango_context = gtk_widget_create_pango_context(style_window);
-    ws->font_desc = pango_font_description_from_string("Sans Bold 12");
-    pango_context_set_font_description(ws->pango_context, ws->font_desc);
-    lang = pango_context_get_language(ws->pango_context);
-    metrics =
-        pango_context_get_metrics(ws->pango_context, ws->font_desc, lang);
+    style_window = Gtk::manage(new Gtk::Window(Gtk::WINDOW_POPUP));
+    gtk_widget_realize(static_cast<Gtk::Widget*>(style_window)->gobj());
+    ws->pango_context = style_window->create_pango_context();
+    ws->font_desc = Pango::FontDescription("Sans Bold 12");
+    ws->pango_context->set_font_description(ws->font_desc);
+    auto lang = ws->pango_context->get_language();
+    auto metrics = ws->pango_context->get_metrics(ws->font_desc, lang);
 
-    ws->text_height = PANGO_PIXELS(pango_font_metrics_get_ascent(metrics) +
-                                   pango_font_metrics_get_descent(metrics));
+    ws->text_height = PANGO_PIXELS(metrics.get_ascent() + metrics.get_descent());
 
     ws->titlebar_height = ws->text_height;
     if (ws->titlebar_height < ws->min_titlebar_height) {
         ws->titlebar_height = ws->min_titlebar_height;
     }
-
-    pango_font_metrics_unref(metrics);
 
     update_window_extents(ws);
     update_shadow(pfs);

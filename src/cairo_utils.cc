@@ -23,11 +23,11 @@
 #include "cairo_utils.h"
 #include "utils.h"
 
-void gdk_cairo_set_source_color_alpha(Cairo::RefPtr<Cairo::Context>& cr, GdkColor* color, double alpha)
+void gdk_cairo_set_source_color_alpha(Cairo::RefPtr<Cairo::Context>& cr,
+                                      const Gdk::Color& color, double alpha)
 {
-    cr->set_source_rgba(color->red / 65535.0,
-                        color->green / 65535.0,
-                        color->blue / 65535.0, alpha);
+    cr->set_source_rgba(color.get_red_p(), color.get_green_p(),
+                        color.get_blue_p(), alpha);
 }
 
 void draw_shadow_background(decor_t* d, Cairo::RefPtr<Cairo::Context>& cr)

@@ -35,7 +35,7 @@ void load_int_setting(const KeyFile& f, int* i, const std::string& key,
                       const std::string& sect);
 void load_bool_setting(const KeyFile& f, bool* b, const std::string& key,
                        const std::string& sect);
-void load_font_setting(const KeyFile& f, PangoFontDescription** fd,
+void load_font_setting(const KeyFile& f, Pango::FontDescription& fd,
                        const std::string& key, const std::string& sect);
 void load_string_setting(const KeyFile& f, std::string& s, const std::string& key,
                          const std::string& sect);
