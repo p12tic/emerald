@@ -85,8 +85,9 @@ int double_click_timeout = 250;
 
 Gtk::Window* tip_window;
 Gtk::Label* tip_label;
-GTimeVal tooltip_last_popdown = { -1, -1 };
-int tooltip_timer_tag = 0;
+Glib::TimeVal tooltip_last_popdown = { -1, -1 };
+
+sigc::connection tooltip_timeout_conn;
 
 std::vector<decor_t*> g_draw_list;
 
@@ -294,48 +295,38 @@ void hide_tooltip()
 
     tip_window->hide();
 
-    if (tooltip_timer_tag) {
-        g_source_remove(tooltip_timer_tag);
-        tooltip_timer_tag = 0;
+    if (tooltip_timeout_conn) {
+        tooltip_timeout_conn.disconnect();
     }
 }
 
 bool tooltip_recently_shown()
 {
-    GTimeVal now;
-    glong msec;
-
-    g_get_current_time(&now);
-
-    msec = (now.tv_sec - tooltip_last_popdown.tv_sec) * 1000 +
-           (now.tv_usec - tooltip_last_popdown.tv_usec) / 1000;
-
-    return (msec < STICKY_REVERT_DELAY);
+    Glib::TimeVal now;
+    now.assign_current_time();
+    now -= tooltip_last_popdown;
+    return now.as_double() * 1000 < STICKY_REVERT_DELAY;
 }
 
-int tooltip_timeout(void* data)
+bool tooltip_timeout(const std::string& msg)
 {
-    tooltip_timer_tag = 0;
-
-    show_tooltip((const char*)data);
-
+    show_tooltip(msg);
     return false;
 }
 
-void tooltip_start_delay(const char* text)
+void tooltip_start_delay(const std::string& msg)
 {
-    unsigned delay = DEFAULT_DELAY;
-
-    if (tooltip_timer_tag) {
+    if (tooltip_timeout_conn) {
         return;
     }
 
+    unsigned delay = DEFAULT_DELAY;
     if (tooltip_recently_shown()) {
         delay = STICKY_DELAY;
     }
 
-    tooltip_timer_tag = g_timeout_add(delay,
-                                      tooltip_timeout, (void*) text);
+    tooltip_timeout_conn = Glib::signal_timeout().connect(
+                sigc::bind(&tooltip_timeout, msg), delay);
 }
 
 int tooltip_paint_window()
