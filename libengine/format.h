@@ -43,7 +43,7 @@ std::basic_ostream<CharT,Traits>&
     operator<<(std::basic_ostream<CharT,Traits>& ost,
                const FormatWrapper<CharT,Traits,Alloc>& tr)
 {
-    ost << tr;
+    ost << tr.format();
     return ost;
 }
 
