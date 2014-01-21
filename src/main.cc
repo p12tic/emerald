@@ -46,6 +46,7 @@
 
 #include <algorithm>
 #include <vector>
+#include <functional>
 
 void reload_all_settings(int sig);
 
@@ -775,14 +776,14 @@ void bottom_right_event(Wnck::Window* win, XEvent* xevent)
     }
 }
 
-void force_quit_dialog_realize(GtkWidget* dialog, void* data)
+void force_quit_dialog_realize(Gtk::MessageDialog* dialog, Wnck::Window* win)
 {
-    Wnck::Window* win = reinterpret_cast<Wnck::Window*>(data);
-
     gdk_error_trap_push();
-    XSetTransientForHint(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()),
-                         GDK_WINDOW_XID(dialog->window),
-                         win->get_xid());
+    auto drawable = Glib::RefPtr<Gdk::Drawable>(dialog->get_window());
+    auto xid = gdk_x11_drawable_get_xid(drawable->gobj());
+
+    XSetTransientForHint(gdk_x11_display_get_xdisplay(gdk_display_get_default()),
+                         xid, win->get_xid());
     XSync(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), false);
     gdk_error_trap_pop();
 }
@@ -849,9 +850,8 @@ void kill_window(Wnck::Window* win)
     gdk_error_trap_pop();
 }
 
-void force_quit_dialog_response(GtkWidget* dialog, int response, void* data)
+void force_quit_dialog_response(int response, Wnck::Window* win)
 {
-    Wnck::Window* win = reinterpret_cast<Wnck::Window*>(data);
     decor_t* d = get_decor(win);
 
     if (response == GTK_RESPONSE_ACCEPT) {
@@ -859,64 +859,64 @@ void force_quit_dialog_response(GtkWidget* dialog, int response, void* data)
     }
 
     if (d->force_quit_dialog) {
-        d->force_quit_dialog = NULL;
-        gtk_widget_destroy(dialog);
+        auto dlg = d->force_quit_dialog;
+        d->force_quit_dialog = nullptr;
+        delete dlg;
     }
+}
+
+std::string markup_escape(const std::string& src)
+{
+    std::string res;
+    res.reserve(src.size());
+
+    for (char ch : src) {
+        switch (ch) {
+        case '<' : res += "&lt;"; break;
+        case '>' : res += "&gt;"; break;
+        case '&' : res += "&amp;"; break;
+        case '\'' : res += "&apos;"; break;
+        case '\"' : res += "&quot;"; break;
+        default: res.push_back(ch);
+        }
+    }
+    return res;
 }
 
 void show_force_quit_dialog(Wnck::Window* win, Time timestamp)
 {
     decor_t* d = get_decor(win);
-    GtkWidget* dialog;
-    char* tmp;
 
     if (d->force_quit_dialog) {
         return;
     }
 
-    std::string name = win->get_name();
+    std::string top = format(_("The window \"%s\" is not responding."),
+                             markup_escape(win->get_name()));
+    std::string bot = _("Forcing this application to quit will cause you "
+                        " to lose any unsaved changes.");
 
-    tmp = g_markup_escape_text(name.c_str(), -1);
-    std::string str = format(_("The window \"%s\" is not responding."), tmp);
+    std::string markup = format("<b>%s</b>\n\n%s", markup_escape(top),
+                                markup_escape(bot));
 
-    dialog = gtk_message_dialog_new(NULL, static_cast<GtkDialogFlags>(0),
-                                    GTK_MESSAGE_WARNING,
-                                    GTK_BUTTONS_NONE,
-                                    "<b>%s</b>\n\n%s",
-                                    str.c_str(),
-                                    _("Forcing this application to "
-                                      "quit will cause you to lose any "
-                                      "unsaved changes."));
+    auto *dlg = new Gtk::MessageDialog(markup, true, Gtk::MESSAGE_WARNING,
+                                       Gtk::BUTTONS_NONE, true);
 
-    gtk_window_set_icon_name(GTK_WINDOW(dialog), "force-quit");
+    dlg->set_icon_name("force-quit");
+    dlg->add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_REJECT);
+    dlg->add_button(_("_Force Quit"), Gtk::RESPONSE_ACCEPT);
+    dlg->set_default_response(Gtk::RESPONSE_REJECT);
+    dlg->signal_realize().connect(std::bind(force_quit_dialog_realize, dlg, win));
+    dlg->signal_response().connect(std::bind(force_quit_dialog_response,
+                                             std::placeholders::_1, win));
+    dlg->set_modal();
+    gtk_widget_realize(static_cast<Gtk::Widget*>(dlg)->gobj()); // protected method
 
-    gtk_label_set_use_markup(GTK_LABEL(GTK_MESSAGE_DIALOG(dialog)->label),
-                             true);
-    gtk_label_set_line_wrap(GTK_LABEL(GTK_MESSAGE_DIALOG(dialog)->label),
-                            true);
+    gdk_x11_window_set_user_time(dlg->get_window()->gobj(), timestamp);
 
-    gtk_dialog_add_buttons(GTK_DIALOG(dialog),
-                           GTK_STOCK_CANCEL,
-                           GTK_RESPONSE_REJECT,
-                           _("_Force Quit"), GTK_RESPONSE_ACCEPT, NULL);
+    dlg->show();
 
-    gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_REJECT);
-
-    g_signal_connect(G_OBJECT(dialog), "realize",
-                     G_CALLBACK(force_quit_dialog_realize), win);
-
-    g_signal_connect(G_OBJECT(dialog), "response",
-                     G_CALLBACK(force_quit_dialog_response), win);
-
-    gtk_window_set_modal(GTK_WINDOW(dialog), true);
-
-    gtk_widget_realize(dialog);
-
-    gdk_x11_window_set_user_time(dialog->window, timestamp);
-
-    gtk_widget_show(dialog);
-
-    d->force_quit_dialog = dialog;
+    d->force_quit_dialog = dlg;
 }
 
 void hide_force_quit_dialog(Wnck::Window* win)
@@ -924,8 +924,9 @@ void hide_force_quit_dialog(Wnck::Window* win)
     decor_t* d = get_decor(win);
 
     if (d->force_quit_dialog) {
-        gtk_widget_destroy(d->force_quit_dialog);
-        d->force_quit_dialog = NULL;
+        auto dlg = d->force_quit_dialog;
+        d->force_quit_dialog = nullptr;
+        delete dlg;
     }
 }
 
@@ -1043,8 +1044,7 @@ event_filter_func(GdkXEvent* gdkxevent, GdkEvent* event, void* data)
                 win = Wnck::Window::get_for_xid(xevent->xclient.window);
                 if (win) {
                     if (xevent->xclient.data.l[2])
-                        show_force_quit_dialog(win,
-                                               xevent->xclient.data.l[1]);
+                        show_force_quit_dialog(win, xevent->xclient.data.l[1]);
                     else {
                         hide_force_quit_dialog(win);
                     }

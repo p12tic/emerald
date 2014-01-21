@@ -348,7 +348,7 @@ struct decor_t {
     Wnck::WindowState   state;
     Wnck::WindowActions actions;
     XID           prop_xid;
-    GtkWidget*         force_quit_dialog;
+    Gtk::MessageDialog* force_quit_dialog;
     frame_settings* fs;
     void (*draw)(decor_t* d);
     button_region_t   button_region[B_T_COUNT];

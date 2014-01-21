@@ -813,12 +813,10 @@ void remove_frame_window(Wnck::Window* win)
         d->icon_pixbuf = NULL;
     }
 
-
     if (d->force_quit_dialog) {
-        GtkWidget* dialog = d->force_quit_dialog;
-
-        d->force_quit_dialog = NULL;
-        gtk_widget_destroy(dialog);
+        auto dlg = d->force_quit_dialog;
+        d->force_quit_dialog = nullptr;
+        delete dlg;
     }
 
     d->width = 0;
