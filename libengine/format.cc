@@ -35,3 +35,21 @@ template boost::basic_format<char>& boost::basic_format<char>::operator%(const u
 template boost::basic_format<char>& boost::basic_format<char>::operator%(const float&);
 template boost::basic_format<char>& boost::basic_format<char>::operator%(const double&);
 template boost::basic_format<char>& boost::basic_format<char>::operator%(const std::string&);
+
+std::string markup_escape(const std::string& src)
+{
+    std::string res;
+    res.reserve(src.size());
+
+    for (char ch : src) {
+        switch (ch) {
+        case '<' : res += "&lt;"; break;
+        case '>' : res += "&gt;"; break;
+        case '&' : res += "&amp;"; break;
+        case '\'' : res += "&apos;"; break;
+        case '\"' : res += "&quot;"; break;
+        default: res.push_back(ch);
+        }
+    }
+    return res;
+}

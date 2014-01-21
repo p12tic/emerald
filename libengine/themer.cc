@@ -19,6 +19,7 @@
 
 #include <libengine/engine.h>
 #include <libengine/filesystem.h>
+#include <libengine/format.h>
 #include <signal.h>
 #include <boost/algorithm/string.hpp>
 #include <list>
@@ -395,9 +396,6 @@ void append_engine(const std::string& dlname)
             get_meta_info_proc meta;
             g_engine_list.push_back(EngineData());
             EngineData* d = &g_engine_list.back();
-            const char* format =
-                "<b>%s</b> (%s)\n"
-                "<i><small>%s</small></i>";
             meta = reinterpret_cast<get_meta_info_proc>(dlsym(hand, "get_meta_info"));
             if ((err = dlerror())) {
                 g_warning("%s", err);
@@ -419,16 +417,18 @@ void append_engine(const std::string& dlname)
             d->vbox = Gtk::manage(new Gtk::VBox{false, 2});
             lay(*(d->vbox));
 
+            std::string markup = format("<b>%s</b> (%s)\n<i><small>%s</small></i>",
+                                        markup_escape(d->canname),
+                                        markup_escape(d->meta.version),
+                                        markup_escape(d->meta.description));
+
             Gtk::TreeModel::Row row = *(engine_model_->append());
             row[g_engine_columns.dlname] = d->dlname;
             row[g_engine_columns.name] = d->canname;
             row[g_engine_columns.version] = d->meta.version;
             row[g_engine_columns.last_compat] = d->meta.last_compat;
             row[g_engine_columns.icon] = d->meta.icon;
-            row[g_engine_columns.markup] =
-                    g_markup_printf_escaped(format, d->canname.c_str(),
-                                            d->meta.version.c_str(),
-                                            d->meta.description.c_str()); // FIXME: LEAK possible
+            row[g_engine_columns.markup] = markup;
 
             //engine_combo_->prepend_text(d->canname);
         }

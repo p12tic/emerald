@@ -177,4 +177,7 @@ extern template boost::basic_format<char>& boost::basic_format<char>::operator%(
 extern template boost::basic_format<char>& boost::basic_format<char>::operator%(const double&);
 extern template boost::basic_format<char>& boost::basic_format<char>::operator%(const std::string&);
 
+/// Escapes a string for use in Glib markup
+std::string markup_escape(const std::string& src);
+
 #endif

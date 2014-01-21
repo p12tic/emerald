@@ -148,7 +148,7 @@ void theme_list_append(const std::string& value, const std::string& dir,
         }
 
         //create the Theme column data
-        const char* format =
+        const char* fmt =
             _("<b><big>%s</big></b>\n"
               "<i>%s</i>\n"
               "<small>"
@@ -156,10 +156,10 @@ void theme_list_append(const std::string& value, const std::string& dir,
               "<b>Created By</b> %s\n"
               "<b>Use With</b> %s\n"
               "</small>");
-        std::string rvalue = value;
+        std::string name = value;
         if (value[0] == '*') {
-            rvalue = value.substr(2);
-            format =
+            name = value.substr(2);
+            fmt =
                 _("<b><big>%s</big></b> (System Theme)\n"
                   "<i>%s</i>\n"
                   "<small>"
@@ -169,11 +169,12 @@ void theme_list_append(const std::string& value, const std::string& dir,
                   "</small>");
         }
 
-        char* val = g_markup_printf_escaped(format, rvalue.c_str(), s_desc.c_str(),
-                                            s_th_version.c_str(), s_creator.c_str(),
-                                            s_sugg.c_str());
-        row[theme_columns_.markup] = val ? val : "";
-        g_free(val);
+        std::string markup = format(fmt, markup_escape(name),
+                                    markup_escape(s_desc),
+                                    markup_escape(s_th_version),
+                                    markup_escape(s_creator),
+                                    markup_escape(s_sugg));
+        row[theme_columns_.markup] = markup;
     }
 
     auto pix = Gdk::Pixbuf::create_from_file(imgpath, -1, 100);
