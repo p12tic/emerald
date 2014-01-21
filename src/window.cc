@@ -781,9 +781,8 @@ void remove_frame_window(Wnck::Window* win)
     }
     d->button_fade_info.cr.clear();
 
-    if (d->button_fade_info.timer >= 0) {
-        g_source_remove(d->button_fade_info.timer);
-        d->button_fade_info.timer = -1;
+    if (d->button_fade_info.timer_conn) {
+        d->button_fade_info.timer_conn.disconnect();
     }
 
     d->name = "";

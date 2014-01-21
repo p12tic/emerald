@@ -298,7 +298,6 @@ struct rectangle_t {
 };
 
 struct button_fade_info_t {
-    void** d;  // needed by the timer function
     Cairo::RefPtr<Cairo::Context> cr;
     double    y1;
     int  counters[B_T_COUNT]; // 0: not fading, > 0: fading in, < 0: fading out
@@ -306,7 +305,7 @@ struct button_fade_info_t {
     //                                          fade-in initiation)
     // min value: -ws->button_fade_num_steps
     bool pulsating[B_T_COUNT];
-    int    timer;
+    sigc::connection timer_conn;
     bool first_draw;
 };
 

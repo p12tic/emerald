@@ -46,7 +46,7 @@ void reset_buttons_bg_and_fade(decor_t* d)
 {
     d->draw_only_buttons_region = false;
     d->button_fade_info.cr.clear();
-    d->button_fade_info.timer = -1;
+    d->button_fade_info.timer_conn.disconnect();
     int b_t;
 
     for (b_t = 0; b_t < B_T_COUNT; b_t++) {
@@ -74,9 +74,8 @@ void stop_button_fade(decor_t* d)
 
     d->button_fade_info.cr.clear();
 
-    if (d->button_fade_info.timer >= 0) {
-        g_source_remove(d->button_fade_info.timer);
-        d->button_fade_info.timer = -1;
+    if (d->button_fade_info.timer_conn) {
+        d->button_fade_info.timer_conn.disconnect();
     }
     for (j = 0; j < B_T_COUNT; j++) {
         d->button_fade_info.counters[j] = 0;
@@ -990,27 +989,23 @@ void draw_buttons_with_fade(decor_t* d, Cairo::RefPtr<Cairo::Context>& cr, doubl
         }
     }
 
-    if (fade_info->timer == -1 || button_pressed)
+    if (!fade_info->timer_conn || button_pressed)
         // button_pressed is needed because sometimes after a button is pressed,
         // this function is called twice, first with S_(IN)ACTIVE, then with S_(IN)ACTIVE_PRESS
         // where it should have been only once with S_(IN)ACTIVE_PRESS
     {
-        fade_info->d = reinterpret_cast<void**>(d);
         fade_info->y1 = y1;
-        if (draw_buttons_timer_func((void*) fade_info) == true) {      // call once now
+        if (draw_buttons_timer_func(d, fade_info) == true) {      // call once now
             // and start a new timer for the next step
-            fade_info->timer =
-                g_timeout_add(ws->button_fade_step_duration,
-                              draw_buttons_timer_func,
-                              (void*) fade_info);
+            fade_info->timer_conn = Glib::signal_timeout().connect(
+                        sigc::bind(&draw_buttons_timer_func, d, fade_info),
+                        ws->button_fade_step_duration);
         }
     }
 }
 
-int draw_buttons_timer_func(void* data)
+bool draw_buttons_timer_func(decor_t* d, button_fade_info_t* fade_info)
 {
-    button_fade_info_t* fade_info = (button_fade_info_t*) data;
-    decor_t* d = (decor_t*)(fade_info->d);
     window_settings* ws = d->fs->ws;
     int num_steps = ws->button_fade_num_steps;
 
@@ -1157,9 +1152,8 @@ int draw_buttons_timer_func(void* data)
     fade_info->first_draw = false;
     if (!any_active_buttons) {
         fade_info->cr.clear();
-        if (fade_info->timer >= 0) {
-            g_source_remove(fade_info->timer);
-            fade_info->timer = -1;
+        if (fade_info->timer_conn) {
+            fade_info->timer_conn.disconnect();
         }
         return false;
     }
