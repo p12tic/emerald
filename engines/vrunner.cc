@@ -466,15 +466,15 @@ void load_engine_settings(const KeyFile& f, window_settings* ws)
     FLTS(title_notch_position);
 
     private_fs* pfs = reinterpret_cast<private_fs*>(ws->fs_act->engine_fs);
-    CCOLOR(pfs, title_left_lower, title_left);
-    CCOLOR(pfs, title_middle_lower, title_middle);
-    CCOLOR(pfs, title_right_lower, title_right);
+    pfs->title_left_lower = apply_contrast(pfs->title_left, pfs->color_contrast, pfs->alpha_contrast);
+    pfs->title_middle_lower = apply_contrast(pfs->title_middle, pfs->color_contrast, pfs->alpha_contrast);
+    pfs->title_right_lower = apply_contrast(pfs->title_right, pfs->color_contrast, pfs->alpha_contrast);
     load_bool_setting(f, &pfs->use_glow, "active_use_glow", SECT);
 
     pfs = reinterpret_cast<private_fs*>(ws->fs_inact->engine_fs);
-    CCOLOR(pfs, title_left_lower, title_left);
-    CCOLOR(pfs, title_middle_lower, title_middle);
-    CCOLOR(pfs, title_right_lower, title_right);
+    pfs->title_left_lower = apply_contrast(pfs->title_left, pfs->color_contrast, pfs->alpha_contrast);
+    pfs->title_middle_lower = apply_contrast(pfs->title_middle, pfs->color_contrast, pfs->alpha_contrast);
+    pfs->title_right_lower = apply_contrast(pfs->title_right, pfs->color_contrast, pfs->alpha_contrast);
     load_bool_setting(f, &pfs->use_glow, "inactive_use_glow", SECT);
 
     load_bool_setting(f, &pws->round_top_left, "round_top_left", SECT);
@@ -506,20 +506,20 @@ void init_engine(window_settings* ws)
     pfs->use_glow = false;
     pfs->alpha_contrast = 0.9;
     pfs->glow_radius = 7.0;
-    ACOLOR(pfs, title_left, 0.8, 0.8, 0.8, 0.8);
-    CCOLOR(pfs, title_left_lower, title_left);
-    ACOLOR(pfs, title_middle, 0.8, 0.8, 0.8, 0.8);
-    CCOLOR(pfs, title_middle_lower, title_middle);
-    ACOLOR(pfs, title_right, 0.8, 0.8, 0.8, 0.8);
-    CCOLOR(pfs, title_right_lower, title_right);
-    ACOLOR(pfs, window_highlight, 1.0, 1.0, 1.0, 0.8);
-    ACOLOR(pfs, window_shadow, 0.6, 0.6, 0.6, 0.8);
-    ACOLOR(pfs, window_halo, 0.8, 0.8, 0.8, 0.8);
-    ACOLOR(pfs, separator_line, 0.0, 0.0, 0.0, 0.0);
-    ACOLOR(pfs, contents_highlight, 1.0, 1.0, 1.0, 0.8);
-    ACOLOR(pfs, contents_shadow, 0.6, 0.6, 0.6, 0.8);
-    ACOLOR(pfs, contents_halo, 0.8, 0.8, 0.8, 0.8);
-    ACOLOR(pfs, glow_inner, 0.9, 0.9, 0.9, 0.9);
+    pfs->title_left = alpha_color(0.8, 0.8, 0.8, 0.8);
+    pfs->title_left_lower = apply_contrast(pfs->title_left, pfs->color_contrast, pfs->alpha_contrast);
+    pfs->title_middle = alpha_color(0.8, 0.8, 0.8, 0.8);
+    pfs->title_middle_lower = apply_contrast(pfs->title_middle, pfs->color_contrast, pfs->alpha_contrast);
+    pfs->title_right = alpha_color(0.8, 0.8, 0.8, 0.8);
+    pfs->title_right_lower = apply_contrast(pfs->title_right, pfs->color_contrast, pfs->alpha_contrast);
+    pfs->window_highlight = alpha_color(1.0, 1.0, 1.0, 0.8);
+    pfs->window_shadow = alpha_color(0.6, 0.6, 0.6, 0.8);
+    pfs->window_halo = alpha_color(0.8, 0.8, 0.8, 0.8);
+    pfs->separator_line = alpha_color(0.0, 0.0, 0.0, 0.0);
+    pfs->contents_highlight = alpha_color(1.0, 1.0, 1.0, 0.8);
+    pfs->contents_shadow = alpha_color(0.6, 0.6, 0.6, 0.8);
+    pfs->contents_halo = alpha_color(0.8, 0.8, 0.8, 0.8);
+    pfs->glow_inner = alpha_color(0.9, 0.9, 0.9, 0.9);
 
     pfs = new private_fs{};
     ws->fs_inact->engine_fs = pfs;
@@ -529,20 +529,20 @@ void init_engine(window_settings* ws)
     pfs->alpha_contrast = 0.9;
     pfs->use_glow = false;
     pfs->glow_radius = 7.0;
-    ACOLOR(pfs, title_left, 0.8, 0.8, 0.8, 0.6);
-    CCOLOR(pfs, title_left_lower, title_left);
-    ACOLOR(pfs, title_middle, 0.8, 0.8, 0.8, 0.6);
-    CCOLOR(pfs, title_middle_lower, title_middle);
-    ACOLOR(pfs, title_right, 0.8, 0.8, 0.8, 0.6);
-    CCOLOR(pfs, title_right_lower, title_right);
-    ACOLOR(pfs, window_highlight, 1.0, 1.0, 1.0, 0.7);
-    ACOLOR(pfs, window_shadow, 0.6, 0.6, 0.6, 0.7);
-    ACOLOR(pfs, window_halo, 0.8, 0.8, 0.8, 0.7);
-    ACOLOR(pfs, separator_line, 0.0, 0.0, 0.0, 0.0);
-    ACOLOR(pfs, contents_highlight, 1.0, 1.0, 1.0, 0.8);
-    ACOLOR(pfs, contents_shadow, 0.6, 0.6, 0.6, 0.8);
-    ACOLOR(pfs, contents_halo, 0.8, 0.8, 0.8, 0.8);
-    ACOLOR(pfs, glow_inner, 0.9, 0.9, 0.9, 0.9);
+    pfs->title_left = alpha_color(0.8, 0.8, 0.8, 0.6);
+    pfs->title_left_lower = apply_contrast(pfs->title_left, pfs->color_contrast, pfs->alpha_contrast);
+    pfs->title_middle = alpha_color(0.8, 0.8, 0.8, 0.6);
+    pfs->title_middle_lower = apply_contrast(pfs->title_middle, pfs->color_contrast, pfs->alpha_contrast);
+    pfs->title_right = alpha_color(0.8, 0.8, 0.8, 0.6);
+    pfs->title_right_lower = apply_contrast(pfs->title_right, pfs->color_contrast, pfs->alpha_contrast);
+    pfs->window_highlight = alpha_color(1.0, 1.0, 1.0, 0.7);
+    pfs->window_shadow = alpha_color(0.6, 0.6, 0.6, 0.7);
+    pfs->window_halo = alpha_color(0.8, 0.8, 0.8, 0.7);
+    pfs->separator_line = alpha_color(0.0, 0.0, 0.0, 0.0);
+    pfs->contents_highlight = alpha_color(1.0, 1.0, 1.0, 0.8);
+    pfs->contents_shadow = alpha_color(0.6, 0.6, 0.6, 0.8);
+    pfs->contents_halo = alpha_color(0.8, 0.8, 0.8, 0.8);
+    pfs->glow_inner = alpha_color(0.9, 0.9, 0.9, 0.9);
 }
 
 extern "C"

@@ -36,8 +36,6 @@ bool get_window_prop(Window xwindow, Atom atom, Window* val);
 
 #include <X11/cursorfont.h>
 
-#define C(name) { 0, XC_ ## name }
-
 struct _cursor {
     Cursor cursor;
     unsigned int shape;

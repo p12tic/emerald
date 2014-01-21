@@ -96,16 +96,22 @@ window_settings* global_ws;
 
 _cursor cursor[3][3] = {
     {
-        C(top_left_corner), C(top_side), C(top_right_corner)
+        { 0, XC_top_left_corner },
+        { 0, XC_top_side },
+        { 0, XC_top_right_corner }
     },
     {
-        C(left_side), C(left_ptr), C(right_side)
+        { 0, XC_left_side },
+        { 0, XC_left_ptr },
+        { 0, XC_right_side }
     },
     {
-        C(bottom_left_corner), C(bottom_side), C(bottom_right_corner)
+        { 0, XC_bottom_left_corner },
+        { 0, XC_bottom_side },
+        { 0, XC_bottom_right_corner }
     }
 };
-_cursor button_cursor = C(hand2);
+_cursor button_cursor = { 0, XC_hand2 };
 
 void
 update_default_decorations(GdkScreen* screen, frame_settings* fs_act,
@@ -1695,10 +1701,27 @@ void load_settings(window_settings* ws)
         engine = "legacy";
         load_engine(engine, ws);
     }
-    LFACSS(f, ws, text, titlebar);
-    LFACSS(f, ws, text_halo, titlebar);
-    LFACSS(f, ws, button, buttons);
-    LFACSS(f, ws, button_halo, buttons);
+
+    load_color_setting(f,&ws->fs_act->text.color,"active_text", "titlebar");
+    load_color_setting(f,&ws->fs_inact->text.color,"inactive_text", "titlebar");
+    load_float_setting(f,&ws->fs_act->text.alpha,"active_text_alpha", "titlebar");
+    load_float_setting(f,&ws->fs_inact->text.alpha,"inactive_text_alpha", "titlebar");
+
+    load_color_setting(f,&ws->fs_act->text_halo.color,"active_text_halo", "titlebar");
+    load_color_setting(f,&ws->fs_inact->text_halo.color,"inactive_text_halo", "titlebar");
+    load_float_setting(f,&ws->fs_act->text_halo.alpha,"active_text_halo_alpha", "titlebar");
+    load_float_setting(f,&ws->fs_inact->text_halo.alpha,"inactive_text_halo_alpha", "titlebar");
+
+    load_color_setting(f,&ws->fs_act->button.color,"active_button", "buttons");
+    load_color_setting(f,&ws->fs_inact->button.color,"inactive_button", "buttons");
+    load_float_setting(f,&ws->fs_act->button.alpha,"active_button_alpha", "buttons");
+    load_float_setting(f,&ws->fs_inact->button.alpha,"inactive_button_alpha", "buttons");
+
+    load_color_setting(f,&ws->fs_act->button_halo.color,"active_button_halo", "buttons");
+    load_color_setting(f,&ws->fs_inact->button_halo.color,"inactive_button_halo", "buttons");
+    load_float_setting(f,&ws->fs_act->button_halo.alpha,"active_button_halo_alpha", "buttons");
+    load_float_setting(f,&ws->fs_inact->button_halo.alpha,"inactive_button_halo_alpha", "buttons");
+
     load_engine_settings(f, ws);
     load_font_setting(f, &ws->font_desc, "titlebar_font", "titlebar");
     load_bool_setting(f, &ws->use_pixmap_buttons, "use_pixmap_buttons",
@@ -1841,18 +1864,18 @@ int main(int argc, char* argv[])
 
     pfs = new frame_settings{};
     pfs->ws = ws;
-    ACOLOR(pfs, text, 1.0, 1.0, 1.0, 1.0);
-    ACOLOR(pfs, text_halo, 0.0, 0.0, 0.0, 0.2);
-    ACOLOR(pfs, button, 1.0, 1.0, 1.0, 0.8);
-    ACOLOR(pfs, button_halo, 0.0, 0.0, 0.0, 0.2);
+    pfs->text = alpha_color(1.0, 1.0, 1.0, 1.0);
+    pfs->text_halo = alpha_color(0.0, 0.0, 0.0, 0.2);
+    pfs->button = alpha_color(1.0, 1.0, 1.0, 0.8);
+    pfs->button_halo = alpha_color(0.0, 0.0, 0.0, 0.2);
     ws->fs_act = pfs;
 
     pfs = new frame_settings{};
     pfs->ws = ws;
-    ACOLOR(pfs, text, 0.8, 0.8, 0.8, 0.8);
-    ACOLOR(pfs, text_halo, 0.0, 0.0, 0.0, 0.2);
-    ACOLOR(pfs, button, 0.8, 0.8, 0.8, 0.8);
-    ACOLOR(pfs, button_halo, 0.0, 0.0, 0.0, 0.2);
+    pfs->text = alpha_color(0.8, 0.8, 0.8, 0.8);
+    pfs->text_halo = alpha_color(0.0, 0.0, 0.0, 0.2);
+    pfs->button = alpha_color(0.8, 0.8, 0.8, 0.8);
+    pfs->button_halo = alpha_color(0.0, 0.0, 0.0, 0.2);
     ws->fs_inact = pfs;
 
     ws->round_top_left = true;

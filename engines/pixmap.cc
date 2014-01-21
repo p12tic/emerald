@@ -513,18 +513,18 @@ void init_engine(window_settings* ws)
     // private frame settings for active frames
     pfs = new private_fs{};
     ws->fs_act->engine_fs = pfs;
-    ACOLOR(pfs, inner, 0.8, 0.8, 0.8, 0.5);
-    ACOLOR(pfs, outer, 0.8, 0.8, 0.8, 0.5);
-    ACOLOR(pfs, title_inner, 0.8, 0.8, 0.8, 0.8);
-    ACOLOR(pfs, title_outer, 0.8, 0.8, 0.8, 0.8);
+    pfs->inner = alpha_color(0.8, 0.8, 0.8, 0.5);
+    pfs->outer = alpha_color(0.8, 0.8, 0.8, 0.5);
+    pfs->title_inner = alpha_color(0.8, 0.8, 0.8, 0.8);
+    pfs->title_outer = alpha_color(0.8, 0.8, 0.8, 0.8);
 
     // private frame settings for inactive frames
     pfs = new private_fs{};
     ws->fs_inact->engine_fs = pfs;
-    ACOLOR(pfs, inner, 0.8, 0.8, 0.8, 0.3);
-    ACOLOR(pfs, outer, 0.8, 0.8, 0.8, 0.3);
-    ACOLOR(pfs, title_inner, 0.8, 0.8, 0.8, 0.6);
-    ACOLOR(pfs, title_outer, 0.8, 0.8, 0.8, 0.6);
+    pfs->inner = alpha_color(0.8, 0.8, 0.8, 0.3);
+    pfs->outer = alpha_color(0.8, 0.8, 0.8, 0.3);
+    pfs->title_inner = alpha_color(0.8, 0.8, 0.8, 0.6);
+    pfs->title_outer = alpha_color(0.8, 0.8, 0.8, 0.6);
 }
 
 extern "C"

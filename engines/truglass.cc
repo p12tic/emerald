@@ -458,36 +458,36 @@ void init_engine(window_settings* ws)
     // private frame settings for active frames
     pfs = new private_fs{};
     ws->fs_act->engine_fs = pfs;
-    ACOLOR(pfs, base, 0.8, 0.8, 0.8, 0.5);
-    ACOLOR(pfs, upper_glow, 0.8, 0.8, 0.8, 0.8);
-    ACOLOR(pfs, lower_glow, 0.8, 0.8, 0.8, 0.8);
-    ACOLOR(pfs, upper_title_glow, 0.8, 0.8, 0.8, 0.8);
-    ACOLOR(pfs, middle_glow, 0.8, 0.8, 0.8, 0.8);
-    ACOLOR(pfs, outer_glow, 0.8, 0.8, 0.8, 0.8);
-    ACOLOR(pfs, window_highlight, 1.0, 1.0, 1.0, 0.8);
-    ACOLOR(pfs, window_shadow, 0.6, 0.6, 0.6, 0.8);
-    ACOLOR(pfs, window_halo, 0.8, 0.8, 0.8, 0.8);
-    ACOLOR(pfs, separator_line, 0.0, 0.0, 0.0, 0.0);
-    ACOLOR(pfs, contents_highlight, 1.0, 1.0, 1.0, 0.8);
-    ACOLOR(pfs, contents_shadow, 0.6, 0.6, 0.6, 0.8);
-    ACOLOR(pfs, contents_halo, 0.8, 0.8, 0.8, 0.8);
+    pfs->base = alpha_color(0.8, 0.8, 0.8, 0.5);
+    pfs->upper_glow = alpha_color(0.8, 0.8, 0.8, 0.8);
+    pfs->lower_glow = alpha_color(0.8, 0.8, 0.8, 0.8);
+    pfs->upper_title_glow = alpha_color(0.8, 0.8, 0.8, 0.8);
+    pfs->middle_glow = alpha_color(0.8, 0.8, 0.8, 0.8);
+    pfs->outer_glow = alpha_color(0.8, 0.8, 0.8, 0.8);
+    pfs->window_highlight = alpha_color(1.0, 1.0, 1.0, 0.8);
+    pfs->window_shadow = alpha_color(0.6, 0.6, 0.6, 0.8);
+    pfs->window_halo = alpha_color(0.8, 0.8, 0.8, 0.8);
+    pfs->separator_line = alpha_color(0.0, 0.0, 0.0, 0.0);
+    pfs->contents_highlight = alpha_color(1.0, 1.0, 1.0, 0.8);
+    pfs->contents_shadow = alpha_color(0.6, 0.6, 0.6, 0.8);
+    pfs->contents_halo = alpha_color(0.8, 0.8, 0.8, 0.8);
 
     // private frame settings for inactive frames
     pfs = new private_fs{};
     ws->fs_inact->engine_fs = pfs;
-    ACOLOR(pfs, base, 0.8, 0.8, 0.8, 0.3);
-    ACOLOR(pfs, upper_glow, 0.8, 0.8, 0.8, 0.6);
-    ACOLOR(pfs, lower_glow, 0.8, 0.8, 0.8, 0.6);
-    ACOLOR(pfs, upper_title_glow, 0.8, 0.8, 0.8, 0.8);
-    ACOLOR(pfs, middle_glow, 0.8, 0.8, 0.8, 0.8);
-    ACOLOR(pfs, outer_glow, 0.8, 0.8, 0.8, 0.8);
-    ACOLOR(pfs, window_highlight, 1.0, 1.0, 1.0, 0.7);
-    ACOLOR(pfs, window_shadow, 0.6, 0.6, 0.6, 0.7);
-    ACOLOR(pfs, window_halo, 0.8, 0.8, 0.8, 0.7);
-    ACOLOR(pfs, separator_line, 0.0, 0.0, 0.0, 0.0);
-    ACOLOR(pfs, contents_highlight, 1.0, 1.0, 1.0, 0.8);
-    ACOLOR(pfs, contents_shadow, 0.6, 0.6, 0.6, 0.8);
-    ACOLOR(pfs, contents_halo, 0.8, 0.8, 0.8, 0.8);
+    pfs->base = alpha_color(0.8, 0.8, 0.8, 0.3);
+    pfs->upper_glow = alpha_color(0.8, 0.8, 0.8, 0.6);
+    pfs->lower_glow = alpha_color(0.8, 0.8, 0.8, 0.6);
+    pfs->upper_title_glow = alpha_color(0.8, 0.8, 0.8, 0.8);
+    pfs->middle_glow = alpha_color(0.8, 0.8, 0.8, 0.8);
+    pfs->outer_glow = alpha_color(0.8, 0.8, 0.8, 0.8);
+    pfs->window_highlight = alpha_color(1.0, 1.0, 1.0, 0.7);
+    pfs->window_shadow = alpha_color(0.6, 0.6, 0.6, 0.7);
+    pfs->window_halo = alpha_color(0.8, 0.8, 0.8, 0.7);
+    pfs->separator_line = alpha_color(0.0, 0.0, 0.0, 0.0);
+    pfs->contents_highlight = alpha_color(1.0, 1.0, 1.0, 0.8);
+    pfs->contents_shadow = alpha_color(0.6, 0.6, 0.6, 0.8);
+    pfs->contents_halo = alpha_color(0.8, 0.8, 0.8, 0.8);
 }
 
 extern "C"

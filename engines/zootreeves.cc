@@ -1248,32 +1248,32 @@ void init_engine(window_settings* ws)
 
     pfs = new private_fs;
     ws->fs_act->engine_fs = pfs;
-    ACOLOR(pfs, inner, 0.8, 0.8, 0.8, 0.5);
-    ACOLOR(pfs, outer, 0.8, 0.8, 0.8, 0.5);
-    ACOLOR(pfs, title_inner, 0.8, 0.8, 0.8, 0.8);
-    ACOLOR(pfs, title_outer, 0.8, 0.8, 0.8, 0.8);
-    ACOLOR(pfs, window_highlight, 1.0, 1.0, 1.0, 0.8);
-    ACOLOR(pfs, window_shadow, 0.6, 0.6, 0.6, 0.8);
-    ACOLOR(pfs, window_frame_halo, 1.0, 1.0, 1.0, 1.0);
-    ACOLOR(pfs, separator_line, 0.0, 0.0, 0.0, 0.0);
-    ACOLOR(pfs, contents_highlight, 1.0, 1.0, 1.0, 0.8);
-    ACOLOR(pfs, contents_shadow, 0.6, 0.6, 0.6, 0.8);
-    ACOLOR(pfs, contents_halo, 0.8, 0.8, 0.8, 0.8);
+    pfs->inner = alpha_color(0.8, 0.8, 0.8, 0.5);
+    pfs->outer = alpha_color(0.8, 0.8, 0.8, 0.5);
+    pfs->title_inner = alpha_color(0.8, 0.8, 0.8, 0.8);
+    pfs->title_outer = alpha_color(0.8, 0.8, 0.8, 0.8);
+    pfs->window_highlight = alpha_color(1.0, 1.0, 1.0, 0.8);
+    pfs->window_shadow = alpha_color(0.6, 0.6, 0.6, 0.8);
+    pfs->window_frame_halo = alpha_color(1.0, 1.0, 1.0, 1.0);
+    pfs->separator_line = alpha_color(0.0, 0.0, 0.0, 0.0);
+    pfs->contents_highlight = alpha_color(1.0, 1.0, 1.0, 0.8);
+    pfs->contents_shadow = alpha_color(0.6, 0.6, 0.6, 0.8);
+    pfs->contents_halo = alpha_color(0.8, 0.8, 0.8, 0.8);
 
     pfs = new private_fs;
     ws->fs_inact->engine_fs = pfs;
 
-    ACOLOR(pfs, inner, 0.8, 0.8, 0.8, 0.3);
-    ACOLOR(pfs, outer, 0.8, 0.8, 0.8, 0.3);
-    ACOLOR(pfs, title_inner, 0.8, 0.8, 0.8, 0.6);
-    ACOLOR(pfs, title_outer, 0.8, 0.8, 0.8, 0.6);
-    ACOLOR(pfs, window_highlight, 1.0, 1.0, 1.0, 0.7);
-    ACOLOR(pfs, window_shadow, 0.6, 0.6, 0.6, 0.7);
-    ACOLOR(pfs, window_frame_halo, 1.0, 1.0, 1.0, 1.0);
-    ACOLOR(pfs, separator_line, 0.0, 0.0, 0.0, 0.0);
-    ACOLOR(pfs, contents_highlight, 1.0, 1.0, 1.0, 0.8);
-    ACOLOR(pfs, contents_shadow, 0.6, 0.6, 0.6, 0.8);
-    ACOLOR(pfs, contents_halo, 0.8, 0.8, 0.8, 0.8);
+    pfs->inner = alpha_color(0.8, 0.8, 0.8, 0.3);
+    pfs->outer = alpha_color(0.8, 0.8, 0.8, 0.3);
+    pfs->title_inner = alpha_color(0.8, 0.8, 0.8, 0.6);
+    pfs->title_outer = alpha_color(0.8, 0.8, 0.8, 0.6);
+    pfs->window_highlight = alpha_color(1.0, 1.0, 1.0, 0.7);
+    pfs->window_shadow = alpha_color(0.6, 0.6, 0.6, 0.7);
+    pfs->window_frame_halo = alpha_color(1.0, 1.0, 1.0, 1.0);
+    pfs->separator_line = alpha_color(0.0, 0.0, 0.0, 0.0);
+    pfs->contents_highlight = alpha_color(1.0, 1.0, 1.0, 0.8);
+    pfs->contents_shadow = alpha_color(0.6, 0.6, 0.6, 0.8);
+    pfs->contents_halo = alpha_color(0.8, 0.8, 0.8, 0.8);
 }
 
 extern "C"

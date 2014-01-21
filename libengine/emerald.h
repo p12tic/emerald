@@ -148,22 +148,26 @@ struct decor_color_t {
 
 typedef void (*event_callback)(Wnck::Window* win, XEvent* event);
 
-#define ACOLOR(pfs,idn,zr,zg,zb,za) \
-    (pfs)->idn.color.r = (zr);\
-    (pfs)->idn.color.g = (zg);\
-    (pfs)->idn.color.b = (zb);\
-    (pfs)->idn.alpha   = (za);
-
-#define CCOLOR(pfs,idn,zc) \
-    (pfs)->idn.color.r = ((pfs)->color_contrast * pfs->zc.color.r);\
-    (pfs)->idn.color.g = ((pfs)->color_contrast * pfs->zc.color.g);\
-    (pfs)->idn.color.b = ((pfs)->color_contrast * pfs->zc.color.b);\
-    (pfs)->idn.alpha   = ((pfs)->alpha_contrast * pfs->zc.alpha);
-
 struct alpha_color {
+    alpha_color() : color{}, alpha{} {}
+    alpha_color(double mred, double mgreen, double mblue, double malpha) :
+        color{mred, mgreen, mblue}, alpha(malpha) {}
+
     decor_color_t color;
     double alpha;
 };
+
+inline alpha_color apply_contrast(const alpha_color& color,
+                                  double color_contrast,
+                                  double alpha_contrast)
+{
+    alpha_color res;
+    res.color.r = color_contrast * color.color.r;
+    res.color.g = color_contrast * color.color.g;
+    res.color.b = color_contrast * color.color.b;
+    res.alpha   = alpha_contrast * color.alpha;
+    return res;
+}
 
 struct pos_t {
     int x, y, w, h;
@@ -357,12 +361,6 @@ struct decor_t {
     button_region_t   button_region_inact[B_T_COUNT];
     bool only_change_active;
 };
-
-#define LFACSS(f,ws,zc,sec) \
-    load_color_setting(f,&ws->fs_act->zc.color,"active_" #zc , #sec);\
-    load_color_setting(f,&ws->fs_inact->zc.color,"inactive_" #zc , #sec);\
-    load_float_setting(f,&ws->fs_act->zc.alpha,"active_" #zc "_alpha", #sec);\
-    load_float_setting(f,&ws->fs_inact->zc.alpha,"inactive_" #zc "_alpha", #sec);
 
 #define SHADE_LEFT   (1 << 0)
 #define SHADE_RIGHT  (1 << 1)

@@ -200,13 +200,13 @@ void init_engine(window_settings* ws)
 
     pfs = new private_fs;
     ws->fs_act->engine_fs = pfs;
-    ACOLOR(pfs, border, 0.0, 0.0, 0.0, 1.0);
-    ACOLOR(pfs, title_bar, 0.0, 0.0, 0.0, 0.3);
+    pfs->border = alpha_color(0.0, 0.0, 0.0, 1.0);
+    pfs->title_bar = alpha_color(0.0, 0.0, 0.0, 0.3);
 
     pfs = new private_fs;
     ws->fs_inact->engine_fs = pfs;
-    ACOLOR(pfs, border, 0.0, 0.0, 0.0, 1.0);
-    ACOLOR(pfs, title_bar, 0.0, 0.0, 0.0, 0.0);
+    pfs->border = alpha_color(0.0, 0.0, 0.0, 1.0);
+    pfs->title_bar = alpha_color(0.0, 0.0, 0.0, 0.0);
 }
 
 extern "C"
