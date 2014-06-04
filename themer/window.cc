@@ -1118,6 +1118,13 @@ Gtk::Widget* ThemerWindow::build_tree_view()
 
     vbox.pack_start(*Gtk::manage(new Gtk::HSeparator()), false, false);
 
+    /* Do not delete, TODO: properly convert to gtkmm
+    auto filt = Gtk::TreeModelFilter::create(theme_model_);
+    filt->set_visible_func(sigc::bind(&is_visible, std::ref(searchbox)));
+
+    auto sort = Gtk::TreeModelSort::create(filt);
+    searchbox.signal_changed().connect(sigc::bind(&cb_refilter, filt));
+    */
     theme_selector_ = Gtk::manage(new Gtk::TreeView(theme_model_));
     theme_selector_->set_headers_clickable();
     theme_selector_->set_reorderable();
