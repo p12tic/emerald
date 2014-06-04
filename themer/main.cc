@@ -14,6 +14,35 @@
 
 namespace fs = boost::filesystem;
 
+class ThemerWindow {
+public:
+
+ThemerWindow(int install_file, const std::string& input_file)
+{
+    main_window_ = new Gtk::Window();
+
+    if (install_file == 1) {
+        create_filechooserdialog1(input_file);
+    }
+
+    main_window_->set_title("Emerald Themer " VERSION);
+    main_window_->set_resizable(true);
+    main_window_->set_default_size(700, 500);
+    main_window_->signal_delete_event().connect(sigc::mem_fun(*this, &ThemerWindow::cb_main_destroy));
+    main_window_->set_default_icon_from_file(PIXMAPS_DIR "/emerald-theme-manager-icon.png");
+
+    main_window_->set_border_width(5);
+
+    layout_main_window();
+    main_window_->show_all();
+
+    refresh_theme_list("");
+    copy_from_defaults_if_needed();
+    init_settings();
+    set_changed(false);
+    set_apply(true);
+}
+
 struct FetcherInfo {
     Gtk::Dialog* dialog;
     Gtk::ProgressBar* progbar;
@@ -729,13 +758,13 @@ void layout_file_frame(Gtk::Box& vbox)
 
     auto& btn = *Gtk::manage(new Gtk::Button(Gtk::Stock::SAVE));
     hbox.pack_start(btn, false, false, 0);
-    btn.signal_clicked().connect(&cb_save);
+    btn.signal_clicked().connect(sigc::mem_fun(*this, &ThemerWindow::cb_save));
 
     export_button_ = Gtk::manage(new Gtk::Button(_("Export...")));
     Gtk::Image im(Gtk::Stock::SAVE_AS, Gtk::ICON_SIZE_BUTTON);
     export_button_->set_image(im);
     hbox.pack_start(*export_button_, false, false, 0);
-    export_button_->signal_clicked().connect(&cb_export);
+    export_button_->signal_clicked().connect(sigc::mem_fun(*this, &ThemerWindow::cb_export));
 }
 
 void layout_info_frame(Gtk::Box& vbox)
@@ -1080,25 +1109,31 @@ Gtk::Widget* build_tree_view()
     hbox.pack_start(searchbox, true, true, 0);
 
     auto& clearbut = *Gtk::manage(new Gtk::Button(Gtk::Stock::CLEAR));
-    clearbut.signal_clicked().connect(sigc::bind(&cb_clearbox, std::ref(searchbox)));
+    clearbut.signal_clicked().connect(
+                sigc::bind(sigc::mem_fun(*this, &ThemerWindow::cb_clearbox),
+                           std::ref(searchbox)));
     hbox.pack_start(clearbut, false, false, 0);
 
     hbox.pack_start(*Gtk::manage(new Gtk::VSeparator()), false, false);
 
     reload_button_ = Gtk::manage(new Gtk::Button(Gtk::Stock::DELETE));
     hbox.pack_start(*reload_button_, false, false, 0);
-    reload_button_->signal_clicked().connect(&cb_refresh);
+    reload_button_->signal_clicked().connect(
+                sigc::mem_fun(*this, &ThemerWindow::cb_refresh));
 
     delete_button_ = Gtk::manage(new Gtk::Button(Gtk::Stock::DELETE));
     hbox.pack_start(*delete_button_, false, false, 0);
     delete_button_->set_sensitive(false);
-    delete_button_->signal_clicked().connect(sigc::bind(&cb_delete, delete_button_));
+    delete_button_->signal_clicked().connect(
+                sigc::bind(sigc::mem_fun(*this, &ThemerWindow::cb_delete),
+                           delete_button_));
 
     import_button_ = Gtk::manage(new Gtk::Button("Import..."));
     auto &img = *Gtk::manage(new Gtk::Image(Gtk::Stock::OPEN, Gtk::ICON_SIZE_BUTTON));
     import_button_->set_image(img);
     hbox.pack_start(*import_button_, false, false, 0);
-    import_button_->signal_clicked().connect(&cb_import);
+    import_button_->signal_clicked().connect(
+                sigc::mem_fun(*this, &ThemerWindow::cb_import));
 
     vbox.pack_start(*Gtk::manage(new Gtk::HSeparator()), false, false);
 
@@ -1145,7 +1180,8 @@ Gtk::Widget* build_tree_view()
 
     theme_select_ = theme_selector_->get_selection();
     theme_select_->set_mode(Gtk::SELECTION_SINGLE);
-    theme_select_->signal_changed().connect(&cb_load);
+    theme_select_->signal_changed().connect(
+                sigc::mem_fun(*this, &ThemerWindow::cb_load));
 
     auto& scrollwin = *Gtk::manage(new Gtk::ScrolledWindow());
     scrollwin.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
@@ -1199,7 +1235,9 @@ void fetch_svn()
     fe->dialog = &dialog;
     fe->progbar = &progbar;
     fe->pd = pd;
-    Glib::signal_timeout().connect(sigc::bind(&watcher_func, fe), 100);;
+    Glib::signal_timeout().connect(
+                sigc::bind(sigc::mem_fun(*this, &ThemerWindow::watcher_func),
+                           fe), 100);
 }
 
 void fetch_gpl_svn()
@@ -1244,7 +1282,8 @@ void layout_repo_pane(Gtk::Box& vbox)
     auto& im1 = *Gtk::manage(new Gtk::Image(Gtk::Stock::CONNECT, Gtk::ICON_SIZE_BUTTON));
     fetch_button_->set_image(im1);
     table_append(*fetch_button_, false);
-    fetch_button_->signal_clicked().connect(&fetch_gpl_svn);
+    fetch_button_->signal_clicked().connect(
+                sigc::mem_fun(*this, &ThemerWindow::fetch_gpl_svn));
 
     auto* rlabel = Gtk::manage(new Gtk::Label(
                  _("This repository contains GPL'd themes that can be used under \n"
@@ -1255,7 +1294,8 @@ void layout_repo_pane(Gtk::Box& vbox)
     auto& im2 = *Gtk::manage(new Gtk::Image(Gtk::Stock::CONNECT, Gtk::ICON_SIZE_BUTTON));
     fetch_button2_->set_image(im2);
     table_append(*fetch_button2_, false);
-    fetch_button2_->signal_clicked().connect(&fetch_ngpl_svn);
+    fetch_button2_->signal_clicked().connect(
+                sigc::mem_fun(*this, &ThemerWindow::fetch_ngpl_svn));
 
     rlabel = Gtk::manage(new Gtk::Label(
                  _("This repository contains non-GPL'd themes. They might infringe \n"
@@ -1311,9 +1351,11 @@ void layout_main_window()
 
     auto& quit_button = *Gtk::manage(new Gtk::Button(Gtk::Stock::QUIT));
     hbox.pack_end(quit_button, false, false);
-    quit_button.signal_clicked().connect(&cb_quit);
+    quit_button.signal_clicked().connect(
+                sigc::mem_fun(*this, &ThemerWindow::cb_quit));
     main_window_->add(vbox);
 }
+};
 
 int main(int argc, char* argv[])
 {
@@ -1358,32 +1400,11 @@ int main(int argc, char* argv[])
 
     init_key_files();
 
-    main_window_ = new Gtk::Window();
-
-    if (install_file == 1) {
-        create_filechooserdialog1(input_file);
-    }
-
 #ifdef USE_DBUS
     setup_dbus();
 #endif
 
-    main_window_->set_title("Emerald Themer " VERSION);
-    main_window_->set_resizable(true);
-    main_window_->set_default_size(700, 500);
-    main_window_->signal_delete_event().connect(&cb_main_destroy);
-    main_window_->set_default_icon_from_file(PIXMAPS_DIR "/emerald-theme-manager-icon.png");
-
-    main_window_->set_border_width(5);
-
-    layout_main_window();
-    main_window_->show_all();
-
-    refresh_theme_list("");
-    copy_from_defaults_if_needed();
-    init_settings();
-    set_changed(false);
-    set_apply(true);
+    ThemerWindow win(install_file, input_file);
 
     kit.run();
     return 0;
