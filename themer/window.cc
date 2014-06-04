@@ -232,7 +232,7 @@ void ThemerWindow::refresh_theme_list(const std::string& theme)
 
 void ThemerWindow::cb_refresh()
 {
-    refresh_theme_list(NULL);
+    refresh_theme_list("");
 }
 
 bool ThemerWindow::confirm_dialog(const std::string& fmt, const std::string& val)
@@ -447,7 +447,7 @@ void ThemerWindow::cb_save()
         info_dialog(_("Theme Saved"));
     }
     version_entry_->set_text(VERSION);
-    refresh_theme_list(NULL);
+    refresh_theme_list("");
 }
 
 void ThemerWindow::cb_delete(Gtk::Widget* w)
@@ -1188,7 +1188,7 @@ bool ThemerWindow::watcher_func(FetcherInfo* fe)
     fe->progbar->pulse();
     if (waitpid(fe->pd, NULL, WNOHANG) != 0) {
         import_cache(*(fe->progbar));
-        refresh_theme_list(NULL);
+        refresh_theme_list("");
         //fe->dialog->destroy_(); // FIXME -- private
         delete fe;
         return false;
