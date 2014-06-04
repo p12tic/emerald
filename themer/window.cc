@@ -73,7 +73,7 @@ void ThemerWindow::theme_list_append(const std::string& value,
     std::string path = dir + "/" + fil + "/theme.ini";
     std::string imgpath = dir + "/" + fil + "/theme.screenshot.png";
 
-    EngineMetaInfo emi;
+    EngineMetaInfo metainfo;
 
     KeyFile f;
     if (!f.load_from_file(path)) {
@@ -88,19 +88,19 @@ void ThemerWindow::theme_list_append(const std::string& value,
 
     std::string ver_str;
     if (engine_o) {
-        get_engine_meta_info(engine_o->c_str(), &emi);
+        get_engine_meta_info(engine_o->c_str(), &metainfo);
         auto ver_o = f.get_string_opt("engine_version", *engine_o);
         std::string ver = ver_o ? *ver_o : "0.0.0"; //val2
 
         auto th_ver_o = f.get_string_opt("theme", "version");
         std::string th_ver = th_ver_o ? *th_ver_o : "0.0.0"; // tver
 
-        std::string elc = emi.last_compat;
-        if (elc.empty()) {
-            elc = "0.0.0";
+        std::string last_compat = metainfo.last_compat;
+        if (last_compat.empty()) {
+            last_compat = "0.0.0";
         }
 
-        bool is_en_uptodate = strverscmp(ver.c_str(), elc.c_str()) >= 0;
+        bool is_en_uptodate = strverscmp(ver.c_str(), last_compat.c_str()) >= 0;
         bool is_th_uptodate = strverscmp(th_ver.c_str(), LAST_COMPAT_VER) >= 0;
 
         ver_str = std::string("Engine: ") + (is_en_uptodate ? "YES" : "NO") +
