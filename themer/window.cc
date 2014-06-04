@@ -230,11 +230,6 @@ void ThemerWindow::refresh_theme_list(const std::string& theme)
     }
 }
 
-void ThemerWindow::cb_refresh()
-{
-    refresh_theme_list("");
-}
-
 bool ThemerWindow::confirm_dialog(const std::string& fmt, const std::string& val)
 {
     Gtk::MessageDialog dlg(*main_window_, std::string(format(fmt, val)), false,
@@ -450,7 +445,7 @@ void ThemerWindow::cb_save()
     refresh_theme_list("");
 }
 
-void ThemerWindow::cb_delete(Gtk::Widget* w)
+void ThemerWindow::cb_delete()
 {
     //first normalize the name
     auto row = theme_select_->get_selected();
@@ -477,7 +472,7 @@ void ThemerWindow::cb_delete(Gtk::Widget* w)
             fs::remove_all(homedir / ".emerald/themes" / at);
         }
         info_dialog(_("Theme deleted"));
-        w->set_sensitive(false);
+        delete_button_->set_sensitive(false);
         refresh_theme_list("");
     } else {
         error_dialog(_("No such theme to delete"));
@@ -704,9 +699,8 @@ void ThemerWindow::add_meta_string_value(SettingsTable& tbl,
     SettingItem::create(entry, "theme", key);
 }
 
-void ThemerWindow::cb_export()
+boost::optional<std::string> ThemerWindow::ask_filename_for_export()
 {
-    //get a filename
     Gtk::FileChooserDialog& dialog =
             *Gtk::manage(new Gtk::FileChooserDialog(*main_window_,
                                                     _("Export Theme..."),
@@ -724,8 +718,9 @@ void ThemerWindow::cb_export()
     dialog.set_current_name(pth);
 
     if (dialog.run() == Gtk::RESPONSE_ACCEPT) {
-        std::string fn = dialog.get_filename();
-        export_theme(fn.c_str());
+        return boost::optional<std::string>(dialog.get_filename());
+    } else {
+        return boost::none;
     }
 }
 
@@ -747,7 +742,12 @@ void ThemerWindow::layout_file_frame(Gtk::Box& vbox)
     Gtk::Image im(Gtk::Stock::SAVE_AS, Gtk::ICON_SIZE_BUTTON);
     export_button_->set_image(im);
     hbox.pack_start(*export_button_, false, false, 0);
-    export_button_->signal_clicked().connect([=](){ cb_export(); });
+    export_button_->signal_clicked().connect([=](){
+        auto fn_opt = ask_filename_for_export();
+        if (fn_opt) {
+            export_theme(*fn_opt);
+        }
+    });
 }
 
 void ThemerWindow::layout_info_frame(Gtk::Box& vbox)
@@ -1026,11 +1026,6 @@ Gtk::Box* ThemerWindow::build_lower_pane(Gtk::Box& vbox)
     return &my_vbox;
 }
 
-void ThemerWindow::cb_refilter(Glib::RefPtr<Gtk::TreeModelFilter> filt)
-{
-    filt->refilter();
-}
-
 bool ThemerWindow::is_visible(const Gtk::TreeModel::const_iterator& iter)
 {
     std::string tx = searchbox_->get_text();
@@ -1103,12 +1098,12 @@ Gtk::Widget* ThemerWindow::build_tree_view()
 
     reload_button_ = Gtk::manage(new Gtk::Button(Gtk::Stock::DELETE));
     hbox.pack_start(*reload_button_, false, false, 0);
-    reload_button_->signal_clicked().connect([=](){ cb_refresh(); });
+    reload_button_->signal_clicked().connect([=](){ refresh_theme_list(""); });
 
     delete_button_ = Gtk::manage(new Gtk::Button(Gtk::Stock::DELETE));
     hbox.pack_start(*delete_button_, false, false, 0);
     delete_button_->set_sensitive(false);
-    delete_button_->signal_clicked().connect([=](){ cb_delete(delete_button_); });
+    delete_button_->signal_clicked().connect([=](){ cb_delete(); });
 
     import_button_ = Gtk::manage(new Gtk::Button("Import..."));
     auto &img = *Gtk::manage(new Gtk::Image(Gtk::Stock::OPEN, Gtk::ICON_SIZE_BUTTON));
@@ -1123,7 +1118,7 @@ Gtk::Widget* ThemerWindow::build_tree_view()
     filt->set_visible_func([=](){ return is_visible(); });
 
     auto sort = Gtk::TreeModelSort::create(filt);
-    searchbox_->signal_changed().connect([=](){ cb_refilter(filt); });
+    searchbox_->signal_changed().connect([=](){ filt->refilter() });
     */
     theme_selector_ = Gtk::manage(new Gtk::TreeView(theme_model_));
     theme_selector_->set_headers_clickable();

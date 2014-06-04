@@ -36,7 +36,6 @@ public:
     void theme_scan_dir(const std::string& dir, bool writable);
     void scroll_to_theme(const std::string& theme);
     void refresh_theme_list(const std::string& theme);
-    void cb_refresh();
     bool confirm_dialog(const std::string& fmt, const std::string& val);
     void info_dialog(const std::string& val);
     void error_dialog(const std::string& val);
@@ -44,7 +43,7 @@ public:
     std::string import_theme(const std::string& file_s);
     void export_theme(const std::string& file_s);
     void cb_save();
-    void cb_delete(Gtk::Widget* w);
+    void cb_delete();
     bool cb_main_destroy(GdkEventAny*);
     void layout_button_box(SettingsTable& tbl, Gtk::Box& vbox, int b_t);
     void layout_general_buttons_frame(Gtk::Box& hbox);
@@ -66,7 +65,6 @@ public:
     void layout_title_frame(Gtk::Box& vbox);
     void add_meta_string_value(SettingsTable& tbl, const std::string& title,
                                const std::string& key);
-    void cb_export();
     void layout_file_frame(Gtk::Box& vbox);
     void layout_info_frame(Gtk::Box& vbox);
 
@@ -87,7 +85,6 @@ public:
     void layout_engine_pane(Gtk::Box& vbox);
     void layout_lower_pane(Gtk::Box& vbox);
     Gtk::Box* build_lower_pane(Gtk::Box& vbox);
-    void cb_refilter(Glib::RefPtr<Gtk::TreeModelFilter> filt);
     bool is_visible(const Gtk::TreeModel::const_iterator& iter);
     void cb_clearbox();
     void cb_import();
@@ -103,6 +100,9 @@ public:
     void layout_themes_pane(Gtk::Box& vbox);
     void create_filechooserdialog1(std::string input);
     void layout_main_window();
+    
+    /// Launches a file dialog and returns the selected path, if successful
+    boost::optional<std::string> ask_filename_for_export();
 
 private:
 
