@@ -266,6 +266,7 @@ bool get_engine_meta_info(const std::string& engine, EngineMetaInfo* inf)
     }
     return false;
 }
+
 void update_preview(Gtk::FileChooser* chooser, const std::string& filename,
                     Gtk::Image* img)
 {

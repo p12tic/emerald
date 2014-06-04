@@ -80,15 +80,14 @@ void ThemerWindow::theme_list_append(const std::string& value,
         return;
     }
 
-    Gtk::TreeModel::Row row = *(theme_model_->append());
-    row[theme_columns_.name] = value;
+    ThemeList::ThemeDesc desc;
+    desc.name = value;
 
     auto engine_o = f.get_string_opt("engine", "engine");
-    row[theme_columns_.engine] = engine_o ? *engine_o : "";
+    desc.engine = engine_o ? *engine_o : "";
 
-    std::string ver_str;
     if (engine_o) {
-        get_engine_meta_info(engine_o->c_str(), &metainfo);
+        get_engine_meta_info(desc.engine, &metainfo);
         auto ver_o = f.get_string_opt("engine_version", *engine_o);
         std::string ver = ver_o ? *ver_o : "0.0.0"; //val2
 
@@ -103,9 +102,8 @@ void ThemerWindow::theme_list_append(const std::string& value,
         bool is_en_uptodate = strverscmp(ver.c_str(), last_compat.c_str()) >= 0;
         bool is_th_uptodate = strverscmp(th_ver.c_str(), LAST_COMPAT_VER) >= 0;
 
-        ver_str = std::string("Engine: ") + (is_en_uptodate ? "YES" : "NO") +
-                " (" + ver + ")\n";
-        ver_str += std::string("Emerald: ") + (is_th_uptodate ? "YES" : "NO") +
+        desc.engine_version = std::string("Engine: ") + (is_en_uptodate ? "YES" : "NO") +
+                " (" + ver + ")\n" + "Emerald: " + (is_th_uptodate ? "YES" : "NO") +
                 " (" + th_ver + ")\n";
 
     } else {
@@ -114,28 +112,22 @@ void ThemerWindow::theme_list_append(const std::string& value,
 
         bool is_th_uptodate = strverscmp(th_ver.c_str(), LAST_COMPAT_VER) >= 0;
 
-        ver_str = "No Engine\n";
-        ver_str += std::string("Emerald: ") + (is_th_uptodate ? "YES" : "NO") +
-                " (" + th_ver + ")\n";
+        desc.engine_version = std::string("No Engine\n") +
+                "Emerald: " + (is_th_uptodate ? "YES" : "NO") + " (" + th_ver + ")\n";
     }
-    row[theme_columns_.engine_version] = ver_str;
 
     std::string s_creator, s_desc, s_th_version, s_sugg;
     auto opt = f.get_string_opt("theme", "creator");
-    s_creator = opt ? *opt : "";
-    row[theme_columns_.creator] = s_creator;
+    desc.creator = s_creator = opt ? *opt : "";
 
     opt = f.get_string_opt("theme", "description");
-    s_desc = opt ? *opt : "";
-    row[theme_columns_.description] = s_desc;
+    desc.description = s_desc = opt ? *opt : "";
 
     opt = f.get_string_opt("theme", "theme_version");
-    s_th_version = opt ? *opt : "";
-    row[theme_columns_.theme_version] = s_th_version;
+    desc.theme_version = s_th_version = opt ? *opt : "";
 
     opt = f.get_string_opt("theme", "suggested");
-    s_sugg = opt ? *opt : "";
-    row[theme_columns_.suggested] = s_sugg;
+    desc.suggested = s_sugg = opt ? *opt : "";
 
     {
         if (s_creator == "") {
@@ -145,7 +137,7 @@ void ThemerWindow::theme_list_append(const std::string& value,
             s_th_version = _("Unknown");
         }
         if (s_sugg == "") {
-            s_sugg = _("Whatever (no hint)");
+            s_sugg = _("(no hint)");
         }
         if (s_desc == "") {
             s_desc = _("No Description");
@@ -173,22 +165,22 @@ void ThemerWindow::theme_list_append(const std::string& value,
                   "</small>");
         }
 
-        std::string markup = format(fmt, markup_escape(name),
-                                    markup_escape(s_desc),
-                                    markup_escape(s_th_version),
-                                    markup_escape(s_creator),
-                                    markup_escape(s_sugg));
-        row[theme_columns_.markup] = markup;
+        desc.markup = format(fmt, markup_escape(name),
+                             markup_escape(s_desc),
+                             markup_escape(s_th_version),
+                             markup_escape(s_creator),
+                             markup_escape(s_sugg));
     }
 
     auto pix = Gdk::Pixbuf::create_from_file(imgpath, -1, 100);
     if (pix) {
-        row[theme_columns_.pixbuf] = pix;
+        desc.pixbuf = pix;
     } else {
         auto icon_theme = Gtk::IconTheme::create();
         pix = icon_theme->load_icon(GTK_STOCK_MISSING_IMAGE, Gtk::ICON_SIZE_LARGE_TOOLBAR);
-        row[theme_columns_.pixbuf] = pix;
+        desc.pixbuf = pix;
     }
+    theme_list_.add_theme(desc);
 }
 
 void ThemerWindow::theme_scan_dir(const std::string& dir, bool writable)
@@ -208,20 +200,12 @@ void ThemerWindow::theme_scan_dir(const std::string& dir, bool writable)
 
 void ThemerWindow::scroll_to_theme(const std::string& theme)
 {
-    auto it = theme_model_->children().begin();
-    auto it_end = theme_model_->children().end();
-    for (; it != it_end; ++it) {
-        std::string s = (*it)[theme_columns_.name];
-        if (s == theme) {
-            Gtk::TreePath p = theme_model_->get_path(it);
-            theme_selector_->scroll_to_row(p);
-        }
-    }
+    theme_list_.scroll_to_theme(theme);
 }
 
 void ThemerWindow::refresh_theme_list(const std::string& theme)
 {
-    theme_model_->clear();
+    theme_list_.clear();
     theme_scan_dir(DATA_DIR "/emerald/themes/", false);
     auto path = std::string{g_get_home_dir()} + "/.emerald/themes/";
     theme_scan_dir(path, true);
@@ -254,11 +238,11 @@ void ThemerWindow::error_dialog(const std::string& val)
 void ThemerWindow::cb_load()
 {
     //first normalize the name
-    auto it = theme_select_->get_selected();
-    if (!it) {
+    auto sel_opt = theme_list_.get_selected_theme_name();
+    if (!sel_opt) {
         return;
     }
-    std::string at = (*it)[theme_columns_.name];
+    std::string at = *sel_opt;
     std::string mt = at;
     bool dist = false;
     if (at.length() >= 1 && at[0] == '*') {
@@ -448,11 +432,11 @@ void ThemerWindow::cb_save()
 void ThemerWindow::cb_delete()
 {
     //first normalize the name
-    auto row = theme_select_->get_selected();
-    if (!row) {
+    auto row_opt = theme_list_.get_selected_theme_name();
+    if (!row_opt) {
         return;
     }
-    std::string at = (*row)[theme_columns_.name];
+    std::string at = *row_opt;
 
     if (at.length() >= 1 && at[0] == '*') {
         error_dialog(_("Can't delete system themes\n(or you forgot to enter a name)"));
@@ -1026,30 +1010,6 @@ Gtk::Box* ThemerWindow::build_lower_pane(Gtk::Box& vbox)
     return &my_vbox;
 }
 
-bool ThemerWindow::is_visible(const Gtk::TreeModel::const_iterator& iter)
-{
-    std::string tx = searchbox_->get_text();
-    if (tx.empty()) {
-        return true;
-    }
-    for (auto& ch : tx) { ch = std::tolower(ch); }
-
-    std::vector<std::string> strs;
-    strs.push_back((*iter)[theme_columns_.name]);
-    strs.push_back((*iter)[theme_columns_.engine]);
-    strs.push_back((*iter)[theme_columns_.creator]);
-    strs.push_back((*iter)[theme_columns_.description]);
-    strs.push_back((*iter)[theme_columns_.suggested]);
-
-    for (auto& str : strs) {
-        for (auto& ch : str) { ch = std::tolower(ch); }
-        if (str.find(tx) != std::string::npos) {
-            return true;
-        }
-    }
-    return false;
-}
-
 void ThemerWindow::cb_clearbox()
 {
     searchbox_->set_text("");
@@ -1084,9 +1044,6 @@ Gtk::Widget* ThemerWindow::build_tree_view()
 
     hbox.pack_start(*Gtk::manage(new Gtk::Label(_("Search:"))), false, false, 0);
 
-    //create data store
-    theme_model_ = Gtk::ListStore::create(theme_columns_);
-
     searchbox_ = Gtk::manage(new Gtk::Entry());
     hbox.pack_start(*searchbox_, true, true, 0);
 
@@ -1113,64 +1070,11 @@ Gtk::Widget* ThemerWindow::build_tree_view()
 
     vbox.pack_start(*Gtk::manage(new Gtk::HSeparator()), false, false);
 
-    /* Do not delete, TODO: properly convert to gtkmm
-    auto filt = Gtk::TreeModelFilter::create(theme_model_);
-    filt->set_visible_func([=](){ return is_visible(); });
-
-    auto sort = Gtk::TreeModelSort::create(filt);
-    searchbox_->signal_changed().connect([=](){ filt->refilter() });
-    */
-    theme_selector_ = Gtk::manage(new Gtk::TreeView(theme_model_));
-    theme_selector_->set_headers_clickable();
-    theme_selector_->set_reorderable();
-
-    {
-    auto &renderer = *Gtk::manage(new Gtk::CellRendererText());
-    renderer.property_ellipsize().set_value(Pango::ELLIPSIZE_END);
-    int id = theme_selector_->append_column("Theme", renderer);
-    auto &column = *(theme_selector_->get_column(id-1));
-    column.add_attribute(renderer.property_markup(), theme_columns_.markup);
-    column.set_sort_column_id(theme_columns_.markup);
-    column.set_resizable();
-    column.set_reorderable();
-    } {
-    auto &renderer = *Gtk::manage(new Gtk::CellRendererPixbuf());
-    renderer.set_alignment(0, 0.5);
-    int id = theme_selector_->append_column("Screenshot", renderer);
-    auto &column = *(theme_selector_->get_column(id-1));
-    column.add_attribute(renderer.property_pixbuf(), theme_columns_.pixbuf);
-    column.set_sort_column_id(theme_columns_.pixbuf);
-    column.set_max_width(400);
-    column.set_resizable();
-    column.set_reorderable();
-    } {
-    auto &renderer = *Gtk::manage(new Gtk::CellRendererText());
-    int id = theme_selector_->append_column("Up-to-Date", renderer);
-    auto &column = *(theme_selector_->get_column(id-1));
-    column.add_attribute(renderer.property_text(), theme_columns_.engine_version);
-    column.set_sort_column_id(theme_columns_.engine_version);
-    column.set_resizable();
-    column.set_reorderable();
-    } {
-    auto &renderer = *Gtk::manage(new Gtk::CellRendererText());
-    int id = theme_selector_->append_column("Engine", renderer);
-    auto &column = *(theme_selector_->get_column(id-1));
-    column.add_attribute(renderer.property_text(), theme_columns_.engine);
-    column.set_sort_column_id(theme_columns_.engine);
-    column.set_resizable();
-    column.set_reorderable();
-    }
-
-    theme_select_ = theme_selector_->get_selection();
-    theme_select_->set_mode(Gtk::SELECTION_SINGLE);
-    theme_select_->signal_changed().connect([=](){ cb_load(); });
-
-    auto& scrollwin = *Gtk::manage(new Gtk::ScrolledWindow());
-    scrollwin.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-    scrollwin.add(*theme_selector_);
-    scrollwin.set_size_request(500, 200);
-
-    vbox.pack_start(scrollwin, true, true);
+    theme_list_.signal_get_filter_text().connect([&](){ return searchbox_->get_text(); });
+    theme_list_.signal_selection_changed().connect([=](){ cb_load(); });
+    theme_list_.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+    theme_list_.set_size_request(500, 200);
+    vbox.pack_start(theme_list_, true, true);
     return &vbox;
 }
 

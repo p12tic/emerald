@@ -2,7 +2,7 @@
 
 include $(top_srcdir)/common.am
 
-emerald_theme_manager_SOURCES = main.cc window.cc
+emerald_theme_manager_SOURCES = main.cc window.cc theme_list.cc
 
 noinst_HEADERS = window.h compat.h
 

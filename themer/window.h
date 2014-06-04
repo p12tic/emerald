@@ -22,6 +22,7 @@
 
 #include <libengine/emerald.h>
 #include <libengine/libengine.h>
+#include "theme_list.h"
 
 struct FetcherInfo;
 
@@ -85,7 +86,6 @@ public:
     void layout_engine_pane(Gtk::Box& vbox);
     void layout_lower_pane(Gtk::Box& vbox);
     Gtk::Box* build_lower_pane(Gtk::Box& vbox);
-    bool is_visible(const Gtk::TreeModel::const_iterator& iter);
     void cb_clearbox();
     void cb_import();
     Gtk::Widget* build_tree_view();
@@ -106,37 +106,7 @@ public:
 
 private:
 
-    class ThemeColumns :
-        public Gtk::TreeModel::ColumnRecord	{
-    public:
-        ThemeColumns()
-        {
-            add(name);
-            add(engine);
-            add(engine_version);
-            add(creator);
-            add(description);
-            add(theme_version);
-            add(suggested);
-            add(markup);
-            add(pixbuf);
-        }
-
-        Gtk::TreeModelColumn<std::string> name;
-        Gtk::TreeModelColumn<std::string> engine;
-        Gtk::TreeModelColumn<std::string> engine_version;
-        Gtk::TreeModelColumn<std::string> creator;
-        Gtk::TreeModelColumn<std::string> description;
-        Gtk::TreeModelColumn<std::string> theme_version;
-        Gtk::TreeModelColumn<std::string> suggested;
-        Gtk::TreeModelColumn<std::string> markup;
-        Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> pixbuf;
-    };
-
-    ThemeColumns theme_columns_;
-    Gtk::TreeView* theme_selector_;
-    Glib::RefPtr<Gtk::ListStore> theme_model_;
-    Glib::RefPtr<Gtk::TreeSelection> theme_select_;
+    ThemeList theme_list_;
     Gtk::Window* main_window_;
     Gtk::Entry* entry_box_;
     Gtk::Entry* version_entry_;

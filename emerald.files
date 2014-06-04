@@ -137,5 +137,7 @@ src/window.h
 themer/Makefile.am
 themer/compat.h
 themer/main.cc
+themer/theme_list.cc
+themer/theme_list.h
 themer/window.cc
 themer/window.h
