@@ -528,15 +528,10 @@ void add_frame_window(Wnck::Window* win, Window frame)
 
         for (i = 0; i < 3; i++)
             for (j = 0; j < 3; j++)
-                g_hash_table_insert(frame_table,
-                                    GINT_TO_POINTER(d->event_windows[i][j]),
-                                    GINT_TO_POINTER(xid));
+                g_frame_table.emplace(d->event_windows[i][j], xid);
 
         for (i = 0; i < B_T_COUNT; i++)
-            g_hash_table_insert(frame_table,
-                                GINT_TO_POINTER(d->button_windows[i]),
-                                GINT_TO_POINTER(xid));
-
+            g_frame_table.emplace(d->button_windows[i], xid);
 
         update_window_decoration_state(win);
         update_window_decoration_actions(win);

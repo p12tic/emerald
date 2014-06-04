@@ -78,7 +78,7 @@ std::string program_name;
 
 Gtk::Widget* style_window;
 
-GHashTable* frame_table;
+std::unordered_map<Window, XID> g_frame_table;
 Wnck::ActionMenu* action_menu = NULL;
 bool action_menu_mapped = false;
 int double_click_timeout = 250;
@@ -909,23 +909,22 @@ event_filter_func(GdkXEvent* gdkxevent, GdkEvent* event, void* data)
 
     switch (xevent->type) {
     case ButtonPress:
-    case ButtonRelease:
-        xid = (unsigned long)
-              g_hash_table_lookup(frame_table,
-                                  GINT_TO_POINTER(xevent->xbutton.window));
+    case ButtonRelease: {
+        auto it = g_frame_table.find(xevent->xbutton.window);
+        xid = (it != g_frame_table.end()) ? it->second : 0;
         break;
+    }
     case EnterNotify:
-    case LeaveNotify:
-        xid = (unsigned long)
-              g_hash_table_lookup(frame_table,
-                                  GINT_TO_POINTER(xevent->xcrossing.
-                                          window));
+    case LeaveNotify: {
+        auto it = g_frame_table.find(xevent->xcrossing.window);
+        xid = (it != g_frame_table.end()) ? it->second : 0;
         break;
-    case MotionNotify:
-        xid = (unsigned long)
-              g_hash_table_lookup(frame_table,
-                                  GINT_TO_POINTER(xevent->xmotion.window));
+    }
+    case MotionNotify: {
+        auto it = g_frame_table.find(xevent->xmotion.window);
+        xid = (it != g_frame_table.end()) ? it->second : 0;
         break;
+    }
     case PropertyNotify:
         if (xevent->xproperty.atom == frame_window_atom) {
             Wnck::Window* win;
@@ -987,8 +986,7 @@ event_filter_func(GdkXEvent* gdkxevent, GdkEvent* event, void* data)
         }
         break;
     case DestroyNotify:
-        g_hash_table_remove(frame_table,
-                            GINT_TO_POINTER(xevent->xproperty.window));
+        g_frame_table.erase(xevent->xproperty.window);
         break;
     case ClientMessage:
         if (xevent->xclient.message_type == toolkit_action_atom) {
@@ -1914,8 +1912,6 @@ int main(int argc, char* argv[])
     if (button_cursor.shape != XC_left_ptr)
         button_cursor.cursor =
             XCreateFontCursor(xdisplay, button_cursor.shape);
-
-    frame_table = g_hash_table_new(NULL, NULL);
 
     if (!create_tooltip_window()) {
         std::cerr << format("%s, Couldn't create tooltip window\n", argv[0]);

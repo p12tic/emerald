@@ -21,6 +21,7 @@
 #define EMERALD_UTILS_H
 
 #include <libengine/emerald.h>
+#include <unordered_map>
 
 int get_b_offset(int b);
 int get_b_t_offset(int b_t);
@@ -45,7 +46,7 @@ void engine_draw_frame(decor_t* d, Cairo::RefPtr<Cairo::Context>& cr);
 bool load_engine(const std::string& engine_name, window_settings* ws);
 void load_engine_settings(const KeyFile& f, window_settings* ws);
 
-extern GHashTable* frame_table;
+extern std::unordered_map<XID, Window> g_frame_table;
 
 extern _cursor cursor[3][3];
 extern _cursor button_cursor;
