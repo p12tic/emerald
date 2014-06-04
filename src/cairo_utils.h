@@ -35,7 +35,8 @@ void get_button_pos(window_settings* ws, int b_t,
 void button_state_paint(Cairo::RefPtr<Cairo::Context>& cr,
                         alpha_color* color, alpha_color* color_2, unsigned state);
 int get_b_state(decor_t* d, int button);
-void draw_pixbuf(GdkPixbuf* pixbuf, Cairo::RefPtr<Cairo::Context>& cr,
+void draw_pixbuf(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf,
+                 Cairo::RefPtr<Cairo::Context>& cr,
                  double x, double y, double x2, double y2, double alpha);
 void draw_button_with_glow_alpha_bstate(int b_t, decor_t* d, Cairo::RefPtr<Cairo::Context>& cr,
                                         int y1, double button_alpha,

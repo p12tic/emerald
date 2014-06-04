@@ -54,16 +54,11 @@ void reset_buttons_bg_and_fade(decor_t* d)
         d->button_fade_info.pulsating[b_t] = 0;
         d->button_region[b_t].base_x1 = -100;
         d->button_region[b_t].glow_x1 = -100;
-        if (d->button_region[b_t].bg_pixmap) {
-            g_object_unref(G_OBJECT(d->button_region[b_t].bg_pixmap));
-        }
-        d->button_region[b_t].bg_pixmap = NULL;
+        d->button_region[b_t].bg_pixmap.clear();
+
         d->button_region_inact[b_t].base_x1 = -100;
         d->button_region_inact[b_t].glow_x1 = -100;
-        if (d->button_region_inact[b_t].bg_pixmap) {
-            g_object_unref(G_OBJECT(d->button_region_inact[b_t].bg_pixmap));
-        }
-        d->button_region_inact[b_t].bg_pixmap = NULL;
+        d->button_region_inact[b_t].bg_pixmap.clear();
         d->button_last_drawn_state[b_t] = 0;
     }
 }
@@ -119,11 +114,11 @@ void draw_button_backgrounds(decor_t* d, int* necessary_update_type)
         } else {
             return;
         }
-        if (button_region->bg_pixmap)
-            gdk_draw_drawable(IS_VALID(d->buffer_pixmap) ? d->buffer_pixmap :
-                              d->pixmap,
-                              d->gc, button_region->bg_pixmap, src_x, src_y,
-                              dest_x, dest_y, w, h);
+        if (button_region->bg_pixmap) {
+            auto& pix = d->buffer_pixmap ? d->buffer_pixmap : d->pixmap;
+            pix->draw_drawable(d->gc, button_region->bg_pixmap, src_x, src_y,
+                               dest_x, dest_y, w, h);
+        }
         d->min_drawn_buttons_region.x1 =
             MIN(d->min_drawn_buttons_region.x1, dest_x);
         d->min_drawn_buttons_region.y1 =
@@ -150,14 +145,9 @@ void update_button_regions(decor_t* d)
         }
         button_region_t* button_region = &(d->button_region[b_t]);
 
-        if (button_region->bg_pixmap) {
-            g_object_unref(G_OBJECT(button_region->bg_pixmap));
-            button_region->bg_pixmap = NULL;
-        }
-        if (d->button_region_inact[b_t].bg_pixmap) {
-            g_object_unref(G_OBJECT(d->button_region_inact[b_t].bg_pixmap));
-            d->button_region_inact[b_t].bg_pixmap = NULL;
-        }
+        button_region->bg_pixmap.clear();
+        d->button_region_inact[b_t].bg_pixmap.clear();
+
         // Reset overlaps
         for (b_t2 = 0; b_t2 < b_t; b_t2++)
             if (!BUTTON_NOT_VISIBLE(d, b_t2)) {
@@ -283,10 +273,12 @@ void draw_window_decoration_real(decor_t* d, bool shadow_time)
     double y1 = ws->top_space - ws->win_extents.top;
 
     if (!d->draw_only_buttons_region) {      // if not only drawing buttons
-        auto *g_cr = gdk_cairo_create(GDK_DRAWABLE
-                                      (IS_VALID(d->buffer_pixmap) ? d->buffer_pixmap :
-                                        d->pixmap));
-        Cairo::RefPtr<Cairo::Context> cr{new Cairo::Context(g_cr, true)};
+        Cairo::RefPtr<Cairo::Context> cr;
+        if (d->buffer_pixmap) {
+            cr = d->buffer_pixmap->create_cairo_context();
+        } else {
+            cr = d->pixmap->create_cairo_context();
+        }
         cr->set_operator(Cairo::OPERATOR_SOURCE);
         cr->set_line_width(1.0);
         cr->save();
@@ -387,11 +379,10 @@ void draw_window_decoration_real(decor_t* d, bool shadow_time)
                 if (!button_region->bg_pixmap) {
                     std::cerr << program_name << ": Error allocating buffer.\n";
                 } else {
-                    gdk_draw_drawable(button_region->bg_pixmap, d->gc,
-                                      IS_VALID(d->buffer_pixmap) ?
-                                      d->buffer_pixmap : d->pixmap,
-                                      rx, ry, 0, 0,
-                                      rw, rh);
+                    auto& pix = (d->buffer_pixmap ? d->buffer_pixmap : d->pixmap);
+                    button_region->bg_pixmap->draw_drawable(d->gc, pix,
+                                                            rx, ry, 0, 0,
+                                                            rw, rh);
                 }
             }
         }
@@ -474,10 +465,12 @@ void draw_window_decoration_real(decor_t* d, bool shadow_time)
     }
     // Draw buttons
 
-    auto g_cr = gdk_cairo_create(GDK_DRAWABLE(IS_VALID(d->buffer_pixmap) ?
-                                         d->buffer_pixmap : d->pixmap));
-    Cairo::RefPtr<Cairo::Context> cr{new Cairo::Context(g_cr, true)};
-
+    Cairo::RefPtr<Cairo::Context> cr;
+    if (d->buffer_pixmap) {
+        cr = d->buffer_pixmap->create_cairo_context();
+    } else {
+        cr = d->pixmap->create_cairo_context();
+    }
     cr->set_operator(Cairo::OPERATOR_OVER);
 
     if (ws->use_button_fade && ws->use_pixmap_buttons) {
@@ -486,7 +479,7 @@ void draw_window_decoration_real(decor_t* d, bool shadow_time)
         draw_buttons_without_fade(d, cr, y1);
     }
 
-    if (IS_VALID(d->buffer_pixmap)) {
+    if (d->buffer_pixmap) {
         /*if (d->draw_only_buttons_region && d->min_drawn_buttons_region.x1 < 10000)        // if region is updated at least once
           {
           gdk_draw_drawable(d->pixmap,
@@ -503,15 +496,8 @@ void draw_window_decoration_real(decor_t* d, bool shadow_time)
           }
           else*/
         {
-            gdk_draw_drawable(d->pixmap,
-                              d->gc,
-                              d->buffer_pixmap,
-                              0,
-                              0,
-                              0,
-                              0,
-                              d->width,
-                              d->height);
+            d->pixmap->draw_drawable(d->gc, d->buffer_pixmap,
+                                     0, 0, 0, 0, d->width, d->height);
             //ws->top_space + ws->bottom_space +
             //ws->titlebar_height + 2);
         }
@@ -583,7 +569,7 @@ void decor_update_switcher_property(decor_t* d)
 
     data = decor_alloc_property(1, WINDOW_DECORATION_TYPE_PIXMAP);
 
-    decor_quads_to_property(data, 0, GDK_PIXMAP_XID(d->pixmap),
+    decor_quads_to_property(data, 0, GDK_PIXMAP_XID(d->pixmap->gobj()),
                             &extents, &extents, &extents, &extents,
                             0, 0, quads, nQuad, 0xffffff, 0, 0);
 
@@ -621,7 +607,7 @@ void draw_switcher_background(decor_t* d)
     ushort a = SWITCHER_ALPHA;
     window_settings* ws = d->fs->ws;
 
-    if (!IS_VALID(d->buffer_pixmap)) {
+    if (!d->buffer_pixmap) {
         return;
     }
 
@@ -635,8 +621,7 @@ void draw_switcher_background(decor_t* d)
     acolor.alpha = alpha;
     acolor2.alpha = alpha * 0.75;
 
-    auto* g_cr = gdk_cairo_create(GDK_DRAWABLE(d->buffer_pixmap));
-    Cairo::RefPtr<Cairo::Context> cr{new Cairo::Context(g_cr, true)};
+    Cairo::RefPtr<Cairo::Context> cr = d->buffer_pixmap->create_cairo_context();
 
     cr->set_operator(Cairo::OPERATOR_SOURCE);
 
@@ -652,7 +637,7 @@ void draw_switcher_background(decor_t* d)
     cr->set_line_width(1.0);
 
     cr->set_operator(Cairo::OPERATOR_SOURCE);
-    if (d->prop_xid || !IS_VALID(d->buffer_pixmap)) {
+    if (d->prop_xid || !d->buffer_pixmap) {
         draw_shadow_background(d, cr);
     }
 
@@ -773,9 +758,8 @@ void draw_switcher_background(decor_t* d)
 
     cr->stroke();
 
-    gdk_draw_drawable(d->pixmap,
-                      d->gc,
-                      d->buffer_pixmap, 0, 0, 0, 0, d->width, d->height);
+    d->pixmap->draw_drawable(d->gc, d->buffer_pixmap, 0, 0, 0, 0,
+                             d->width, d->height);
 
     pixel = (((a * normal_bg.get_red()) >> 24) & 0x0000ff) |
             (((a * normal_bg.get_green()) >> 16) & 0x00ff00) |
@@ -795,7 +779,7 @@ void draw_switcher_background(decor_t* d)
 
 void draw_switcher_foreground(decor_t* d)
 {
-    if (!IS_VALID(d->pixmap) || !IS_VALID(d->buffer_pixmap)) {
+    if (!d->pixmap || !d->buffer_pixmap) {
         return;
     }
 
@@ -817,8 +801,7 @@ void draw_switcher_foreground(decor_t* d)
     double y1 = ws->top_space - ws->win_extents.top;
     double x2 = d->width - ws->right_space + ws->win_extents.right;
 
-    auto* g_cr = gdk_cairo_create(GDK_DRAWABLE(d->buffer_pixmap));
-    Cairo::RefPtr<Cairo::Context> cr{new Cairo::Context(g_cr, true)};
+    Cairo::RefPtr<Cairo::Context> cr = d->buffer_pixmap->create_cairo_context();
 
     cr->set_operator(Cairo::OPERATOR_SOURCE);
 
@@ -885,9 +868,8 @@ void draw_switcher_foreground(decor_t* d)
         d->layout->show_in_cairo_context(cr);
     }
 
-    gdk_draw_drawable(d->pixmap,
-                      d->gc,
-                      d->buffer_pixmap, 0, 0, 0, 0, d->width, d->height);
+    d->pixmap->draw_drawable(d->gc, d->buffer_pixmap, 0, 0, 0, 0,
+                             d->width, d->height);
 }
 
 void draw_switcher_decoration(decor_t* d)
@@ -1021,10 +1003,11 @@ bool draw_buttons_timer_func(decor_t* d, button_fade_info_t* fade_info)
     d->min_drawn_buttons_region.y2 = -100;
 
     if (!fade_info->cr) {
-        auto* g_cr = gdk_cairo_create(GDK_DRAWABLE
-                            (IS_VALID(d->buffer_pixmap) ? d->buffer_pixmap : d->pixmap));
-        fade_info->cr = Cairo::RefPtr<Cairo::Context>{new Cairo::Context(g_cr, true)};
-
+        if (d->buffer_pixmap) {
+            fade_info->cr = d->buffer_pixmap->create_cairo_context();
+        } else {
+            fade_info->cr = d->pixmap->create_cairo_context();
+        }
         fade_info->cr->set_operator(Cairo::OPERATOR_OVER);
     }
 
@@ -1134,20 +1117,18 @@ bool draw_buttons_timer_func(decor_t* d, button_fade_info_t* fade_info)
             break;
         }
 
-    if (IS_VALID(d->buffer_pixmap) && !d->button_fade_info.first_draw &&
+    if (d->buffer_pixmap && !d->button_fade_info.first_draw &&
             d->min_drawn_buttons_region.x1 < 10000) {
         // if region is updated at least once
-        gdk_draw_drawable(d->pixmap,
-                          d->gc,
-                          d->buffer_pixmap,
-                          d->min_drawn_buttons_region.x1,
-                          d->min_drawn_buttons_region.y1,
-                          d->min_drawn_buttons_region.x1,
-                          d->min_drawn_buttons_region.y1,
-                          d->min_drawn_buttons_region.x2 -
-                          d->min_drawn_buttons_region.x1,
-                          d->min_drawn_buttons_region.y2 -
-                          d->min_drawn_buttons_region.y1);
+        d->pixmap->draw_drawable(d->gc, d->buffer_pixmap,
+                                 d->min_drawn_buttons_region.x1,
+                                 d->min_drawn_buttons_region.y1,
+                                 d->min_drawn_buttons_region.x1,
+                                 d->min_drawn_buttons_region.y1,
+                                 d->min_drawn_buttons_region.x2 -
+                                 d->min_drawn_buttons_region.x1,
+                                 d->min_drawn_buttons_region.y2 -
+                                 d->min_drawn_buttons_region.y1);
     }
     fade_info->first_draw = false;
     if (!any_active_buttons) {
@@ -1305,7 +1286,7 @@ void decor_update_window_property(decor_t* d)
 
     data = decor_alloc_property(1, WINDOW_DECORATION_TYPE_PIXMAP);
 
-    decor_quads_to_property(data, 0, GDK_PIXMAP_XID(d->pixmap),
+    decor_quads_to_property(data, 0, GDK_PIXMAP_XID(d->pixmap->gobj()),
                             &extents, &maxextents, &maxextents, &maxextents,
                             0, 0, quads, nQuad, 0xffffff, 0, 0);
 

@@ -44,7 +44,7 @@ void draw_shadow_background(decor_t* d, Cairo::RefPtr<Cairo::Context>& cr)
         return;
     }
 
-    gdk_drawable_get_size(ws->large_shadow_pixmap, &width, &height);
+    ws->large_shadow_pixmap->get_size(width, height);
 
     left = ws->left_space + ws->left_corner_space;
     right = ws->right_space + ws->right_corner_space;
@@ -286,13 +286,14 @@ int get_b_state(decor_t* d, int button)
     return ret;
 }
 
-void draw_pixbuf(GdkPixbuf* pixbuf, Cairo::RefPtr<Cairo::Context>& cr,
+void draw_pixbuf(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf,
+                 Cairo::RefPtr<Cairo::Context>& cr,
                  double x, double y, double x2, double y2, double alpha)
 {
     cr->save();
     cr->rectangle(x, y, x2 - x, y2 - y);
     cr->clip();
-    gdk_cairo_set_source_pixbuf(cr->cobj(), pixbuf, x, y);
+    Gdk::Cairo::set_source_pixbuf(cr, pixbuf, x, y);
     cr->paint_with_alpha(alpha);
     cr->restore();
 }

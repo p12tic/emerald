@@ -42,8 +42,6 @@
 #include <gtk/gtkwindow.h>
 #include <gdk/gdkx.h>
 
-#define IS_VALID(o) (o && o->parent_instance.ref_count)
-
 #ifdef USE_DBUS
 #define DBUS_API_SUBJECT_TO_CHANGE
 #include <dbus/dbus.h>
@@ -198,17 +196,17 @@ struct window_settings {
     bool use_pixmap_buttons;// = false;
     double  corner_radius;//    =   5.0;
     Pango::Alignment title_text_align;// = PANGO_ALIGN_CENTER;
-    GdkPixbuf* ButtonPix[S_COUNT* B_COUNT];
-    GdkPixbuf* ButtonArray[B_COUNT];
+    Glib::RefPtr<Gdk::Pixbuf> ButtonPix[S_COUNT* B_COUNT];
+    Glib::RefPtr<Gdk::Pixbuf> ButtonArray[B_COUNT];
 
     bool    use_button_glow;
     bool    use_button_inactive_glow;
     bool    use_decoration_cropping;
     bool    use_button_fade;
-    GdkPixbuf* ButtonGlowPix[B_COUNT];
-    GdkPixbuf* ButtonGlowArray;
-    GdkPixbuf* ButtonInactiveGlowArray;
-    GdkPixbuf* ButtonInactiveGlowPix[B_COUNT];
+    Glib::RefPtr<Gdk::Pixbuf> ButtonGlowPix[B_COUNT];
+    Glib::RefPtr<Gdk::Pixbuf> ButtonGlowArray;
+    Glib::RefPtr<Gdk::Pixbuf> ButtonInactiveGlowArray;
+    Glib::RefPtr<Gdk::Pixbuf> ButtonInactiveGlowPix[B_COUNT];
     int         button_fade_num_steps;        // number of steps
     int         button_fade_step_duration;    // step duration in milliseconds
     int         button_fade_pulse_len_steps;  // length of pulse (number of steps)
@@ -252,10 +250,10 @@ struct window_settings {
     int shadow_bottom_corner_space;// = 0;
 
 
-    GdkPixmap* shadow_pixmap;// = NULL;
-    GdkPixmap* large_shadow_pixmap;// = NULL;
-    GdkPixmap* decor_normal_pixmap;// = NULL;
-    GdkPixmap* decor_active_pixmap;// = NULL;
+    Glib::RefPtr<Gdk::Pixmap> shadow_pixmap;
+    Glib::RefPtr<Gdk::Pixmap> large_shadow_pixmap;
+    Glib::RefPtr<Gdk::Pixmap> decor_normal_pixmap;
+    Glib::RefPtr<Gdk::Pixmap> decor_active_pixmap;
 
     Cairo::RefPtr<Cairo::SurfacePattern> shadow_pattern;// = NULL;
 
@@ -265,8 +263,8 @@ struct window_settings {
     Glib::RefPtr<Pango::Context> pango_context;
 
     decor_extents_t switcher_extents;// = { 0, 0, 0, 0 };
-    GdkPixmap* switcher_pixmap;// = NULL;
-    GdkPixmap* switcher_buffer_pixmap;// = NULL;
+    Glib::RefPtr<Gdk::Pixmap> switcher_pixmap;// = NULL;
+    Glib::RefPtr<Gdk::Pixmap> switcher_buffer_pixmap;// = NULL;
     int      switcher_width;
     int      switcher_height;
 
@@ -315,7 +313,7 @@ struct button_region_t {
 
     // holds whether this button's glow overlap with the other button's non-glow (base) area
     bool    overlap_buttons[B_T_COUNT];
-    GdkPixmap* bg_pixmap;
+    Glib::RefPtr<Gdk::Pixmap> bg_pixmap;
 };
 
 struct decor_t {
@@ -330,9 +328,9 @@ struct decor_t {
     int tobj_item_pos[11];
     int tobj_item_state[11];
     int tobj_item_width[11];
-    GdkPixmap*         pixmap;
-    GdkPixmap*         buffer_pixmap;
-    GdkGC*         gc;
+    Glib::RefPtr<Gdk::Pixmap> pixmap;
+    Glib::RefPtr<Gdk::Pixmap> buffer_pixmap;
+    Glib::RefPtr<Gdk::GC> gc;
     int          width;
     int          height;
     int              client_width;
@@ -342,8 +340,8 @@ struct decor_t {
     Glib::RefPtr<Pango::Layout> layout;
     std::string        name;
     Cairo::RefPtr<Cairo::Pattern> icon;
-    GdkPixmap*         icon_pixmap;
-    GdkPixbuf*         icon_pixbuf;
+    Glib::RefPtr<Gdk::Pixmap> icon_pixmap;
+    Glib::RefPtr<Gdk::Pixbuf> icon_pixbuf;
     Wnck::WindowState   state;
     Wnck::WindowActions actions;
     XID           prop_xid;
@@ -355,8 +353,8 @@ struct decor_t {
     bool          draw_only_buttons_region;
     int              button_last_drawn_state[B_T_COUNT]; // last drawn state or fade counter
     button_fade_info_t button_fade_info;
-    GdkPixmap* p_active, * p_active_buffer;
-    GdkPixmap* p_inactive, * p_inactive_buffer;
+    Glib::RefPtr<Gdk::Pixmap> p_active, p_active_buffer;
+    Glib::RefPtr<Gdk::Pixmap> p_inactive, p_inactive_buffer;
     button_region_t   button_region_inact[B_T_COUNT];
     bool only_change_active;
 };

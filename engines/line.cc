@@ -68,7 +68,7 @@ void draw_shadow_background(decor_t* d, Cairo::RefPtr<Cairo::Context>& cr)
         return;
     }
 
-    gdk_drawable_get_size(ws->large_shadow_pixmap, &width, &height);
+    ws->large_shadow_pixmap->get_size(width, height);
 
     left = ws->left_space + ws->left_corner_space;
     right = ws->right_space + ws->right_corner_space;

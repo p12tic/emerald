@@ -24,50 +24,33 @@
 #include <libengine/format.h>
 #include <X11/Xatom.h>
 
-GdkPixmap* create_pixmap(int w, int h)
+Glib::RefPtr<Gdk::Pixmap> create_pixmap(int w, int h)
 {
-    GdkPixmap* pixmap;
-    GdkVisual* visual;
-    GdkColormap* colormap;
-
-    visual = gdk_visual_get_best_with_depth(32);
-    if (!visual) {
-        return NULL;
+    try {
+        Glib::RefPtr<Gdk::Drawable> empty;
+        auto visual = Gdk::Visual::get_best(32);
+        auto pixmap = Gdk::Pixmap::create(empty, w, h, 32);
+        auto colormap = Gdk::Colormap::create(visual, false);
+        pixmap->set_colormap(colormap);
+        return pixmap;
+    } catch (...) {
+        return {};
     }
-
-    pixmap = gdk_pixmap_new(NULL, w, h, 32);
-    if (!pixmap) {
-        return NULL;
-    }
-
-    colormap = gdk_colormap_new(visual, false);
-    if (!colormap) {
-        g_object_unref(G_OBJECT(pixmap));
-        return NULL;
-    }
-
-    gdk_drawable_set_colormap(GDK_DRAWABLE(pixmap), colormap);
-    g_object_unref(G_OBJECT(colormap));
-
-    return pixmap;
 }
 
-GdkPixmap* pixmap_new_from_pixbuf(GdkPixbuf* pixbuf)
+Glib::RefPtr<Gdk::Pixmap> pixmap_new_from_pixbuf(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf)
 {
-    GdkPixmap* pixmap;
-    unsigned width, height;
 
-    width = gdk_pixbuf_get_width(pixbuf);
-    height = gdk_pixbuf_get_height(pixbuf);
+    unsigned width = pixbuf->get_width();
+    unsigned height = pixbuf->get_height();
 
-    pixmap = create_pixmap(width, height);
+    Glib::RefPtr<Gdk::Pixmap> pixmap = create_pixmap(width, height);
     if (!pixmap) {
-        return NULL;
+        return pixmap;
     }
 
-    auto* g_cr = gdk_cairo_create(GDK_DRAWABLE(pixmap));
-    Cairo::RefPtr<Cairo::Context> cr{new Cairo::Context(g_cr, true)};
-    gdk_cairo_set_source_pixbuf(cr->cobj(), pixbuf, 0, 0);
+    Cairo::RefPtr<Cairo::Context> cr = pixmap->create_cairo_context();
+    Gdk::Cairo::set_source_pixbuf(cr, pixbuf);
     cr->set_operator(Cairo::OPERATOR_SOURCE);
     cr->paint();
 
@@ -334,23 +317,14 @@ void update_window_decoration_icon(Wnck::Window* win)
     decor_t* d = get_decor(win);
 
     d->icon.clear();
+    d->icon_pixmap.clear();
+    d->icon_pixbuf.clear();
 
-    if (d->icon_pixmap) {
-        g_object_unref(G_OBJECT(d->icon_pixmap));
-        d->icon_pixmap = NULL;
-    }
+    d->icon_pixbuf = win->get_mini_icon();
     if (d->icon_pixbuf) {
-        g_object_unref(G_OBJECT(d->icon_pixbuf));
-    }
-
-    d->icon_pixbuf = wnck_window_get_mini_icon(win->gobj());
-    if (d->icon_pixbuf) {
-
-        g_object_ref(G_OBJECT(d->icon_pixbuf));
 
         d->icon_pixmap = pixmap_new_from_pixbuf(d->icon_pixbuf);
-        auto* g_cr = gdk_cairo_create(GDK_DRAWABLE(d->icon_pixmap));
-        Cairo::RefPtr<Cairo::Context> cr {new Cairo::Context(g_cr, true)};
+        Cairo::RefPtr<Cairo::Context> cr = d->icon_pixmap->create_cairo_context();
         d->icon = Cairo::SurfacePattern::create(cr->get_target());
     }
 }
@@ -416,8 +390,8 @@ void update_window_decoration_actions(Wnck::Window* win)
 bool update_window_decoration_size(Wnck::Window* win)
 {
     decor_t* d = get_decor(win);
-    GdkPixmap* pixmap, *buffer_pixmap = NULL;
-    GdkPixmap* ipixmap, *ibuffer_pixmap = NULL;
+    Glib::RefPtr<Gdk::Pixmap> pixmap, buffer_pixmap;
+    Glib::RefPtr<Gdk::Pixmap> ipixmap, ibuffer_pixmap;
     int width, height;
 
     window_settings* ws = d->fs->ws;
@@ -458,7 +432,6 @@ bool update_window_decoration_size(Wnck::Window* win)
                       ws->left_space + ws->right_space +
                       ws->bottom_space);
     if (!buffer_pixmap) {
-        g_object_unref(G_OBJECT(pixmap));
         return false;
     }
 
@@ -472,25 +445,11 @@ bool update_window_decoration_size(Wnck::Window* win)
                                    ws->left_space + ws->right_space +
                                    ws->bottom_space);
 
-    if (d->p_active) {
-        g_object_unref(G_OBJECT(d->p_active));
-    }
-
-    if (d->p_active_buffer) {
-        g_object_unref(G_OBJECT(d->p_active_buffer));
-    }
-
-    if (d->p_inactive) {
-        g_object_unref(G_OBJECT(d->p_inactive));
-    }
-
-    if (d->p_inactive_buffer) {
-        g_object_unref(G_OBJECT(d->p_inactive_buffer));
-    }
-
-    if (d->gc) {
-        g_object_unref(G_OBJECT(d->gc));
-    }
+    d->p_active.clear();
+    d->p_active_buffer.clear();
+    d->p_inactive.clear();
+    d->p_inactive_buffer.clear();
+    d->gc.clear();
 
     d->only_change_active = false;
 
@@ -500,7 +459,7 @@ bool update_window_decoration_size(Wnck::Window* win)
     d->p_active_buffer = buffer_pixmap;
     d->p_inactive = ipixmap;
     d->p_inactive_buffer = ibuffer_pixmap;
-    d->gc = gdk_gc_new(pixmap);
+    d->gc = Gdk::GC::create(pixmap);
 
     d->width = width;
     d->height = height;
@@ -593,7 +552,6 @@ void add_frame_window(Wnck::Window* win, Window frame)
 bool update_switcher_window(Wnck::Window* win, Window selected)
 {
     decor_t* d = get_decor(win);
-    GdkPixmap* pixmap, *buffer_pixmap = NULL;
     int height, width = 0;
     Wnck::Window* selected_win;
     window_settings* ws = d->fs->ws;
@@ -608,13 +566,11 @@ bool update_switcher_window(Wnck::Window* win, Window selected)
     d->decorated = false;
     d->draw = draw_switcher_decoration;
 
-    if (!IS_VALID(d->pixmap) && IS_VALID(ws->switcher_pixmap)) {
-        g_object_ref(G_OBJECT(ws->switcher_pixmap));
+    if (!d->pixmap) {
         d->pixmap = ws->switcher_pixmap;
     }
 
-    if (!IS_VALID(d->buffer_pixmap) && IS_VALID(ws->switcher_buffer_pixmap)) {
-        g_object_ref(G_OBJECT(ws->switcher_buffer_pixmap));
+    if (!d->buffer_pixmap) {
         d->buffer_pixmap = ws->switcher_buffer_pixmap;
     }
 
@@ -668,12 +624,8 @@ bool update_switcher_window(Wnck::Window* win, Window selected)
     }
 
     if (width == d->width && height == d->height) {
-        if (!d->gc) {
-            if (d->pixmap->parent_instance.ref_count) {
-                d->gc = gdk_gc_new(d->pixmap);
-            } else {
-                d->pixmap = NULL;
-            }
+        if (!d->gc && d->pixmap) {
+            d->gc = Gdk::GC::create(d->pixmap);
         }
 
         if (d->pixmap) {
@@ -682,35 +634,14 @@ bool update_switcher_window(Wnck::Window* win, Window selected)
         }
     }
 
-    pixmap = create_pixmap(width, height);
+    Glib::RefPtr<Gdk::Pixmap> pixmap = create_pixmap(width, height);
     if (!pixmap) {
         return false;
     }
 
-    buffer_pixmap = create_pixmap(width, height);
+    Glib::RefPtr<Gdk::Pixmap> buffer_pixmap = create_pixmap(width, height);
     if (!buffer_pixmap) {
-        g_object_unref(G_OBJECT(pixmap));
         return false;
-    }
-
-    if (ws->switcher_pixmap) {
-        g_object_unref(G_OBJECT(ws->switcher_pixmap));
-    }
-
-    if (ws->switcher_buffer_pixmap) {
-        g_object_unref(G_OBJECT(ws->switcher_buffer_pixmap));
-    }
-
-    if (d->pixmap) {
-        g_object_unref(G_OBJECT(d->pixmap));
-    }
-
-    if (d->buffer_pixmap) {
-        g_object_unref(G_OBJECT(d->buffer_pixmap));
-    }
-
-    if (d->gc) {
-        g_object_unref(G_OBJECT(d->gc));
     }
 
     ws->switcher_pixmap = pixmap;
@@ -719,12 +650,9 @@ bool update_switcher_window(Wnck::Window* win, Window selected)
     ws->switcher_width = width;
     ws->switcher_height = height;
 
-    g_object_ref(G_OBJECT(pixmap));
-    g_object_ref(G_OBJECT(buffer_pixmap));
-
     d->pixmap = pixmap;
     d->buffer_pixmap = buffer_pixmap;
-    d->gc = gdk_gc_new(pixmap);
+    d->gc = Gdk::GC::create(pixmap);
 
     d->width = width;
     d->height = height;
@@ -742,42 +670,15 @@ void remove_frame_window(Wnck::Window* win)
 {
     decor_t* d = get_decor(win);
 
-    if (d->p_active) {
-        g_object_unref(G_OBJECT(d->p_active));
-        d->p_active = NULL;
-    }
+    d->p_active.clear();
+    d->p_active_buffer.clear();
+    d->p_inactive.clear();
+    d->p_inactive_buffer.clear();
+    d->gc.clear();
 
-    if (d->p_active_buffer) {
-        g_object_unref(G_OBJECT(d->p_active_buffer));
-        d->p_active_buffer = NULL;
-    }
-
-    if (d->p_inactive) {
-        g_object_unref(G_OBJECT(d->p_inactive));
-        d->p_inactive = NULL;
-    }
-
-    if (d->p_inactive_buffer) {
-        g_object_unref(G_OBJECT(d->p_inactive_buffer));
-        d->p_inactive_buffer = NULL;
-    }
-
-    if (d->gc) {
-        g_object_unref(G_OBJECT(d->gc));
-        d->gc = NULL;
-    }
-
-    int b_t;
-
-    for (b_t = 0; b_t < B_T_COUNT; b_t++) {
-        if (d->button_region[b_t].bg_pixmap) {
-            g_object_unref(G_OBJECT(d->button_region[b_t].bg_pixmap));
-            d->button_region[b_t].bg_pixmap = NULL;
-        }
-        if (d->button_region_inact[b_t].bg_pixmap) {
-            g_object_unref(G_OBJECT(d->button_region_inact[b_t].bg_pixmap));
-            d->button_region_inact[b_t].bg_pixmap = NULL;
-        }
+    for (int b_t = 0; b_t < B_T_COUNT; b_t++) {
+        d->button_region[b_t].bg_pixmap.clear();
+        d->button_region_inact[b_t].bg_pixmap.clear();
     }
     d->button_fade_info.cr.clear();
 
@@ -789,15 +690,8 @@ void remove_frame_window(Wnck::Window* win)
     d->layout.clear();
     d->icon.clear();
 
-    if (d->icon_pixmap) {
-        g_object_unref(G_OBJECT(d->icon_pixmap));
-        d->icon_pixmap = NULL;
-    }
-
-    if (d->icon_pixbuf) {
-        g_object_unref(G_OBJECT(d->icon_pixbuf));
-        d->icon_pixbuf = NULL;
-    }
+    d->icon_pixmap.clear();
+    d->icon_pixbuf.clear();
 
     if (d->force_quit_dialog) {
         auto dlg = d->force_quit_dialog;

@@ -22,8 +22,8 @@
 
 #include <libengine/emerald.h>
 
-GdkPixmap* create_pixmap(int w, int h);
-GdkPixmap* pixmap_new_from_pixbuf(GdkPixbuf* pixbuf);
+Glib::RefPtr<Gdk::Pixmap> create_pixmap(int w, int h);
+Glib::RefPtr<Gdk::Pixmap> pixmap_new_from_pixbuf(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf);
 void position_title_object(char obj, Wnck::Window* win, window_settings* ws,
                            int x, int s);
 void layout_title_objects(Wnck::Window* win);

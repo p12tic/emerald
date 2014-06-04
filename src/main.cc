@@ -138,13 +138,13 @@ update_default_decorations(GdkScreen* screen, frame_settings* fs_act,
     if (ws->shadow_pixmap) {
         int width, height;
 
-        gdk_drawable_get_size(ws->shadow_pixmap, &width, &height);
+        ws->shadow_pixmap->get_size(width, height);
 
         nQuad = set_shadow_quads(quads, width, height, ws);
 
         data = decor_alloc_property(1, WINDOW_DECORATION_TYPE_PIXMAP);
 
-        decor_quads_to_property(data, 0, GDK_PIXMAP_XID(ws->shadow_pixmap),
+        decor_quads_to_property(data, 0, GDK_PIXMAP_XID(ws->shadow_pixmap->gobj()),
                                 &ws->shadow_extents, &ws->shadow_extents, &ws->shadow_extents, &ws->shadow_extents,
                                 0, 0, quads, nQuad, 0xffffff, 0, 0);
 
@@ -168,7 +168,6 @@ update_default_decorations(GdkScreen* screen, frame_settings* fs_act,
 
     extents.top += ws->titlebar_height;
 
-    d.buffer_pixmap = NULL;
     d.state = static_cast<Wnck::WindowState>(0);
     d.actions = static_cast<Wnck::WindowActions>(0);
     d.prop_xid = 0;
@@ -177,12 +176,8 @@ update_default_decorations(GdkScreen* screen, frame_settings* fs_act,
 
     reset_buttons_bg_and_fade(&d);
 
-    if (ws->decor_normal_pixmap) {
-        g_object_unref(G_OBJECT(ws->decor_normal_pixmap));
-    }
-    if (ws->decor_active_pixmap) {
-        g_object_unref(G_OBJECT(ws->decor_active_pixmap));
-    }
+    ws->decor_normal_pixmap.clear();
+    ws->decor_active_pixmap.clear();
 
     nQuad = my_set_window_quads(quads, d.width, d.height, ws, false, false);
 
@@ -191,13 +186,9 @@ update_default_decorations(GdkScreen* screen, frame_settings* fs_act,
                                           ws->top_space + ws->left_space + ws->right_space +
                                           ws->bottom_space + ws->titlebar_height);
 
-    g_object_ref(G_OBJECT(ws->decor_active_pixmap));
-
     if (ws->decor_normal_pixmap && ws->decor_active_pixmap) {
         d.p_inactive = ws->decor_normal_pixmap;
         d.p_active = ws->decor_active_pixmap;
-        d.p_active_buffer = NULL;
-        d.p_inactive_buffer = NULL;
         d.active = false;
         d.fs = fs_inact;
 
@@ -207,11 +198,11 @@ update_default_decorations(GdkScreen* screen, frame_settings* fs_act,
             data = decor_alloc_property(1, WINDOW_DECORATION_TYPE_PIXMAP);
         }
 
-        decor_quads_to_property(data, 0, GDK_PIXMAP_XID(d.p_inactive),
+        decor_quads_to_property(data, 0, GDK_PIXMAP_XID(d.p_inactive->gobj()),
                                 &extents, &extents, &extents, &extents,
                                 0, 0, quads, nQuad, 0xffffff, 0, 0);
 
-        decor_quads_to_property(data, 0, GDK_PIXMAP_XID(d.p_active),
+        decor_quads_to_property(data, 0, GDK_PIXMAP_XID(d.p_active->gobj()),
                                 &extents, &extents, &extents, &extents,
                                 0, 0, quads, nQuad, 0xffffff, 0, 0);
 
@@ -1183,7 +1174,6 @@ int update_shadow(frame_settings* fs)
 {
     Display* xdisplay = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
     XRenderPictFormat* format;
-    GdkPixmap* pixmap;
     Picture src, dst, tmp;
     XFilters* filters;
     const char* filter = NULL;
@@ -1255,7 +1245,6 @@ int update_shadow(frame_settings* fs)
     ws->switcher_bottom_corner_space =
         MAX(0, ws->bottom_corner_space - SWITCHER_SPACE);
 
-    d.buffer_pixmap = NULL;
     d.state = static_cast<Wnck::WindowState>(0);
     d.actions = static_cast<Wnck::WindowActions>(0);
     d.prop_xid = 0;
@@ -1279,30 +1268,22 @@ int update_shadow(frame_settings* fs)
     /* shadow color */
     src = XRenderCreateSolidFill(xdisplay, &color);
 
-    if (ws->large_shadow_pixmap) {
-        g_object_unref(G_OBJECT(ws->large_shadow_pixmap));
-        ws->large_shadow_pixmap = NULL;
-    }
-
+    ws->large_shadow_pixmap.clear();
     ws->shadow_pattern.clear();
-
-    if (ws->shadow_pixmap) {
-        g_object_unref(G_OBJECT(ws->shadow_pixmap));
-        ws->shadow_pixmap = NULL;
-    }
+    ws->shadow_pixmap.clear();
 
     /* no shadow */
     if (size <= 0) {
         return 1;
     }
 
-    pixmap = create_pixmap(d.width, d.height);
+    auto pixmap = create_pixmap(d.width, d.height);
     if (!pixmap) {
         return 0;
     }
 
     /* query server for convolution filter */
-    filters = XRenderQueryFilters(xdisplay, GDK_PIXMAP_XID(pixmap));
+    filters = XRenderQueryFilters(xdisplay, GDK_PIXMAP_XID(pixmap->gobj()));
     if (filters) {
         int i;
 
@@ -1319,7 +1300,6 @@ int update_shadow(frame_settings* fs)
     if (!filter) {
         std::cerr << "can't generate shadows, X server doesn't support "
                      "convolution filters\n";
-        g_object_unref(G_OBJECT(pixmap));
         return 1;
     }
 
@@ -1327,16 +1307,15 @@ int update_shadow(frame_settings* fs)
 
     d.pixmap = create_pixmap(d.width, d.height);
     if (!d.pixmap) {
-        g_object_unref(G_OBJECT(pixmap));
         return 0;
     }
 
     /* draw decorations */
     (*d.draw)(&d);
 
-    dst = XRenderCreatePicture(xdisplay, GDK_PIXMAP_XID(d.pixmap),
+    dst = XRenderCreatePicture(xdisplay, GDK_PIXMAP_XID(d.pixmap->gobj()),
                                format, 0, NULL);
-    tmp = XRenderCreatePicture(xdisplay, GDK_PIXMAP_XID(pixmap),
+    tmp = XRenderCreatePicture(xdisplay, GDK_PIXMAP_XID(pixmap->gobj()),
                                format, 0, NULL);
 
     /* first pass */
@@ -1362,12 +1341,9 @@ int update_shadow(frame_settings* fs)
     XRenderFreePicture(xdisplay, tmp);
     XRenderFreePicture(xdisplay, dst);
 
-    g_object_unref(G_OBJECT(pixmap));
-
     ws->large_shadow_pixmap = d.pixmap;
 
-    auto g_cr = gdk_cairo_create(GDK_DRAWABLE(ws->large_shadow_pixmap));
-    auto cr = Cairo::RefPtr<Cairo::Context>{new Cairo::Context{g_cr, true}};
+    auto cr = ws->large_shadow_pixmap->create_cairo_context();
 
     ws->shadow_pattern = Cairo::SurfacePattern::create(cr->get_target());
     ws->shadow_pattern->set_filter(Cairo::FILTER_NEAREST);
@@ -1386,11 +1362,10 @@ int update_shadow(frame_settings* fs)
 
     d.pixmap = create_pixmap(d.width, d.height);
     if (!d.pixmap) {
-        g_object_unref(G_OBJECT(pixmap));
         return 0;
     }
 
-    dst = XRenderCreatePicture(xdisplay, GDK_PIXMAP_XID(d.pixmap),
+    dst = XRenderCreatePicture(xdisplay, GDK_PIXMAP_XID(d.pixmap->gobj()),
                                format, 0, NULL);
 
     /* draw rectangle */
@@ -1404,7 +1379,7 @@ int update_shadow(frame_settings* fs)
                          d.height - ws->shadow_top_space -
                          ws->shadow_bottom_space);
 
-    tmp = XRenderCreatePicture(xdisplay, GDK_PIXMAP_XID(pixmap),
+    tmp = XRenderCreatePicture(xdisplay, GDK_PIXMAP_XID(pixmap->gobj()),
                                format, 0, NULL);
 
     /* first pass */
@@ -1431,8 +1406,6 @@ int update_shadow(frame_settings* fs)
     XRenderFreePicture(xdisplay, dst);
     XRenderFreePicture(xdisplay, src);
 
-    g_object_unref(G_OBJECT(pixmap));
-
     ws->shadow_pixmap = d.pixmap;
 
     return 1;
@@ -1452,30 +1425,33 @@ void titlebar_font_changed(window_settings* ws)
     }
 }
 
+Glib::RefPtr<Gdk::Pixbuf> load_from_file(const std::string& fn)
+{
+    try {
+        return Gdk::Pixbuf::create_from_file(fn);
+    } catch (...) {
+        return Glib::RefPtr<Gdk::Pixbuf>{nullptr};
+    }
+}
+
 void load_buttons_image(window_settings* ws, int y)
 {
     int rel_button = get_b_offset(y);
 
-    if (ws->ButtonArray[y]) {
-        g_object_unref(ws->ButtonArray[y]);
-    }
+    ws->ButtonArray[y].clear();
     std::string file = make_filename("buttons", b_types[y], "png");
-    if (!(ws->ButtonArray[y] = gdk_pixbuf_new_from_file(file.c_str(), NULL))) {
-        ws->ButtonArray[y] = gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, 16 * S_COUNT, 16);    // create a blank pixbuf
+    if (!(ws->ButtonArray[y] = load_from_file(file))) {
+        ws->ButtonArray[y] = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, true, 8, 16 * S_COUNT, 16);    // create a blank pixbuf
     }
 
-    int pix_width = gdk_pixbuf_get_width(ws->ButtonArray[y]) / S_COUNT;
-    int pix_height = gdk_pixbuf_get_height(ws->ButtonArray[y]);
+    int pix_width = ws->ButtonArray[y]->get_width() / S_COUNT;
+    int pix_height = ws->ButtonArray[y]->get_height();
     ws->c_icon_size[rel_button].w = pix_width;
     ws->c_icon_size[rel_button].h = pix_height;
     for (unsigned x = 0; x < S_COUNT; x++) {
-        if (ws->ButtonPix[x + y * S_COUNT]) {
-            g_object_unref(ws->ButtonPix[x + y * S_COUNT]);
-        }
-
         ws->ButtonPix[x + y * S_COUNT] =
-            gdk_pixbuf_new_subpixbuf(ws->ButtonArray[y], x * pix_width, 0,
-                                     pix_width, pix_height);
+            Gdk::Pixbuf::create_subpixbuf(ws->ButtonArray[y], x * pix_width, 0,
+                                          pix_width, pix_height);
     }
 }
 
@@ -1487,72 +1463,58 @@ void load_buttons_glow_images(window_settings* ws)
     bool success2 = false;
 
     if (ws->use_button_glow) {
-        if (ws->ButtonGlowArray) {
-            g_object_unref(ws->ButtonGlowArray);
-        }
         std::string file1 = make_filename("buttons", "glow", "png");
-        if ((ws->ButtonGlowArray = gdk_pixbuf_new_from_file(file1.c_str(), NULL))) {
+        if ((ws->ButtonGlowArray = load_from_file(file1))) {
             success1 = true;
         }
     }
     if (ws->use_button_inactive_glow) {
-        if (ws->ButtonInactiveGlowArray) {
-            g_object_unref(ws->ButtonInactiveGlowArray);
-        }
         std::string file2 = make_filename("buttons", "inactive_glow", "png");
-        if ((ws->ButtonInactiveGlowArray =
-                     gdk_pixbuf_new_from_file(file2.c_str(), NULL))) {
+        if ((ws->ButtonInactiveGlowArray = load_from_file(file2))) {
             success2 = true;
         }
     }
     if (success1 && success2) {
-        pix_width = gdk_pixbuf_get_width(ws->ButtonGlowArray) / B_COUNT;
-        pix_height = gdk_pixbuf_get_height(ws->ButtonGlowArray);
-        pix_width2 =
-            gdk_pixbuf_get_width(ws->ButtonInactiveGlowArray) / B_COUNT;
-        pix_height2 = gdk_pixbuf_get_height(ws->ButtonInactiveGlowArray);
+        pix_width = ws->ButtonGlowArray->get_width() / B_COUNT;
+        pix_height = ws->ButtonGlowArray->get_height();
+        pix_width2 = ws->ButtonInactiveGlowArray->get_width() / B_COUNT;
+        pix_height2 = ws->ButtonInactiveGlowArray->get_height();
 
         if (pix_width != pix_width2 || pix_height != pix_height2) {
             g_warning
             ("Choose same size glow images for active and inactive windows."
              "\nInactive glow image is scaled for now.");
             // Scale the inactive one
-            GdkPixbuf* tmp_pixbuf =
-                gdk_pixbuf_new(gdk_pixbuf_get_colorspace
-                               (ws->ButtonGlowArray),
-                               true,
-                               gdk_pixbuf_get_bits_per_sample(ws->
-                                       ButtonGlowArray),
-                               pix_width * B_COUNT,
-                               pix_height);
+            auto tmppix = Gdk::Pixbuf::create(ws->ButtonGlowArray->get_colorspace(),
+                                              true, ws->ButtonGlowArray->get_bits_per_sample(),
+                                              pix_width * B_COUNT, pix_height);
 
-            gdk_pixbuf_scale(ws->ButtonInactiveGlowArray, tmp_pixbuf,
-                             0, 0,
-                             pix_width * B_COUNT, pix_height,
-                             0, 0,
-                             pix_width / (double)pix_width2,
-                             pix_height / (double)pix_height2,
-                             GDK_INTERP_BILINEAR);
-            g_object_unref(ws->ButtonInactiveGlowArray);
-            ws->ButtonInactiveGlowArray = tmp_pixbuf;
+            ws->ButtonInactiveGlowArray->scale(tmppix, 0, 0,
+                                               pix_width * B_COUNT, pix_height,
+                                               0, 0,
+                                               pix_width / (double)pix_width2,
+                                               pix_height / (double)pix_height2,
+                                               Gdk::INTERP_BILINEAR);
+            ws->ButtonInactiveGlowArray = tmppix;
         }
     } else {
         pix_width = 16;
         pix_height = 16;
         if (success1) {
-            pix_width = gdk_pixbuf_get_width(ws->ButtonGlowArray) / B_COUNT;
-            pix_height = gdk_pixbuf_get_height(ws->ButtonGlowArray);
+            pix_width = ws->ButtonGlowArray->get_width() / B_COUNT;
+            pix_height = ws->ButtonGlowArray->get_height();
         } else if (success2) {
-            pix_width =
-                gdk_pixbuf_get_width(ws->ButtonInactiveGlowArray) /
-                B_COUNT;
-            pix_height = gdk_pixbuf_get_height(ws->ButtonInactiveGlowArray);
+            pix_width = ws->ButtonInactiveGlowArray->get_width() / B_COUNT;
+            pix_height = ws->ButtonInactiveGlowArray->get_height();
         }
         if (!success1 && ws->use_button_glow) {
-            ws->ButtonGlowArray = gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, pix_width * B_COUNT, pix_height);    // create a blank pixbuf
+            ws->ButtonGlowArray = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, true, 8,
+                                                      pix_width * B_COUNT, pix_height);    // create a blank pixbuf
         }
         if (!success2 && ws->use_button_inactive_glow) {
-            ws->ButtonInactiveGlowArray = gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, pix_width * B_COUNT, pix_height);    // create a blank pixbuf
+            ws->ButtonInactiveGlowArray =
+                    Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, true, 8,
+                                        pix_width * B_COUNT, pix_height);    // create a blank pixbuf
         }
     }
     ws->c_glow_size.w = pix_width;
@@ -1560,24 +1522,18 @@ void load_buttons_glow_images(window_settings* ws)
 
     if (ws->use_button_glow) {
         for (unsigned x = 0; x < B_COUNT; x++) {
-            if (ws->ButtonGlowPix[x]) {
-                g_object_unref(ws->ButtonGlowPix[x]);
-            }
             ws->ButtonGlowPix[x] =
-                gdk_pixbuf_new_subpixbuf(ws->ButtonGlowArray,
-                                         x * pix_width, 0, pix_width,
-                                         pix_height);
+                Gdk::Pixbuf::create_subpixbuf(ws->ButtonGlowArray,
+                                              x * pix_width, 0, pix_width,
+                                              pix_height);
         }
     }
     if (ws->use_button_inactive_glow) {
         for (unsigned x = 0; x < B_COUNT; x++) {
-            if (ws->ButtonInactiveGlowPix[x]) {
-                g_object_unref(ws->ButtonInactiveGlowPix[x]);
-            }
             ws->ButtonInactiveGlowPix[x] =
-                gdk_pixbuf_new_subpixbuf(ws->ButtonInactiveGlowArray,
-                                         x * pix_width, 0, pix_width,
-                                         pix_height);
+                Gdk::Pixbuf::create_subpixbuf(ws->ButtonInactiveGlowArray,
+                                              x * pix_width, 0, pix_width,
+                                              pix_height);
         }
     }
 }
@@ -1848,10 +1804,6 @@ int main(int argc, char* argv[])
 
     program_name = argv[0];
 
-    //ws->ButtonBase = NULL;
-    for (i = 0; i < (S_COUNT * B_COUNT); i++) {
-        ws->ButtonPix[i] = NULL;
-    }
     Gtk::Main kit(argc, argv);
     Wnck::init();
     gdk_error_trap_push();
