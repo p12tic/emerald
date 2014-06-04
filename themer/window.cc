@@ -1025,9 +1025,9 @@ void ThemerWindow::cb_refilter(Glib::RefPtr<Gtk::TreeModelFilter> filt)
     filt->refilter();
 }
 
-bool ThemerWindow::is_visible(const Gtk::TreeModel::const_iterator& iter, Gtk::Entry& e)
+bool ThemerWindow::is_visible(const Gtk::TreeModel::const_iterator& iter)
 {
-    std::string tx = e.get_text();
+    std::string tx = searchbox_->get_text();
     if (tx.empty()) {
         return true;
     }
@@ -1049,9 +1049,9 @@ bool ThemerWindow::is_visible(const Gtk::TreeModel::const_iterator& iter, Gtk::E
     return false;
 }
 
-void ThemerWindow::cb_clearbox(Gtk::Entry& w)
+void ThemerWindow::cb_clearbox()
 {
-    w.set_text("");
+    searchbox_->set_text("");
 }
 
 void ThemerWindow::cb_import()
@@ -1086,13 +1086,12 @@ Gtk::Widget* ThemerWindow::build_tree_view()
     //create data store
     theme_model_ = Gtk::ListStore::create(theme_columns_);
 
-    auto& searchbox = *Gtk::manage(new Gtk::Entry());
-    hbox.pack_start(searchbox, true, true, 0);
+    searchbox_ = Gtk::manage(new Gtk::Entry());
+    hbox.pack_start(*searchbox_, true, true, 0);
 
     auto& clearbut = *Gtk::manage(new Gtk::Button(Gtk::Stock::CLEAR));
     clearbut.signal_clicked().connect(
-                sigc::bind(sigc::mem_fun(*this, &ThemerWindow::cb_clearbox),
-                           std::ref(searchbox)));
+                sigc::mem_fun(*this, &ThemerWindow::cb_clearbox));
     hbox.pack_start(clearbut, false, false, 0);
 
     hbox.pack_start(*Gtk::manage(new Gtk::VSeparator()), false, false);
@@ -1120,10 +1119,10 @@ Gtk::Widget* ThemerWindow::build_tree_view()
 
     /* Do not delete, TODO: properly convert to gtkmm
     auto filt = Gtk::TreeModelFilter::create(theme_model_);
-    filt->set_visible_func(sigc::bind(&is_visible, std::ref(searchbox)));
+    filt->set_visible_func(sigc::mem_fun(*this, &ThemerWindow::is_visible));
 
     auto sort = Gtk::TreeModelSort::create(filt);
-    searchbox.signal_changed().connect(sigc::bind(&cb_refilter, filt));
+    searchbox_->signal_changed().connect(sigc::bind(&cb_refilter, filt));
     */
     theme_selector_ = Gtk::manage(new Gtk::TreeView(theme_model_));
     theme_selector_->set_headers_clickable();

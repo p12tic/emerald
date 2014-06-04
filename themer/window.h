@@ -85,8 +85,8 @@ public:
     void layout_lower_pane(Gtk::Box& vbox);
     Gtk::Box* build_lower_pane(Gtk::Box& vbox);
     void cb_refilter(Glib::RefPtr<Gtk::TreeModelFilter> filt);
-    bool is_visible(const Gtk::TreeModel::const_iterator& iter, Gtk::Entry& e);
-    void cb_clearbox(Gtk::Entry& w);
+    bool is_visible(const Gtk::TreeModel::const_iterator& iter);
+    void cb_clearbox();
     void cb_import();
     Gtk::Widget* build_tree_view();
     void import_cache(Gtk::ProgressBar& progbar);
@@ -145,6 +145,7 @@ private:
     Gtk::Button* export_button_;
     std::string svnpath;
     std::string themecache;
+    Gtk::Entry* searchbox_;
 
 };
 
