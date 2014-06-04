@@ -18,6 +18,7 @@
 */
 
 #include "window.h"
+#include "compat.h"
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>

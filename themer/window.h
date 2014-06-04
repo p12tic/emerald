@@ -22,8 +22,6 @@
 
 #include <libengine/emerald.h>
 
-#define LAST_COMPAT_VER "0.1.0"
-
 struct FetcherInfo;
 
 class ThemerWindow {

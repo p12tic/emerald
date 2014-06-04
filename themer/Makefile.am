@@ -4,7 +4,7 @@ include $(top_srcdir)/common.am
 
 emerald_theme_manager_SOURCES = main.cc window.cc
 
-noinst_HEADERS = window.h
+noinst_HEADERS = window.h compat.h
 
 emerald_theme_manager_LDFLAGS =         \
     $(BOOST_FILESYSTEM_LDFLAGS)         \

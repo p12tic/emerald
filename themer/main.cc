@@ -27,8 +27,7 @@
 #include <gtkmm.h>
 #include <functional>
 #include "window.h"
-
-#define LAST_COMPAT_VER "0.1.0"
+#include "compat.h"
 
 namespace fs = boost::filesystem;
 
