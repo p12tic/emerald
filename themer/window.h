@@ -21,6 +21,7 @@
 #define EMERALD_THEMER_WINDOW_H
 
 #include <libengine/emerald.h>
+#include <libengine/libengine.h>
 
 struct FetcherInfo;
 
@@ -45,30 +46,32 @@ public:
     void cb_save();
     void cb_delete(Gtk::Widget* w);
     bool cb_main_destroy(GdkEventAny*);
-    void layout_button_box(Gtk::Box& vbox, int b_t);
+    void layout_button_box(SettingsTable& tbl, Gtk::Box& vbox, int b_t);
     void layout_general_buttons_frame(Gtk::Box& hbox);
     void layout_button_pane(Gtk::Box& vbox);
     void layout_window_frame(Gtk::Box& vbox, bool active);
-    void add_row(Gtk::Box& vbox, Gtk::Widget& item, const std::string& title);
-    void add_color_button_row(Gtk::Box& vbox, const std::string& title,
+    void add_row(SettingsTable& tbl, Gtk::Box& vbox, Gtk::Widget& item,
+                 const std::string& title);
+    void add_color_button_row(SettingsTable& tbl, Gtk::Box& vbox,
+                              const std::string& title,
                               const std::string& key, const std::string& sect);
-    void add_int_range_row(Gtk::Box& vbox, const std::string& title,
-                           const std::string& key,
+    void add_int_range_row(SettingsTable& tbl, Gtk::Box& vbox,
+                           const std::string& title, const std::string& key,
                            int start, int end, const std::string& sect);
-    void add_float_range_row(Gtk::Box& vbox, const std::string& title,
-                             const std::string& key,
+    void add_float_range_row(SettingsTable& tbl, Gtk::Box& vbox,
+                             const std::string& title, const std::string& key,
                              double start, double end, double prec,
                              const std::string& sect);
     void layout_shadows_frame(Gtk::Box& vbox);
     void layout_title_frame(Gtk::Box& vbox);
-    void add_meta_string_value(const std::string& title,
+    void add_meta_string_value(SettingsTable& tbl, const std::string& title,
                                const std::string& key);
     void cb_export();
     void layout_file_frame(Gtk::Box& vbox);
     void layout_info_frame(Gtk::Box& vbox);
 
-    void add_border_slider(const std::string& text, const std::string& key,
-                           int value);
+    void add_border_slider(SettingsTable& tbl, const std::string& text,
+                           const std::string& key, int value);
     void layout_borders_frame(Gtk::Box& vbox);
     void layout_left_frame_pane(Gtk::Box& hbox);
     void layout_right_frame_pane(Gtk::Box& hbox);

@@ -595,31 +595,31 @@ void my_engine_settings(Gtk::Box& hbox, bool active)
     scroller.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
     vbox.pack_start(scroller, true, true);
 
-    table_new(3, false, false);
+    SettingsTable tbl(3, false, false);
 
-    scroller.add(get_current_table());
+    scroller.add(tbl.table());
 
-    make_labels(_("Colors"));
-    table_append_separator();
-    add_color_alpha_value(_("Left Blend"), "title_left", SECT, active);
-    add_color_alpha_value(_("Middle Blend"), "title_middle", SECT, active);
-    add_color_alpha_value(_("Right Blend"), "title_right", SECT, active);
+    tbl.append_header(_("Colors"));
+    tbl.append_separator();
+    tbl.append_acolor(_("Left Blend"), "title_left", SECT, active);
+    tbl.append_acolor(_("Middle Blend"), "title_middle", SECT, active);
+    tbl.append_acolor(_("Right Blend"), "title_right", SECT, active);
 
-    table_append_separator();
-    table_append(*Gtk::manage(new Gtk::Label(_("Contrast"))), false);
-    table_append(*Gtk::manage(new Gtk::Label(_("Color"))), false);
+    tbl.append_separator();
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Contrast"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Color"))), false);
     scaler = scaler_new(0, 1, 0.01);
-    table_append(*scaler, false);
+    tbl.append(*scaler, false);
     if (active) {
         SettingItem::create(*scaler, SECT, "active_color_contrast");
     } else {
         SettingItem::create(*scaler, SECT, "inactive_color_contrast");
     }
 
-    table_append(*Gtk::manage(new Gtk::Label(_("Contrast"))), false);
-    table_append(*Gtk::manage(new Gtk::Label(_("(Alpha)"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Contrast"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("(Alpha)"))), false);
     scaler = scaler_new(0, 1, 0.01);
-    table_append(*scaler, false);
+    tbl.append(*scaler, false);
 
     if (active) {
         SettingItem::create(*scaler, SECT, "active_alpha_contrast");
@@ -627,29 +627,29 @@ void my_engine_settings(Gtk::Box& hbox, bool active)
         SettingItem::create(*scaler, SECT, "inactive_alpha_contrast");
     }
 
-    table_append(*Gtk::manage(new Gtk::Label(_("Notch"))), false);
-    table_append(*Gtk::manage(new Gtk::Label(_("Position"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Notch"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Position"))), false);
     scaler = scaler_new(0, 1, 0.01);
     scaler->set_value(0.5);
-    table_append(*scaler, false);
+    tbl.append(*scaler, false);
     if (active) {
         SettingItem::create(*scaler, SECT, "active_title_notch_position");
     } else {
         SettingItem::create(*scaler, SECT, "inactive_title_notch_position");
     }
 
-    table_append(*Gtk::manage(new Gtk::Label(_("Curve"))), false);
-    table_append(*Gtk::manage(new Gtk::Label(_("Offset"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Curve"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Offset"))), false);
     scaler = scaler_new(-100, 100, 0.1);
     scaler->set_value(0);
-    table_append(*scaler, false);
+    tbl.append(*scaler, false);
     if (active) {
         SettingItem::create(*scaler, SECT, "active_curve_offset");
     } else {
         SettingItem::create(*scaler, SECT, "inactive_curve_offset");
     }
 
-    table_append_separator();
+    tbl.append_separator();
 
     Gtk::CheckButton* btn;
     btn = Gtk::manage(new Gtk::CheckButton(_("Use Glow")));
@@ -661,30 +661,30 @@ void my_engine_settings(Gtk::Box& hbox, bool active)
         SettingItem::create(*btn, SECT, "inactive_use_glow");
     }
 
-    add_color_alpha_value(_("Title Glow"), "glow_inner", SECT, active);
-    table_append(*Gtk::manage(new Gtk::Label("Glow")), false);
-    table_append(*Gtk::manage(new Gtk::Label(_("Radius"))), false);
+    tbl.append_acolor(_("Title Glow"), "glow_inner", SECT, active);
+    tbl.append(*Gtk::manage(new Gtk::Label("Glow")), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Radius"))), false);
     scaler = scaler_new(0, 25, 0.1);
     scaler->set_value(7.0);
-    table_append(*scaler, false);
+    tbl.append(*scaler, false);
     if (active) {
         SettingItem::create(*scaler, SECT, "active_glow_radius");
     } else {
         SettingItem::create(*scaler, SECT, "inactive_glow_radius");
     }
 
-    table_append_separator();
-    add_color_alpha_value(_("Titlebar Separator"), "separator_line", SECT, active);
+    tbl.append_separator();
+    tbl.append_acolor(_("Titlebar Separator"), "separator_line", SECT, active);
 
-    table_append_separator();
-    add_color_alpha_value(_("Frame Outline"), "window_halo", SECT, active);
-    add_color_alpha_value(_("Frame Highlight"), "window_highlight", SECT, active);
-    add_color_alpha_value("Frame Shadow", "window_shadow", SECT, active);
+    tbl.append_separator();
+    tbl.append_acolor(_("Frame Outline"), "window_halo", SECT, active);
+    tbl.append_acolor(_("Frame Highlight"), "window_highlight", SECT, active);
+    tbl.append_acolor("Frame Shadow", "window_shadow", SECT, active);
 
-    table_append_separator();
-    add_color_alpha_value(_("Contents Outline"), "contents_halo", SECT, active);
-    add_color_alpha_value(_("Contents Highlight"), "contents_highlight", SECT, active);
-    add_color_alpha_value("Contents Shadow", "contents_shadow", SECT, active);
+    tbl.append_separator();
+    tbl.append_acolor(_("Contents Outline"), "contents_halo", SECT, active);
+    tbl.append_acolor(_("Contents Highlight"), "contents_highlight", SECT, active);
+    tbl.append_acolor("Contents Shadow", "contents_shadow", SECT, active);
 }
 
 void layout_engine_colors(Gtk::Box& vbox)

@@ -227,14 +227,14 @@ void my_engine_settings(Gtk::Box& hbox, bool active)
     scroller.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
     vbox.pack_start(scroller, true, true);
 
-    table_new(3, false, false);
+    SettingsTable tbl(3, false, false);
 
-    scroller.add(get_current_table());
+    scroller.add(tbl.table());
 
-    make_labels(_("Colors"));
-    table_append_separator();
-    add_color_alpha_value(_("Outer Frame Blend"), "border", SECT, active);
-    add_color_alpha_value(_("Title Bar"), "title_bar", SECT, active);
+    tbl.append_header(_("Colors"));
+    tbl.append_separator();
+    tbl.append_acolor(_("Outer Frame Blend"), "border", SECT, active);
+    tbl.append_acolor(_("Title Bar"), "title_bar", SECT, active);
 }
 
 void layout_engine_colors(Gtk::Box& vbox)

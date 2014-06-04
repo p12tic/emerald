@@ -583,19 +583,19 @@ void my_engine_settings(Gtk::Box& hbox, bool active)
     scroller.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
     vbox.pack_start(scroller, true, true);
 
-    table_new(3, false, false);
+    SettingsTable tbl(3, false, false);
 
-    scroller.add(get_current_table());
+    scroller.add(tbl.table());
 
-    make_labels("Colors");
-    table_append_separator();
-    add_color_alpha_value(_("Outer Frame Blend"), "outer", SECT, active);
-    add_color_alpha_value(_("Inner Frame Blend"), "inner", SECT, active);
-    table_append_separator();
-    add_color_alpha_value(_("Outer Titlebar Blend"), "title_outer", SECT, active);
-    add_color_alpha_value(_("Inner Titlebar Blend"), "title_inner", SECT, active);
-    table_append_separator();
-    add_color_alpha_value(_("Titlebar Separator"), "separator_line", SECT, active);
+    tbl.append_header("Colors");
+    tbl.append_separator();
+    tbl.append_acolor(_("Outer Frame Blend"), "outer", SECT, active);
+    tbl.append_acolor(_("Inner Frame Blend"), "inner", SECT, active);
+    tbl.append_separator();
+    tbl.append_acolor(_("Outer Titlebar Blend"), "title_outer", SECT, active);
+    tbl.append_acolor(_("Inner Titlebar Blend"), "title_inner", SECT, active);
+    tbl.append_separator();
+    tbl.append_acolor(_("Titlebar Separator"), "separator_line", SECT, active);
 }
 
 void layout_engine_colors(Gtk::Box& vbox)
@@ -607,16 +607,16 @@ void layout_engine_colors(Gtk::Box& vbox)
     my_engine_settings(hbox, false);
 }
 
-void layout_pixmap_box(Gtk::Box& vbox, int b_t, bool active)
+void layout_pixmap_box(SettingsTable& tbl, Gtk::Box& vbox, int b_t, bool active)
 {
     (void) vbox;
     std::string pre = active ? "active" : "inactive";
     std::string key = pre + "_" + p_types[b_t];
 
-    table_append(*Gtk::manage(new Gtk::Label(names[b_t])), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(names[b_t])), false);
     std::string fc_title = std::string(names[b_t]) + " Pixmap";
     auto& filesel = *Gtk::manage(new Gtk::FileChooserButton(fc_title, Gtk::FILE_CHOOSER_ACTION_OPEN));
-    table_append(filesel, false);
+    tbl.append(filesel, false);
 
     Gtk::FileFilter filter;
     filter.set_name("Images");
@@ -631,20 +631,20 @@ void layout_pixmap_box(Gtk::Box& vbox, int b_t, bool active)
     auto* item = SettingItem::register_img_file_setting(filesel, "pixmaps",
                                                         key.c_str(), &image);
     scroller.add(image);
-    table_append(scroller, true);
+    tbl.append(scroller, true);
 
     auto& clearer = *Gtk::manage(new Gtk::Button(Gtk::Stock::CLEAR));
     clearer.signal_clicked().connect([item](){ cb_clear_file(item); });
-    table_append(clearer, false);
+    tbl.append(clearer, false);
 
     // Style : Use Tiled or Scaled pixmaps
     auto& use_scaled = *Gtk::manage(new Gtk::ToggleButton(_("Scaled")));
     SettingItem::create(use_scaled, SECT, (key + "_use_scaled").c_str());
-    table_append(use_scaled, false);
+    tbl.append(use_scaled, false);
 
     // Width : Checkbox (Use my width) + Number (0-500)
     if (b_t == 0 || b_t == 5 || b_t == 8) {
-        table_append(*Gtk::manage(new Gtk::Label(_("Not adjustable"))), false);
+        tbl.append(*Gtk::manage(new Gtk::Label(_("Not adjustable"))), false);
     } else {
         auto& width = *Gtk::manage(new Gtk::SpinButton(1));
         width.set_range(0, 500);
@@ -656,7 +656,7 @@ void layout_pixmap_box(Gtk::Box& vbox, int b_t, bool active)
         auto& tbox = *Gtk::manage(new Gtk::HBox(false, 2));
         tbox.pack_start(width, false, false);
         tbox.pack_start(use_my_width, false, false);
-        table_append(tbox, false);
+        tbl.append(tbox, false);
     }
 
     // Height : Checkbox (Use my width) + Number (0-500)
@@ -673,9 +673,9 @@ void layout_pixmap_box(Gtk::Box& vbox, int b_t, bool active)
         auto& tbox = *Gtk::manage(new Gtk::HBox(false, 2));
         tbox.pack_start(height, false, false);
         tbox.pack_start(use_my_height, false, false);
-        table_append(tbox, false);
+        tbl.append(tbox, false);
     } else {
-        table_append(*Gtk::manage(new Gtk::Label(_("Not adjustable"))), false);
+        tbl.append(*Gtk::manage(new Gtk::Label(_("Not adjustable"))), false);
     }
 }
 
@@ -694,19 +694,19 @@ void layout_engine_pixmaps(Gtk::Box& vbox, bool active)
     scroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
     vbox.pack_start(scroller, true, true);
 
-    table_new(7, false, false);
-    scroller.add(get_current_table());
+    SettingsTable tbl(7, false, false);
+    scroller.add(tbl.table());
 
-    table_append(*Gtk::manage(new Gtk::Label(_("Pixmap"))), false);
-    table_append(*Gtk::manage(new Gtk::Label(_("File"))), false);
-    table_append(*Gtk::manage(new Gtk::Label(_("Preview"))), false);
-    table_append(*Gtk::manage(new Gtk::Label(_("Clear"))), false);
-    table_append(*Gtk::manage(new Gtk::Label(_("Tiled/Scaled"))), false);
-    table_append(*Gtk::manage(new Gtk::Label(_("Width Override"))), false);
-    table_append(*Gtk::manage(new Gtk::Label(_("Height Override"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Pixmap"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("File"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Preview"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Clear"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Tiled/Scaled"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Width Override"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Height Override"))), false);
 
     for (int i = 0; i < 11; i++) {
-        layout_pixmap_box(vbox, i, active);
+        layout_pixmap_box(tbl, vbox, i, active);
     }
 }
 

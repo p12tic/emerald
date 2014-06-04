@@ -71,31 +71,32 @@ Gtk::Scale* scaler_new(double low, double high, double prec)
     return w;
 }
 
-void add_color_alpha_value(const std::string& caption, const std::string& basekey,
-                           const std::string& sect, bool active)
+void SettingsTable::append_acolor(const std::string& caption,
+                                          const std::string& basekey,
+                                          const std::string& sect, bool active)
 {
     std::string colorkey = active ? "active_" : "inactive_";
     colorkey += basekey;
     std::string alphakey = active ? "active_" : "inactive_";
     alphakey += basekey + "_alpha";
 
-    table_append(*Gtk::manage(new Gtk::Label(caption)), false);
+    append(*Gtk::manage(new Gtk::Label(caption)), false);
 
     auto* color_btn = Gtk::manage(new Gtk::ColorButton());
-    table_append(*color_btn, false);
+    append(*color_btn, false);
     SettingItem::create(*color_btn, sect, colorkey);
 
     auto* scaler = scaler_new(0.0, 1.0, 0.01);
-    table_append(*scaler, true);
+    append(*scaler, true);
     SettingItem::create(*scaler, sect, alphakey);
     //we don't g_free because they are registered with SettingItem::create
 }
 
-void make_labels(const std::string& header)
+void SettingsTable::append_header(const std::string& header)
 {
-    table_append(*Gtk::manage(new Gtk::Label(header)), false);
-    table_append(*Gtk::manage(new Gtk::Label("Color")), false);
-    table_append(*Gtk::manage(new Gtk::Label("Opacity")), false);
+    append(*Gtk::manage(new Gtk::Label(header)), false);
+    append(*Gtk::manage(new Gtk::Label("Color")), false);
+    append(*Gtk::manage(new Gtk::Label("Opacity")), false);
 }
 
 Gtk::Box* build_frame(Gtk::Box& vbox, const std::string& title, bool is_hbox)
@@ -113,53 +114,39 @@ Gtk::Box* build_frame(Gtk::Box& vbox, const std::string& title, bool is_hbox)
     return box;
 }
 
-static int current_table_width;
-static Gtk::Table* current_table_;
-static int current_table_col;
-static int current_table_row;
-
-void table_new(int width, bool same, bool labels)
+SettingsTable::SettingsTable(int width, bool same, bool labels)
 {
-    //WARNING - clobbers all the current_table_ vars.
-    current_table_ = Gtk::manage(new Gtk::Table());
-    current_table_->set_homogeneous(same);
-    current_table_->resize(1, width);
-    current_table_->set_row_spacings(8);
-    current_table_->set_col_spacings(8);
-    current_table_col = labels ? 1 : 0;
-    current_table_row = 0;
-    current_table_width = width;
+    table_ = Gtk::manage(new Gtk::Table());
+    table_->set_homogeneous(same);
+    table_->resize(1, width);
+    table_->set_row_spacings(8);
+    table_->set_col_spacings(8);
+    col_ = labels ? 1 : 0;
+    row_ = 0;
+    width_ = width;
 }
 
-void table_append(Gtk::Widget& child, bool stretch)
+void SettingsTable::append(Gtk::Widget& child, bool stretch)
 {
-    current_table_->attach(child, current_table_col, current_table_col+1,
-                           current_table_row, current_table_row+1,
-                           (stretch ? Gtk::EXPAND : Gtk::SHRINK) | Gtk::FILL,
-                           (stretch ? Gtk::EXPAND : Gtk::SHRINK) | Gtk::FILL);
-    current_table_col++;
-    if (current_table_col == current_table_width) {
-        current_table_col = 0;
-        current_table_row++;
-    //  current_table_.resize(current_table_row+1, current_table_width);
+    table_->attach(child, col_, col_+1, row_, row_+1,
+                   (stretch ? Gtk::EXPAND : Gtk::SHRINK) | Gtk::FILL,
+                   (stretch ? Gtk::EXPAND : Gtk::SHRINK) | Gtk::FILL);
+    col_++;
+    if (col_ == width_) {
+        col_ = 0;
+        width_++;
+    //  table_.resize(row_+1, width_);
     }
 }
 
-void table_append_separator()
+void SettingsTable::append_separator()
 {
-    current_table_col = 0;
-    current_table_row++;
-//  current_table_->resize(current_table_row+1, current_table_width);
-    current_table_->attach(*Gtk::manage(new Gtk::HSeparator()),
-                           0, current_table_width,
-                           current_table_row, current_table_row+1);
-    current_table_row++;
-//  current_table_.resize(current_table_row+1, current_table_width);
-}
-
-Gtk::Table& get_current_table()
-{
-    return *current_table_;
+    col_ = 0;
+    row_++;
+//  table_->resize(current_table_row+1, current_table_width);
+    table_->attach(*Gtk::manage(new Gtk::HSeparator()), 0, width_, row_, row_+1);
+    row_++;
+//  table_.resize(row_+1, width);
 }
 
 void send_reload_signal()

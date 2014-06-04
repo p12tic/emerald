@@ -76,16 +76,28 @@ rounded_rectangle(Cairo::RefPtr<Cairo::Context>& cr,
 bool get_engine_meta_info(const std::string& engine, EngineMetaInfo* inf);   // returns false if couldn't find engine
 
 Gtk::Scale* scaler_new(double low, double high, double prec);
-void add_color_alpha_value(const std::string& caption, const std::string& basekey,
-                           const std::string& sect, bool active);
 
-void make_labels(const std::string& header);
 Gtk::Box* build_frame(Gtk::Box& vbox, const std::string& title, bool is_hbox);
 
-void table_new(int width, bool same, bool labels);
-void table_append(Gtk::Widget& child, bool stretch);
-void table_append_separator();
-Gtk::Table& get_current_table();
+class SettingsTable {
+public:
+    SettingsTable(int width, bool same, bool labels);
+
+    void append_acolor(const std::string& caption, const std::string& basekey,
+                       const std::string& sect, bool active);
+    void append_header(const std::string& header);
+
+    void append(Gtk::Widget& child, bool stretch);
+    void append_separator();
+
+    Gtk::Table& table() { return *table_; }
+
+private:
+    Gtk::Table* table_;
+    int width_;
+    int col_;
+    int row_;
+};
 
 void send_reload_signal();
 void apply_settings();

@@ -491,14 +491,14 @@ bool ThemerWindow::cb_main_destroy(GdkEventAny*)
     return true;
 }
 
-void ThemerWindow::layout_button_box(Gtk::Box& vbox, int b_t)
+void ThemerWindow::layout_button_box(SettingsTable& tbl, Gtk::Box& vbox, int b_t)
 {
     (void) vbox;
-    table_append(*Gtk::manage(new Gtk::Label(b_names[b_t])), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(b_names[b_t])), false);
     std::string bt_nm = std::string(b_names[b_t]) + " Button Pixmap";
     auto& filesel = *Gtk::manage(new Gtk::FileChooserButton(bt_nm,
                                           Gtk::FILE_CHOOSER_ACTION_OPEN));
-    table_append(filesel, false);
+    tbl.append(filesel, false);
 
     Gtk::FileFilter filter;
     filter.set_name("Images");
@@ -510,11 +510,11 @@ void ThemerWindow::layout_button_box(Gtk::Box& vbox, int b_t)
     SettingItem* item;
     item = SettingItem::register_img_file_setting(filesel, "buttons", b_types[b_t], &image);
 
-    table_append(image, true);
+    tbl.append(image, true);
 
     auto& clearer = *Gtk::manage(new Gtk::Button(Gtk::Stock::CLEAR));
     clearer.signal_clicked().connect([=](){ cb_clear_file(item); });
-    table_append(clearer, false);
+    tbl.append(clearer, false);
 }
 
 void ThemerWindow::layout_general_buttons_frame(Gtk::Box& hbox)
@@ -552,16 +552,16 @@ void ThemerWindow::layout_button_pane(Gtk::Box& vbox)
     scroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
     vbox.pack_start(scroller, true, true);
 
-    table_new(4, false, false);
-    scroller.add(get_current_table());
+    SettingsTable tbl(4, false, false);
+    scroller.add(tbl.table());
 
-    table_append(*Gtk::manage(new Gtk::Label(_("Button"))), false);
-    table_append(*Gtk::manage(new Gtk::Label(_("File"))), false);
-    table_append(*Gtk::manage(new Gtk::Label(_("Preview"))), false);
-    table_append(*Gtk::manage(new Gtk::Label(_("Clear"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Button"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("File"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Preview"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Clear"))), false);
 
     for (i = 0; i < BX_COUNT; i++) {
-        layout_button_box(vbox, i);
+        layout_button_box(tbl, vbox, i);
     }
 }
 
@@ -571,63 +571,66 @@ void ThemerWindow::layout_window_frame(Gtk::Box& vbox, bool active)
     vbox.pack_start(scrollwin, true, true);
     scrollwin.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
-    table_new(3, false, false);
-    scrollwin.add(get_current_table());
-    make_labels(_("Colors"));
-    add_color_alpha_value(_("Text Fill"), "text", "titlebar", active);
-    add_color_alpha_value(_("Text Outline"), "text_halo", "titlebar", active);
-    table_append_separator();
-    add_color_alpha_value(_("Button Fill"), "button", "buttons", active);
-    add_color_alpha_value(_("Button Outline"), "button_halo", "buttons", active);
+    SettingsTable tbl(3, false, false);
+    scrollwin.add(tbl.table());
+    tbl.append_header(_("Colors"));
+    tbl.append_acolor(_("Text Fill"), "text", "titlebar", active);
+    tbl.append_acolor(_("Text Outline"), "text_halo", "titlebar", active);
+    tbl.append_separator();
+    tbl.append_acolor(_("Button Fill"), "button", "buttons", active);
+    tbl.append_acolor(_("Button Outline"), "button_halo", "buttons", active);
 }
 
-void ThemerWindow::add_row(Gtk::Box& vbox, Gtk::Widget& item,
-                           const std::string& title)
+void ThemerWindow::add_row(SettingsTable& tbl, Gtk::Box& vbox,
+                           Gtk::Widget& item, const std::string& title)
 {
     (void) vbox;
     //vbox.pack_start(*Gtk::manage(new Gtk::Label(title)),false,false);
     //vbox.pack_end(item,true,true,0);
-    table_append(*Gtk::manage(new Gtk::Label(title)), false);
-    table_append(item, true);
+    tbl.append(*Gtk::manage(new Gtk::Label(title)), false);
+    tbl.append(item, true);
 }
 
-void ThemerWindow::add_color_button_row(Gtk::Box& vbox, const std::string& title,
+void ThemerWindow::add_color_button_row(SettingsTable& tbl, Gtk::Box& vbox,
+                                        const std::string& title,
                                         const std::string& key,
                                         const std::string& sect)
 {
     auto& color_button = *Gtk::manage(new Gtk::ColorButton());
     SettingItem::create(color_button, sect, key);
-    add_row(vbox, color_button, title);
+    add_row(tbl, vbox, color_button, title);
 }
 
-void ThemerWindow::add_int_range_row(Gtk::Box& vbox, const std::string& title,
+void ThemerWindow::add_int_range_row(SettingsTable& tbl, Gtk::Box& vbox,
+                                     const std::string& title,
                                      const std::string& key,
                                      int start, int end, const std::string& sect)
 {
     auto& scaler = *scaler_new(start, end, 1);
     SettingItem::create(scaler, sect, key);
-    add_row(vbox, scaler, title);
+    add_row(tbl, vbox, scaler, title);
 }
 
-void ThemerWindow::add_float_range_row(Gtk::Box& vbox, const std::string& title,
+void ThemerWindow::add_float_range_row(SettingsTable& tbl, Gtk::Box& vbox,
+                                       const std::string& title,
                                        const std::string& key,
                                        double start, double end, double prec,
                                        const std::string& sect)
 {
     auto& scaler = *scaler_new(start, end, prec);
     SettingItem::create(scaler, sect, key);
-    add_row(vbox, scaler, title);
+    add_row(tbl, vbox, scaler, title);
 }
 
 void ThemerWindow::layout_shadows_frame(Gtk::Box& vbox)
 {
-    table_new(2, false, false);
-    vbox.pack_start(get_current_table(), false, false);
-    add_color_button_row(vbox, _("Color"), "shadow_color", "shadow");
-    add_float_range_row(vbox, _("Opacity"), "shadow_opacity", 0.01, 6.0, 0.01, "shadow");
-    add_float_range_row(vbox, _("Radius"), "shadow_radius", 0.0, 48.0, 0.1, "shadow");
-    add_int_range_row(vbox, _("X Offset"), "shadow_offset_x", -16, 16, "shadow");
-    add_int_range_row(vbox, _("Y Offset"), "shadow_offset_y", -16, 16, "shadow");
+    SettingsTable tbl(2, false, false);
+    vbox.pack_start(tbl.table(), false, false);
+    add_color_button_row(tbl, vbox, _("Color"), "shadow_color", "shadow");
+    add_float_range_row(tbl, vbox, _("Opacity"), "shadow_opacity", 0.01, 6.0, 0.01, "shadow");
+    add_float_range_row(tbl, vbox, _("Radius"), "shadow_radius", 0.0, 48.0, 0.1, "shadow");
+    add_int_range_row(tbl, vbox, _("X Offset"), "shadow_offset_x", -16, 16, "shadow");
+    add_int_range_row(tbl, vbox, _("Y Offset"), "shadow_offset_y", -16, 16, "shadow");
 }
 
 void ThemerWindow::layout_title_frame(Gtk::Box& vbox)
@@ -643,24 +646,24 @@ void ThemerWindow::layout_title_frame(Gtk::Box& vbox)
     hbox.pack_start(fontbtn, false, false);
     SettingItem::create(fontbtn, "titlebar", "titlebar_font");
 
-    table_new(2, false, false);
-    vbox.pack_start(get_current_table(), false, false);
-    table_append(*Gtk::manage(new Gtk::Label(_("Minimum Title-bar Height"))), false);
+    SettingsTable tbl(2, false, false);
+    vbox.pack_start(tbl.table(), false, false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Minimum Title-bar Height"))), false);
     scaler = scaler_new(0, 64, 1);
     scaler->set_value(17);
-    table_append(*scaler, true);
+    tbl.append(*scaler, true);
     SettingItem::create(*scaler, "titlebar", "min_titlebar_height");
 
-    table_append(*Gtk::manage(new Gtk::Label(_("Vertical Button Offset"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Vertical Button Offset"))), false);
     scaler = scaler_new(0, 64, 1);
     scaler->set_value(1);
-    table_append(*scaler, true);
+    tbl.append(*scaler, true);
     SettingItem::create(*scaler, "buttons", "vertical_offset");
 
-    table_append(*Gtk::manage(new Gtk::Label(_("Horizontal Button Offset"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Horizontal Button Offset"))), false);
     scaler = scaler_new(0, 64, 1);
     scaler->set_value(1);
-    table_append(*scaler, true);
+    tbl.append(*scaler, true);
     SettingItem::create(*scaler, "buttons", "horizontal_offset");
 
     {
@@ -691,12 +694,13 @@ void ThemerWindow::layout_title_frame(Gtk::Box& vbox)
     SettingItem::create(*btn,ST_BOOL,SECT,"use_active_colors");*/
 }
 
-void ThemerWindow::add_meta_string_value(const std::string& title,
+void ThemerWindow::add_meta_string_value(SettingsTable& tbl,
+                                         const std::string& title,
                                          const std::string& key)
 {
-    table_append(*Gtk::manage(new Gtk::Label(title)), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(title)), false);
     auto& entry = *Gtk::manage(new Gtk::Entry());
-    table_append(entry, true);
+    tbl.append(entry, true);
     SettingItem::create(entry, "theme", key);
 }
 
@@ -748,44 +752,46 @@ void ThemerWindow::layout_file_frame(Gtk::Box& vbox)
 
 void ThemerWindow::layout_info_frame(Gtk::Box& vbox)
 {
-    table_new(2, false, false);
-    vbox.pack_start(get_current_table(), false, false);
-    add_meta_string_value(_("Creator"), "creator");
-    add_meta_string_value(_("Description"), "description");
-    add_meta_string_value(_("Theme Version"), "theme_version");
-    add_meta_string_value(_("Suggested Widget Theme"), "suggested");
+    SettingsTable tbl(2, false, false);
+    vbox.pack_start(tbl.table(), false, false);
+    add_meta_string_value(tbl, _("Creator"), "creator");
+    add_meta_string_value(tbl, _("Description"), "description");
+    add_meta_string_value(tbl, _("Theme Version"), "theme_version");
+    add_meta_string_value(tbl, _("Suggested Widget Theme"), "suggested");
 
-    table_append_separator();
+    tbl.append_separator();
 
-    table_append(*Gtk::manage(new Gtk::Label(_("Themer Version"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Themer Version"))), false);
 
     version_entry_ = Gtk::manage(new Gtk::Entry);
     version_entry_->set_editable(false);
     version_entry_->set_sensitive(false);
-    table_append(*version_entry_, true);
+    tbl.append(*version_entry_, true);
 }
 
-void ThemerWindow::add_border_slider(const std::string& text, const std::string& key,
+void ThemerWindow::add_border_slider(SettingsTable& tbl,
+                                     const std::string& text,
+                                     const std::string& key,
                                      int value)
 {
-    table_append(*Gtk::manage(new Gtk::Label(text)), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(text)), false);
 
     auto& scaler = *scaler_new(0, 20, 1);
-    table_append(scaler, true);
+    tbl.append(scaler, true);
     scaler.set_value(value);
     SettingItem::create(scaler, "borders", key);
 }
 
 void ThemerWindow::layout_borders_frame(Gtk::Box& vbox)
 {
-    table_new(2, false, false);
-    vbox.pack_start(get_current_table(), false, false, 0);
-    table_append(*Gtk::manage(new Gtk::Label(_("Border"))), false);
-    table_append(*Gtk::manage(new Gtk::Label(_("Size"))), false);
-    add_border_slider(_("Top"), "top", 4);
-    add_border_slider(_("Bottom"), "bottom", 6);
-    add_border_slider(_("Left"), "left", 6);
-    add_border_slider(_("Right"), "right", 6);
+    SettingsTable tbl(2, false, false);
+    vbox.pack_start(tbl.table(), false, false, 0);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Border"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Size"))), false);
+    add_border_slider(tbl, _("Top"), "top", 4);
+    add_border_slider(tbl, _("Bottom"), "bottom", 6);
+    add_border_slider(tbl, _("Left"), "left", 6);
+    add_border_slider(tbl, _("Right"), "right", 6);
     vbox.pack_start(*Gtk::manage(new Gtk::Label(
                             _("Note, when changing these values,\n"
                               "it is advised that you do something\n"
@@ -926,59 +932,59 @@ void ThemerWindow::layout_settings_pane(Gtk::Box& vbox)
     vbox.pack_start(*btn, false, false);
     SettingItem::create_global(*btn, "buttons", "use_button_fade_pulse");
 
-    table_new(2, false, false);
-    vbox.pack_start(get_current_table(), false, false);
+    SettingsTable tbl(2, false, false);
+    vbox.pack_start(tbl.table(), false, false);
 
-    table_append(*Gtk::manage(new Gtk::Label(_("Button Fade Total Duration"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Button Fade Total Duration"))), false);
     Gtk::Scale* scaler;
     scaler = scaler_new(1, 4000, 1);
     scaler->set_value(250);
-    table_append(*scaler, true);
+    tbl.append(*scaler, true);
     SettingItem::create_global(*scaler, "buttons", "button_fade_total_duration");
 
-    table_append(*Gtk::manage(new Gtk::Label(_("Button Fade Step Duration"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Button Fade Step Duration"))), false);
     scaler = scaler_new(1, 2000, 1);
     scaler->set_value(50);
-    table_append(*scaler, true);
+    tbl.append(*scaler, true);
     SettingItem::create(*scaler, "buttons", "button_fade_step_duration");
 
-    table_append(*Gtk::manage(new Gtk::Label(_("Button Pulse Wait Duration"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Button Pulse Wait Duration"))), false);
     scaler = scaler_new(0, 4000, 1);
     scaler->set_value(0);
-    table_append(*scaler, true);
+    tbl.append(*scaler, true);
     SettingItem::create(*scaler, "buttons", "button_fade_pulse_wait_duration");
 
-    table_append(*Gtk::manage(new Gtk::Label(_("Button Pulse Min Opacity %"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Button Pulse Min Opacity %"))), false);
     scaler = scaler_new(0, 100, 1);
     scaler->set_value(0);
-    table_append(*scaler, true);
+    tbl.append(*scaler, true);
     SettingItem::create_global(*scaler, "buttons", "button_fade_pulse_min_opacity");
 
-    table_append(*Gtk::manage(new Gtk::Label(_("Titlebar Double-Click Action"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Titlebar Double-Click Action"))), false);
 
     Gtk::ComboBoxText* combo = Gtk::manage(new Gtk::ComboBoxText());
     for (int i = 0; i < TITLEBAR_ACTION_COUNT; i++) {
         combo->append_text(titlebar_action_name[i]);
     }
     combo->set_active(0);
-    table_append(*combo, true);
+    tbl.append(*combo, true);
     SettingItem::create_global(*combo, "titlebars", "double_click_action");
 
-    table_append(*Gtk::manage(new Gtk::Label(_("Button Hover Cursor"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Button Hover Cursor"))), false);
     combo = Gtk::manage(new Gtk::ComboBoxText());
     combo->append_text(_("Normal"));
     combo->append_text(_("Pointing Finger"));
     combo->set_active(1);
-    table_append(*combo, true);
+    tbl.append(*combo, true);
     SettingItem::create_global(*combo, "buttons", "hover_cursor");
 
-    table_append(*Gtk::manage(new Gtk::Label(_("Compiz Decoration Blur Type"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Compiz Decoration Blur Type"))), false);
     combo = Gtk::manage(new Gtk::ComboBoxText());
     combo->append_text(_("None"));
     combo->append_text(_("Titlebar only"));
     combo->append_text(_("All decoration"));
     combo->set_active(BLUR_TYPE_NONE);
-    table_append(*combo, true);
+    tbl.append(*combo, true);
     SettingItem::create_global(*combo, "decorations", "blur_type");
 }
 
@@ -1255,30 +1261,30 @@ void ThemerWindow::layout_repo_pane(Gtk::Box& vbox)
     vbox.pack_start(hbox, true, true);
 
 
-    table_new(2, true, false);
-    hbox.pack_start(get_current_table(), false, false, 0);
+    SettingsTable tbl(2, true, false);
+    hbox.pack_start(tbl.table(), false, false, 0);
 
     fetch_button_ = Gtk::manage(new Gtk::Button("Fetch GPL'd Themes"));
     auto& im1 = *Gtk::manage(new Gtk::Image(Gtk::Stock::CONNECT, Gtk::ICON_SIZE_BUTTON));
     fetch_button_->set_image(im1);
-    table_append(*fetch_button_, false);
+    tbl.append(*fetch_button_, false);
     fetch_button_->signal_clicked().connect([=](){ fetch_gpl_svn(); });
 
     auto* rlabel = Gtk::manage(new Gtk::Label(
                  _("This repository contains GPL'd themes that can be used under \n"
                    "the terms of GNU GPL licence v2.0 or later \n")));
-    table_append(*rlabel, false);
+    tbl.append(*rlabel, false);
 
     fetch_button2_ = Gtk::manage(new Gtk::Button("Fetch non GPL'd Themes"));
     auto& im2 = *Gtk::manage(new Gtk::Image(Gtk::Stock::CONNECT, Gtk::ICON_SIZE_BUTTON));
     fetch_button2_->set_image(im2);
-    table_append(*fetch_button2_, false);
+    tbl.append(*fetch_button2_, false);
     fetch_button2_->signal_clicked().connect([=](){ fetch_ngpl_svn(); });
 
     rlabel = Gtk::manage(new Gtk::Label(
                  _("This repository contains non-GPL'd themes. They might infringe \n"
                    "copyrights and patent laws in some countries.")));
-    table_append(*rlabel, false);
+    tbl.append(*rlabel, false);
     vbox.pack_start(*Gtk::manage(new Gtk::HSeparator()), false, false);
 
     vbox.pack_start(*Gtk::manage(new Gtk::Label(

@@ -1409,30 +1409,30 @@ void layout_maximised_colors(Gtk::Box& vbox)
     auto& scroller = *Gtk::manage(new Gtk::ScrolledWindow());
     scroller.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
     vbox.pack_start(scroller, true, true);
-    table_new(3, false, false);
+    SettingsTable tbl(3, false, false);
 
-    scroller.add(get_current_table());
+    scroller.add(tbl.table());
 
-    make_labels("Colors");
-    table_append_separator();
-    table_append(*Gtk::manage(new Gtk::Label(_("Outer Frame Blend"))), false);
+    tbl.append_header("Colors");
+    tbl.append_separator();
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Outer Frame Blend"))), false);
 
     Gtk::ColorButton* cbtn;
     cbtn = Gtk::manage(new Gtk::ColorButton());
-    table_append(*cbtn, false);
+    tbl.append(*cbtn, false);
     SettingItem::create(*cbtn, SECT, "outer_maximised_color");
 
     Gtk::Scale* scaler;
     scaler = scaler_new(0.0, 1.0, 0.01);
-    table_append(*scaler, true);
+    tbl.append(*scaler, true);
     SettingItem::create(*scaler, SECT, "outer_maximised_alpha");
 
-    table_append(*Gtk::manage(new Gtk::Label(_("Inner Frame Blend"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Inner Frame Blend"))), false);
     cbtn = Gtk::manage(new Gtk::ColorButton());
-    table_append(*cbtn, false);
+    tbl.append(*cbtn, false);
     SettingItem::create(*cbtn, SECT, "inner_maximised_color");
     scaler = scaler_new(0.0, 1.0, 0.01);
-    table_append(*scaler, true);
+    tbl.append(*scaler, true);
     SettingItem::create(*scaler, SECT, "inner_maximised_alpha");
 }
 
@@ -1477,12 +1477,12 @@ void layout_corners_frame(Gtk::Box& vbox)
 
 }
 
-void add_border_slider(char* text, char* key, int value)
+void add_border_slider(SettingsTable& tbl, char* text, char* key, int value)
 {
-    table_append(*Gtk::manage(new Gtk::Label(text)), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(text)), false);
 
     auto& scaler = *scaler_new(0, 20, 1);
-    table_append(scaler, true);
+    tbl.append(scaler, true);
     scaler.set_value(value);
     SettingItem::create(scaler, "borders", key);
 }
@@ -1500,64 +1500,64 @@ void my_engine_settings(Gtk::Box& hbox, bool active)
     scroller.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
     vbox.pack_start(scroller, true, true);
 
-    table_new(3, false, false);
+    SettingsTable tbl(3, false, false);
 
-    scroller.add(get_current_table());
+    scroller.add(tbl.table());
 
-    make_labels(_("Colors"));
-    table_append_separator();
-    add_color_alpha_value(_("Outer Frame Blend"), "outer", SECT, active);
-    add_color_alpha_value(_("Inner Frame Blend"), "inner", SECT, active);
-    table_append_separator();
-    add_color_alpha_value(_("Outer Titlebar Blend"), "title_outer", SECT, active);
-    add_color_alpha_value(_("Inner Titlebar Blend"), "title_inner", SECT, active);
+    tbl.append_header(_("Colors"));
+    tbl.append_separator();
+    tbl.append_acolor(_("Outer Frame Blend"), "outer", SECT, active);
+    tbl.append_acolor(_("Inner Frame Blend"), "inner", SECT, active);
+    tbl.append_separator();
+    tbl.append_acolor(_("Outer Titlebar Blend"), "title_outer", SECT, active);
+    tbl.append_acolor(_("Inner Titlebar Blend"), "title_inner", SECT, active);
 
-    table_append_separator();
+    tbl.append_separator();
 
-    table_append(*Gtk::manage(new Gtk::Label(_("Repeat Gradient?"))), false);
-    table_append(*Gtk::manage(new Gtk::Label("")), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Repeat Gradient?"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label("")), false);
 
     Gtk::CheckButton* btn;
     std::string key_line = format(active ? "active_%s" : "inactive_%s", "gradient_repeat_enabled");
     btn = Gtk::manage(new Gtk::CheckButton());
-    table_append(*btn, true);
+    tbl.append(*btn, true);
     SettingItem::create(*btn, SECT, key_line);
 
-    table_append(*Gtk::manage(new Gtk::Label(_("Vertical Repeat?"))), false);
-    table_append(*Gtk::manage(new Gtk::Label("")), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Vertical Repeat?"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label("")), false);
     key_line = format(active ? "active_%s" : "inactive_%s", "gradient_repeat_direction_vertical");
     btn = Gtk::manage(new Gtk::CheckButton());
-    table_append(*btn, true);
+    tbl.append(*btn, true);
     SettingItem::create(*btn, SECT, key_line);
 
     key_line = format(active ? "active_%s" : "inactive_%s", "gradient_repeat_direction_diagonal");
-    table_append(*Gtk::manage(new Gtk::Label(_("Diagonal Repeat?"))), false);
-    table_append(*Gtk::manage(new Gtk::Label("")), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Diagonal Repeat?"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label("")), false);
     btn = Gtk::manage(new Gtk::CheckButton());
-    table_append(*btn, true);
+    tbl.append(*btn, true);
     SettingItem::create(*btn, SECT, key_line);
 
-    table_append(*Gtk::manage(new Gtk::Label(_("Repeat Frequency"))), false);
-    table_append(*Gtk::manage(new Gtk::Label("")), false);
+    tbl.append(*Gtk::manage(new Gtk::Label(_("Repeat Frequency"))), false);
+    tbl.append(*Gtk::manage(new Gtk::Label("")), false);
     key_line = format(active ? "active_%s" : "inactive_%s", "gradient_repeat_height");
     auto& scaler = *scaler_new(0, 20, 0.5);
-    table_append(scaler, true);
+    tbl.append(scaler, true);
     SettingItem::create(scaler, SECT, key_line);
-    table_append_separator();
+    tbl.append_separator();
 
-    add_color_alpha_value(_("Titlebar Separator"), "separator_line", SECT, active);
-    table_append_separator();
-    add_color_alpha_value(_("Frame Outline"), "window_frame_halo", SECT, active);
-    add_color_alpha_value(_("Frame Highlight"), "window_highlight", SECT, active);
-    add_color_alpha_value(_("Frame Shadow"), "window_shadow", SECT, active);
-    table_append_separator();
-    add_color_alpha_value(_("Contents Outline"), "contents_halo", SECT, active);
-    add_color_alpha_value(_("Contents Highlight"), "contents_highlight", SECT, active);
-    add_color_alpha_value(_("Contents Shadow"), "contents_shadow", SECT, active);
+    tbl.append_acolor(_("Titlebar Separator"), "separator_line", SECT, active);
+    tbl.append_separator();
+    tbl.append_acolor(_("Frame Outline"), "window_frame_halo", SECT, active);
+    tbl.append_acolor(_("Frame Highlight"), "window_highlight", SECT, active);
+    tbl.append_acolor(_("Frame Shadow"), "window_shadow", SECT, active);
+    tbl.append_separator();
+    tbl.append_acolor(_("Contents Outline"), "contents_halo", SECT, active);
+    tbl.append_acolor(_("Contents Highlight"), "contents_highlight", SECT, active);
+    tbl.append_acolor(_("Contents Shadow"), "contents_shadow", SECT, active);
 
-    add_color_alpha_value(_("Titlebar Separator"), "separator_line", SECT, active);
-    table_append_separator();
-    add_color_alpha_value(_("Contents Shadow"), "contents_shadow", SECT, active);
+    tbl.append_acolor(_("Titlebar Separator"), "separator_line", SECT, active);
+    tbl.append_separator();
+    tbl.append_acolor(_("Contents Shadow"), "contents_shadow", SECT, active);
 }
 
 void layout_engine_colors(Gtk::Box& vbox)

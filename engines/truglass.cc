@@ -550,30 +550,30 @@ void my_engine_settings(Gtk::Box& hbox, bool active)
     scroller.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
     vbox.pack_start(scroller, true, true);
 
-    table_new(3, false, false);
+    SettingsTable tbl(3, false, false);
 
-    scroller.add(get_current_table());
+    scroller.add(tbl.table());
 
-    make_labels(_("Colors"));
-    table_append_separator();
-    add_color_alpha_value(_("Frame Base Color"), "base", SECT, active);
-    add_color_alpha_value(_("Upper Titlebar Glow"), "upper_title_glow", SECT, active);
-    table_append_separator();
-    add_color_alpha_value(_("Upper Glass Glow"), "upper_glow", SECT, active);
-    add_color_alpha_value(_("Lower Glass Glow"), "lower_glow", SECT, active);
-    table_append_separator();
-    add_color_alpha_value(_("Middle Glass Glow"), "middle_glow", SECT, active);
-    add_color_alpha_value(_("Outer Glass Glow"), "outer_glow", SECT, active);
-    table_append_separator();
-    add_color_alpha_value(_("Titlebar Separator"), "separator_line", SECT, active);
-    table_append_separator();
-    add_color_alpha_value(_("Frame Outline"), "window_halo", SECT, active);
-    add_color_alpha_value(_("Frame Highlight"), "window_highlight", SECT, active);
-    add_color_alpha_value(_("Frame Shadow"), "window_shadow", SECT, active);
-    table_append_separator();
-    add_color_alpha_value(_("Contents Outline"), "contents_halo", SECT, active);
-    add_color_alpha_value(_("Contents Highlight"), "contents_highlight", SECT, active);
-    add_color_alpha_value(_("Contents Shadow"), "contents_shadow", SECT, active);
+    tbl.append_header(_("Colors"));
+    tbl.append_separator();
+    tbl.append_acolor(_("Frame Base Color"), "base", SECT, active);
+    tbl.append_acolor(_("Upper Titlebar Glow"), "upper_title_glow", SECT, active);
+    tbl.append_separator();
+    tbl.append_acolor(_("Upper Glass Glow"), "upper_glow", SECT, active);
+    tbl.append_acolor(_("Lower Glass Glow"), "lower_glow", SECT, active);
+    tbl.append_separator();
+    tbl.append_acolor(_("Middle Glass Glow"), "middle_glow", SECT, active);
+    tbl.append_acolor(_("Outer Glass Glow"), "outer_glow", SECT, active);
+    tbl.append_separator();
+    tbl.append_acolor(_("Titlebar Separator"), "separator_line", SECT, active);
+    tbl.append_separator();
+    tbl.append_acolor(_("Frame Outline"), "window_halo", SECT, active);
+    tbl.append_acolor(_("Frame Highlight"), "window_highlight", SECT, active);
+    tbl.append_acolor(_("Frame Shadow"), "window_shadow", SECT, active);
+    tbl.append_separator();
+    tbl.append_acolor(_("Contents Outline"), "contents_halo", SECT, active);
+    tbl.append_acolor(_("Contents Highlight"), "contents_highlight", SECT, active);
+    tbl.append_acolor(_("Contents Shadow"), "contents_shadow", SECT, active);
 }
 
 void layout_engine_colors(Gtk::Box& vbox)
