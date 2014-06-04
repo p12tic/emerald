@@ -26,7 +26,8 @@
 
 namespace fs = boost::filesystem;
 
-namespace std {
+namespace boost {
+namespace filesystem {
 // The following is needed to support C++11 range-for loop if using boost < 1.55
 inline const fs::directory_iterator& begin(const fs::directory_iterator& it)
 {
@@ -46,6 +47,7 @@ inline fs::directory_iterator end(fs::directory_iterator&)
     return fs::directory_iterator{};
 }
 
-} // namespace std
+} // namespace filesystem
+} // namespace boost
 
 #endif
