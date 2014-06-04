@@ -316,8 +316,8 @@ void tooltip_start_delay(const std::string& msg)
         delay = STICKY_DELAY;
     }
 
-    tooltip_timeout_conn = Glib::signal_timeout().connect(
-                sigc::bind(&tooltip_timeout, msg), delay);
+    tooltip_timeout_conn = Glib::signal_timeout().connect([=](){ return tooltip_timeout(msg); },
+                                                          delay);
 }
 
 int tooltip_paint_window()
@@ -870,9 +870,8 @@ void show_force_quit_dialog(Wnck::Window* win, Time timestamp)
     dlg->add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_REJECT);
     dlg->add_button(_("_Force Quit"), Gtk::RESPONSE_ACCEPT);
     dlg->set_default_response(Gtk::RESPONSE_REJECT);
-    dlg->signal_realize().connect(std::bind(force_quit_dialog_realize, dlg, win));
-    dlg->signal_response().connect(std::bind(force_quit_dialog_response,
-                                             std::placeholders::_1, win));
+    dlg->signal_realize().connect([dlg, win](){ force_quit_dialog_realize(dlg, win); });
+    dlg->signal_response().connect([win](int r){ force_quit_dialog_response(r, win); });
     dlg->set_modal();
     gtk_widget_realize(static_cast<Gtk::Widget*>(dlg)->gobj()); // protected method
 

@@ -119,6 +119,11 @@
 
 #define PROP_MOTIF_WM_HINT_ELEMENTS 3
 
+// enable lambda expressions to be used with libsigc++
+namespace sigc {
+    SIGC_FUNCTORS_DEDUCE_RESULT_TYPE_WITH_DECLTYPE
+}
+
 /*  FIXME FIXME FIXME: currently many internal symbols are exported too. This
     should be fixed by using a visibility attribute explicitly and invoking the
     compiler with -fvisibility=hidden

@@ -393,12 +393,13 @@ SettingItem* SettingItem::register_img_file_setting(Gtk::FileChooserButton& widg
                                                     const std::string& key, Gtk::Image* image)
 {
     SettingItem* item = create_impl(widget, ST_IMG_FILE, section, key);
-    widget.signal_selection_changed().connect(sigc::bind(&cb_apply_setting, item));
+    widget.signal_selection_changed().connect([item](){ cb_apply_setting(item); });
     widget.set_width_chars(0);
     item->image_ = image;
     item->preview_ = Gtk::manage(new Gtk::Image());
     widget.set_preview_widget(*(item->preview_));
-    widget.signal_update_preview().connect(sigc::bind(&update_preview_cb, &widget, item->preview_));
+    widget.signal_update_preview().connect(
+                [&widget, item](){ update_preview_cb(&widget, item->preview_); });
     return item;
 }
 
@@ -406,7 +407,7 @@ SettingItem* SettingItem::create_global(Gtk::ComboBoxText& widget,
                                         const std::string& section, const std::string& key)
 {
     auto item = SettingItem::create_impl(widget, ST_SFILE_INT_COMBO, section, key);
-    widget.signal_changed().connect(sigc::bind(&cb_apply_setting, item));
+    widget.signal_changed().connect([item](){ cb_apply_setting(item); });
     return item;
 }
 
@@ -414,7 +415,7 @@ SettingItem* SettingItem::create(Gtk::ComboBoxEntryText& widget,
                                  const std::string& section, const std::string& key)
 {
     auto item = SettingItem::create_impl(widget, ST_STRING_COMBO, section, key);
-    widget.signal_changed().connect(sigc::bind(&cb_apply_setting, item));
+    widget.signal_changed().connect([item](){ cb_apply_setting(item); });
     return item;
 }
 
@@ -422,7 +423,7 @@ SettingItem* SettingItem::create_engine(Gtk::ComboBox& widget,
                                         const std::string& section, const std::string& key)
 {
     auto item = SettingItem::create_impl(widget, ST_ENGINE_COMBO, section, key);
-    widget.signal_changed().connect(sigc::bind(&cb_apply_setting, item));
+    widget.signal_changed().connect([item](){ cb_apply_setting(item); });
     return item;
 }
 
@@ -437,7 +438,7 @@ SettingItem* SettingItem::create(Gtk::FontButton& widget,
                                  const std::string& section, const std::string& key)
 {
     auto item = SettingItem::create_impl(widget, ST_COLOR, section, key);
-    widget.signal_font_set().connect(sigc::bind(&cb_apply_setting, item));
+    widget.signal_font_set().connect([item](){ cb_apply_setting(item); });
     return item;
 }
 
@@ -445,7 +446,7 @@ SettingItem* SettingItem::create(Gtk::ColorButton& widget,
                                  const std::string& section, const std::string& key)
 {
     auto item = SettingItem::create_impl(widget, ST_COLOR, section, key);
-    widget.signal_color_set().connect(sigc::bind(&cb_apply_setting, item));
+    widget.signal_color_set().connect([item](){ cb_apply_setting(item); });
     return item;
 }
 
@@ -454,7 +455,7 @@ SettingItem* SettingItem::create(Gtk::SpinButton& widget,
 {
     auto item = SettingItem::create_impl(widget, ST_FLOAT, section, key);
     item->is_spin_button_ = true;
-    widget.signal_value_changed().connect(sigc::bind(&cb_apply_setting, item));
+    widget.signal_value_changed().connect([item](){ cb_apply_setting(item); });
     return item;
 }
 
@@ -463,7 +464,7 @@ SettingItem* SettingItem::create(Gtk::Range& widget,
 {
     auto item = SettingItem::create_impl(widget, ST_FLOAT, section, key);
     item->is_spin_button_ = false;
-    widget.signal_value_changed().connect(sigc::bind(&cb_apply_setting, item));
+    widget.signal_value_changed().connect([item](){ cb_apply_setting(item); });
     return item;
 }
 
@@ -471,7 +472,7 @@ SettingItem* SettingItem::create_global(Gtk::Range& widget,
                                         const std::string& section, const std::string& key)
 {
     auto item = SettingItem::create_impl(widget, ST_SFILE_INT, section, key);
-    widget.signal_value_changed().connect(sigc::bind(&cb_apply_setting, item));
+    widget.signal_value_changed().connect([item](){ cb_apply_setting(item); });
     return item;
 }
 
@@ -479,7 +480,7 @@ SettingItem* SettingItem::create(Gtk::ToggleButton& widget,
                                  const std::string& section, const std::string& key)
 {
     auto item = SettingItem::create_impl(widget, ST_BOOL, section, key);
-    widget.signal_toggled().connect(sigc::bind(&cb_apply_setting, item));
+    widget.signal_toggled().connect([item](){ cb_apply_setting(item); });
     return item;
 }
 
@@ -487,7 +488,7 @@ SettingItem* SettingItem::create_global(Gtk::ToggleButton& widget,
                                         const std::string& section, const std::string& key)
 {
     auto item = SettingItem::create_impl(widget, ST_SFILE_BOOL, section, key);
-    widget.signal_toggled().connect(sigc::bind(&cb_apply_setting, item));
+    widget.signal_toggled().connect([item](){ cb_apply_setting(item); });
     return item;
 }
 

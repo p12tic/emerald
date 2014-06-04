@@ -979,9 +979,9 @@ void draw_buttons_with_fade(decor_t* d, Cairo::RefPtr<Cairo::Context>& cr, doubl
         fade_info->y1 = y1;
         if (draw_buttons_timer_func(d, fade_info) == true) {      // call once now
             // and start a new timer for the next step
-            fade_info->timer_conn = Glib::signal_timeout().connect(
-                        sigc::bind(&draw_buttons_timer_func, d, fade_info),
-                        ws->button_fade_step_duration);
+            fade_info->timer_conn = Glib::signal_timeout().connect([=]() {
+                return draw_buttons_timer_func(d, fade_info);
+            }, ws->button_fade_step_duration);
         }
     }
 }

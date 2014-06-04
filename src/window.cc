@@ -778,9 +778,9 @@ void window_actions_changed(Wnck::WindowActions,
 
 void connect_window(Wnck::Window* win)
 {
-    win->signal_name_changed().connect(sigc::bind(&window_name_changed, win));
-    win->signal_geometry_changed().connect(sigc::bind(&window_geometry_changed, win));
-    win->signal_icon_changed().connect(sigc::bind(&window_icon_changed, win));
+    win->signal_name_changed().connect([=](){ window_name_changed(win); });
+    win->signal_geometry_changed().connect([=](){ window_geometry_changed(win); });
+    win->signal_icon_changed().connect([=](){ window_icon_changed(win); });
     win->signal_state_changed().connect(sigc::bind(&window_state_changed, win));
     win->signal_actions_changed().connect(sigc::bind(&window_actions_changed, win));
 }
@@ -880,8 +880,8 @@ void window_closed(Wnck::Window* win)
 
 void connect_screen(Wnck::Screen* screen)
 {
-    screen->signal_active_window_changed().connect(sigc::bind(&active_window_changed,
-                                                              screen));
+    screen->signal_active_window_changed().connect(
+                [=](Wnck::Window* w){ active_window_changed(w, screen); });
     screen->signal_window_opened().connect(&window_opened);
     screen->signal_window_closed().connect(&window_closed);
 

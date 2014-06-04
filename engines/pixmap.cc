@@ -634,7 +634,7 @@ void layout_pixmap_box(Gtk::Box& vbox, int b_t, bool active)
     table_append(scroller, true);
 
     auto& clearer = *Gtk::manage(new Gtk::Button(Gtk::Stock::CLEAR));
-    clearer.signal_clicked().connect(sigc::bind(&cb_clear_file, item));
+    clearer.signal_clicked().connect([item](){ cb_clear_file(item); });
     table_append(clearer, false);
 
     // Style : Use Tiled or Scaled pixmaps

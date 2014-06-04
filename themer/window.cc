@@ -45,7 +45,7 @@ ThemerWindow::ThemerWindow(int install_file, const std::string& input_file)
     main_window_->set_title("Emerald Themer " VERSION);
     main_window_->set_resizable(true);
     main_window_->set_default_size(700, 500);
-    main_window_->signal_delete_event().connect(sigc::mem_fun(*this, &ThemerWindow::cb_main_destroy));
+    main_window_->signal_delete_event().connect([=](GdkEventAny* ev){ return cb_main_destroy(ev); });
     main_window_->set_default_icon_from_file(PIXMAPS_DIR "/emerald-theme-manager-icon.png");
 
     main_window_->set_border_width(5);
@@ -513,7 +513,7 @@ void ThemerWindow::layout_button_box(Gtk::Box& vbox, int b_t)
     table_append(image, true);
 
     auto& clearer = *Gtk::manage(new Gtk::Button(Gtk::Stock::CLEAR));
-    clearer.signal_clicked().connect(sigc::bind(&cb_clear_file, item));
+    clearer.signal_clicked().connect([=](){ cb_clear_file(item); });
     table_append(clearer, false);
 }
 
@@ -737,13 +737,13 @@ void ThemerWindow::layout_file_frame(Gtk::Box& vbox)
 
     auto& btn = *Gtk::manage(new Gtk::Button(Gtk::Stock::SAVE));
     hbox.pack_start(btn, false, false, 0);
-    btn.signal_clicked().connect(sigc::mem_fun(*this, &ThemerWindow::cb_save));
+    btn.signal_clicked().connect([=](){ cb_save(); });
 
     export_button_ = Gtk::manage(new Gtk::Button(_("Export...")));
     Gtk::Image im(Gtk::Stock::SAVE_AS, Gtk::ICON_SIZE_BUTTON);
     export_button_->set_image(im);
     hbox.pack_start(*export_button_, false, false, 0);
-    export_button_->signal_clicked().connect(sigc::mem_fun(*this, &ThemerWindow::cb_export));
+    export_button_->signal_clicked().connect([=](){ cb_export(); });
 }
 
 void ThemerWindow::layout_info_frame(Gtk::Box& vbox)
@@ -874,7 +874,7 @@ void ThemerWindow::layout_screenshot_frame(Gtk::Box& vbox)
     item = SettingItem::register_img_file_setting(filesel, "theme", "screenshot", &image);
 
     auto& clearer = *Gtk::manage(new Gtk::Button(Gtk::Stock::CLEAR));
-    clearer.signal_clicked().connect(sigc::bind(&cb_clear_file, item));
+    clearer.signal_clicked().connect([=](){ cb_clear_file(item); });
     hbox->pack_start(clearer, true, true);
 }
 
@@ -1090,39 +1090,34 @@ Gtk::Widget* ThemerWindow::build_tree_view()
     hbox.pack_start(*searchbox_, true, true, 0);
 
     auto& clearbut = *Gtk::manage(new Gtk::Button(Gtk::Stock::CLEAR));
-    clearbut.signal_clicked().connect(
-                sigc::mem_fun(*this, &ThemerWindow::cb_clearbox));
+    clearbut.signal_clicked().connect([=](){ cb_clearbox(); });
     hbox.pack_start(clearbut, false, false, 0);
 
     hbox.pack_start(*Gtk::manage(new Gtk::VSeparator()), false, false);
 
     reload_button_ = Gtk::manage(new Gtk::Button(Gtk::Stock::DELETE));
     hbox.pack_start(*reload_button_, false, false, 0);
-    reload_button_->signal_clicked().connect(
-                sigc::mem_fun(*this, &ThemerWindow::cb_refresh));
+    reload_button_->signal_clicked().connect([=](){ cb_refresh(); });
 
     delete_button_ = Gtk::manage(new Gtk::Button(Gtk::Stock::DELETE));
     hbox.pack_start(*delete_button_, false, false, 0);
     delete_button_->set_sensitive(false);
-    delete_button_->signal_clicked().connect(
-                sigc::bind(sigc::mem_fun(*this, &ThemerWindow::cb_delete),
-                           delete_button_));
+    delete_button_->signal_clicked().connect([=](){ cb_delete(delete_button_); });
 
     import_button_ = Gtk::manage(new Gtk::Button("Import..."));
     auto &img = *Gtk::manage(new Gtk::Image(Gtk::Stock::OPEN, Gtk::ICON_SIZE_BUTTON));
     import_button_->set_image(img);
     hbox.pack_start(*import_button_, false, false, 0);
-    import_button_->signal_clicked().connect(
-                sigc::mem_fun(*this, &ThemerWindow::cb_import));
+    import_button_->signal_clicked().connect([=](){ cb_import(); });
 
     vbox.pack_start(*Gtk::manage(new Gtk::HSeparator()), false, false);
 
     /* Do not delete, TODO: properly convert to gtkmm
     auto filt = Gtk::TreeModelFilter::create(theme_model_);
-    filt->set_visible_func(sigc::mem_fun(*this, &ThemerWindow::is_visible));
+    filt->set_visible_func([=](){ return is_visible(); });
 
     auto sort = Gtk::TreeModelSort::create(filt);
-    searchbox_->signal_changed().connect(sigc::bind(&cb_refilter, filt));
+    searchbox_->signal_changed().connect([=](){ cb_refilter(filt); });
     */
     theme_selector_ = Gtk::manage(new Gtk::TreeView(theme_model_));
     theme_selector_->set_headers_clickable();
@@ -1167,8 +1162,7 @@ Gtk::Widget* ThemerWindow::build_tree_view()
 
     theme_select_ = theme_selector_->get_selection();
     theme_select_->set_mode(Gtk::SELECTION_SINGLE);
-    theme_select_->signal_changed().connect(
-                sigc::mem_fun(*this, &ThemerWindow::cb_load));
+    theme_select_->signal_changed().connect([=](){ cb_load(); });
 
     auto& scrollwin = *Gtk::manage(new Gtk::ScrolledWindow());
     scrollwin.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
@@ -1222,9 +1216,7 @@ void ThemerWindow::fetch_svn()
     fe->dialog = &dialog;
     fe->progbar = &progbar;
     fe->pd = pd;
-    Glib::signal_timeout().connect(
-                sigc::bind(sigc::mem_fun(*this, &ThemerWindow::watcher_func),
-                           fe), 100);
+    Glib::signal_timeout().connect([=](){ return watcher_func(fe); }, 100);
 }
 
 void ThemerWindow::fetch_gpl_svn()
@@ -1270,8 +1262,7 @@ void ThemerWindow::layout_repo_pane(Gtk::Box& vbox)
     auto& im1 = *Gtk::manage(new Gtk::Image(Gtk::Stock::CONNECT, Gtk::ICON_SIZE_BUTTON));
     fetch_button_->set_image(im1);
     table_append(*fetch_button_, false);
-    fetch_button_->signal_clicked().connect(
-                sigc::mem_fun(*this, &ThemerWindow::fetch_gpl_svn));
+    fetch_button_->signal_clicked().connect([=](){ fetch_gpl_svn(); });
 
     auto* rlabel = Gtk::manage(new Gtk::Label(
                  _("This repository contains GPL'd themes that can be used under \n"
@@ -1282,8 +1273,7 @@ void ThemerWindow::layout_repo_pane(Gtk::Box& vbox)
     auto& im2 = *Gtk::manage(new Gtk::Image(Gtk::Stock::CONNECT, Gtk::ICON_SIZE_BUTTON));
     fetch_button2_->set_image(im2);
     table_append(*fetch_button2_, false);
-    fetch_button2_->signal_clicked().connect(
-                sigc::mem_fun(*this, &ThemerWindow::fetch_ngpl_svn));
+    fetch_button2_->signal_clicked().connect([=](){ fetch_ngpl_svn(); });
 
     rlabel = Gtk::manage(new Gtk::Label(
                  _("This repository contains non-GPL'd themes. They might infringe \n"
@@ -1340,8 +1330,7 @@ void ThemerWindow::layout_main_window()
 
     auto& quit_button = *Gtk::manage(new Gtk::Button(Gtk::Stock::QUIT));
     hbox.pack_end(quit_button, false, false);
-    quit_button.signal_clicked().connect(
-                sigc::mem_fun(*this, &ThemerWindow::cb_quit));
+    quit_button.signal_clicked().connect([=](){ cb_quit(); });
     main_window_->add(vbox);
 }
 
