@@ -2,7 +2,10 @@
 
 include $(top_srcdir)/common.am
 
-emerald_theme_manager_SOURCES = main.cc
+emerald_theme_manager_SOURCES = main.cc window.cc
+
+noinst_HEADERS = window.h
+
 emerald_theme_manager_LDFLAGS =         \
     $(BOOST_FILESYSTEM_LDFLAGS)         \
     $(BOOST_SYSTEM_LDFLAGS)

@@ -6,6 +6,7 @@ src/quads.cc
 src/utils.cc
 src/window.cc
 themer/main.cc
+themer/window.cc
 libengine/themer.cc
 engines/legacy.cc
 engines/line.cc
