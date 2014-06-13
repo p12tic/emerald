@@ -13,3 +13,7 @@ m4/*
 !m4/boost.m4
 missing
 aclocal.m4
+emerald.creator
+emerald.files
+emerald.config
+emerald.includes
