@@ -1,7 +1,7 @@
 AC_PREREQ(2.57)
 
 m4_define([emerald_version], [esyscmd(. ./VERSION;echo -n $VERSION)])
-AC_INIT([emerald],[emerald_version], [livinglatexkali@gmail.com])
+AC_INIT([emerald],[emerald_version], [povilas@radix.lt])
 
 AM_INIT_AUTOMAKE([1.9 dist-bzip2])
 AC_CONFIG_HEADER([config.h])
